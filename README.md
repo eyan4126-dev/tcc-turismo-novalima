@@ -32,7 +32,7 @@ A plataforma busca engajar os turistas, o setor privado (hotéis e restaurantes)
 * Metodologia Ágil (Scrum/Kanban via Jira)
 
 ## 👥 Equipe Desenvolvedora
-* **Yan** (@eyan4126-dev) - Scrum Master & Desenvolvedor Back-end
+* **Yan** - Scrum Master & Desenvolvedor Back-end
 * **Daniel** - Arquiteto de Dados & Desenvolvedor Back-end
 * **Waron** - Designer de UX/UI & Desenvolvedor Front-end
 * **João Pedro** - Product Owner & Integração
