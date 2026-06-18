@@ -1,61 +1,38 @@
-# CodeIgniter 4 Framework
+# ⛰️ Nova Lima Turismo Hub
 
-## What is CodeIgniter?
+> TCC (SENAI) - Ecossistema digital projetado para centralizar, validar e cruzar dados do setor turístico de Nova Lima, eliminando planilhas manuais e facilitando o planejamento de políticas públicas e a integração do comércio local.
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](https://codeigniter.com).
+## 📖 Sobre o Projeto
+Este projeto é um Trabalho de Conclusão de Curso (TCC) desenvolvido no SENAI. O objetivo é transformar a gestão turística da cidade de Nova Lima através da tecnologia, substituindo a coleta manual de dados (planilhas e fichas) por um ecossistema de inteligência de dados. 
 
-This repository holds the distributable version of the framework.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
+A plataforma busca engajar os turistas, o setor privado (hotéis e restaurantes) e o poder público, gerando indicadores precisos e em tempo real para otimizar a tomada de decisão, monitorar o impacto econômico de eventos e facilitar a captação de recursos governamentais (ICMS Turismo e SISMAPA).
 
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
+## ✨ Funcionalidades Principais
+* **Coleta Web Inteligente:** Captura de dados demográficos de turistas via acesso Wi-Fi público (Captive Portal) e leitura de QR Codes.
+* **Engajamento e Gamificação:** Automação para envio de pesquisa de satisfação 24 horas após a visita, recompensando o turista com geração de vouchers de desconto locais.
+* **Painel do Empreendedor:** Área logada e customizada para o setor privado enviar relatórios de fluxo e ocupação com facilidade.
+* **Dashboard Gerencial:** Interface para a Prefeitura com triangulação de dados (Catracas, Polícia Militar e Formulários), exibindo gráficos estatísticos de fluxo e perfil de visitantes.
+* **Exportação Fiscal:** Geração automatizada de relatórios formatados para exigências legais.
 
-You can read the [user guide](https://codeigniter.com/user_guide/)
-corresponding to the latest version of the framework.
+## 🚀 Tecnologias e Arquitetura
 
-## Important Change with index.php
+**Back-end & Banco de Dados:**
+* PHP 8+
+* Framework CodeIgniter 4 (Padrão MVC e Rotas de Segurança)
+* MySQL (Modelagem Relacional)
 
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
+**Front-end & Integração:**
+* HTML5 semântico e CSS3
+* Bootstrap 5 (Mobile-First e Responsividade)
+* JavaScript Vanilla & Fetch API
+* Gráficos dinâmicos com Chart.js / ApexCharts
 
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
+**Design & Gestão:**
+* Figma (Prototipagem de Alta Fidelidade e UI/UX)
+* Metodologia Ágil (Scrum/Kanban via Jira)
 
-**Please** read the user guide for a better explanation of how CI4 works!
-
-## Repository Management
-
-We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
-
-This repository is a "distribution" one, built by our release preparation script.
-Problems with it can be raised on our forum, or as issues in the main repository.
-
-## Contributing
-
-We welcome contributions from the community.
-
-Please read the [*Contributing to CodeIgniter*](https://github.com/codeigniter4/CodeIgniter4/blob/develop/CONTRIBUTING.md) section in the development repository.
-
-## Server Requirements
-
-PHP version 8.2 or higher is required, with the following extensions installed:
-
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
-
-> [!WARNING]
-> - The end of life date for PHP 7.4 was November 28, 2022.
-> - The end of life date for PHP 8.0 was November 26, 2023.
-> - The end of life date for PHP 8.1 was December 31, 2025.
-> - If you are still using below PHP 8.2, you should upgrade immediately.
-> - The end of life date for PHP 8.2 will be December 31, 2026.
-
-Additionally, make sure that the following extensions are enabled in your PHP:
-
-- json (enabled by default - don't turn it off)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
+## 👥 Equipe Desenvolvedora
+* **Yan** (@seu-usuario-yan) - Scrum Master & Desenvolvedor Back-end
+* **Daniel** (@seu-usuario-daniel) - Arquiteto de Dados & Desenvolvedor Back-end
+* **Waron** (@seu-usuario-waron) - Designer de UX/UI & Desenvolvedor Front-end
+* **João Pedro** (@seu-usuario-joaopedro) - Product Owner & Integração
