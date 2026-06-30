@@ -28,3 +28,6 @@ $routes->group('api/painel', ['filter' => 'authLojista'], function ($routes) {
     $routes->get('meu-negocio', 'LojistaController::index');
     $routes->post('ocupacao', 'LojistaController::lancarOcupacao');
 });
+
+// Rota pública consumida pelo formulário do turista (Waron)
+$routes->post('api/pesquisa', 'PesquisaController::salvar');
