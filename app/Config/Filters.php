@@ -34,6 +34,10 @@ class Filters extends BaseFilters
         'forcehttps'    => ForceHTTPS::class,
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
+        
+        // Filtros padrões do CI4 já existentes aqui...
+        'authAdmin'   => \App\Filters\AdminAuthFilter::class,
+        'authLojista' => \App\Filters\LojistaAuthFilter::class,
     ];
 
     /**
