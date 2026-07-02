@@ -1,0 +1,270 @@
+CRITICAL - 2026-07-02 23:06:01 --> CodeIgniter\Exceptions\ConfigException: When responding to a credentialed request, the server must not specify the "*" wildcard for the Access-Control-Allow-Origin response-header value.
+[Method: GET, Route: /]
+in SYSTEMPATH\HTTP\Cors.php on line 121.
+ 1 SYSTEMPATH\HTTP\Cors.php(135): CodeIgniter\HTTP\Cors->checkWildcardAndCredentials('allowedOrigins', 'Access-Control-Allow-Origin')
+ 2 SYSTEMPATH\HTTP\Cors.php(211): CodeIgniter\HTTP\Cors->setAllowOrigin(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response))
+ 3 SYSTEMPATH\Filters\Cors.php(84): CodeIgniter\HTTP\Cors->addResponseHeaders(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response))
+ 4 SYSTEMPATH\Filters\Filters.php(241): CodeIgniter\Filters\Cors->before(Object(CodeIgniter\HTTP\IncomingRequest), null)
+ 5 SYSTEMPATH\Filters\Filters.php(221): CodeIgniter\Filters\Filters->runBefore([...])
+ 6 SYSTEMPATH\CodeIgniter.php(465): CodeIgniter\Filters\Filters->run('', 'before')
+ 7 SYSTEMPATH\CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(64): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-07-02 23:13:06 --> CodeIgniter\Exceptions\ConfigException: When responding to a credentialed request, the server must not specify the "*" wildcard for the Access-Control-Allow-Origin response-header value.
+[Method: GET, Route: /]
+in SYSTEMPATH\HTTP\Cors.php on line 121.
+ 1 SYSTEMPATH\HTTP\Cors.php(135): CodeIgniter\HTTP\Cors->checkWildcardAndCredentials('allowedOrigins', 'Access-Control-Allow-Origin')
+ 2 SYSTEMPATH\HTTP\Cors.php(211): CodeIgniter\HTTP\Cors->setAllowOrigin(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response))
+ 3 SYSTEMPATH\Filters\Cors.php(84): CodeIgniter\HTTP\Cors->addResponseHeaders(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response))
+ 4 SYSTEMPATH\Filters\Filters.php(241): CodeIgniter\Filters\Cors->before(Object(CodeIgniter\HTTP\IncomingRequest), null)
+ 5 SYSTEMPATH\Filters\Filters.php(221): CodeIgniter\Filters\Filters->runBefore([...])
+ 6 SYSTEMPATH\CodeIgniter.php(465): CodeIgniter\Filters\Filters->run('', 'before')
+ 7 SYSTEMPATH\CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(64): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-07-02 23:27:39 --> CodeIgniter\Exceptions\ConfigException: When responding to a credentialed request, the server must not specify the "*" wildcard for the Access-Control-Allow-Origin response-header value.
+[Method: GET, Route: /]
+in SYSTEMPATH\HTTP\Cors.php on line 121.
+ 1 SYSTEMPATH\HTTP\Cors.php(135): CodeIgniter\HTTP\Cors->checkWildcardAndCredentials('allowedOrigins', 'Access-Control-Allow-Origin')
+ 2 SYSTEMPATH\HTTP\Cors.php(211): CodeIgniter\HTTP\Cors->setAllowOrigin(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response))
+ 3 SYSTEMPATH\Filters\Cors.php(84): CodeIgniter\HTTP\Cors->addResponseHeaders(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response))
+ 4 SYSTEMPATH\Filters\Filters.php(241): CodeIgniter\Filters\Cors->before(Object(CodeIgniter\HTTP\IncomingRequest), null)
+ 5 SYSTEMPATH\Filters\Filters.php(221): CodeIgniter\Filters\Filters->runBefore([...])
+ 6 SYSTEMPATH\CodeIgniter.php(465): CodeIgniter\Filters\Filters->run('', 'before')
+ 7 SYSTEMPATH\CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(64): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-07-02 23:27:53 --> CodeIgniter\Exceptions\ConfigException: When responding to a credentialed request, the server must not specify the "*" wildcard for the Access-Control-Allow-Origin response-header value.
+[Method: GET, Route: /]
+in SYSTEMPATH\HTTP\Cors.php on line 121.
+ 1 SYSTEMPATH\HTTP\Cors.php(135): CodeIgniter\HTTP\Cors->checkWildcardAndCredentials('allowedOrigins', 'Access-Control-Allow-Origin')
+ 2 SYSTEMPATH\HTTP\Cors.php(211): CodeIgniter\HTTP\Cors->setAllowOrigin(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response))
+ 3 SYSTEMPATH\Filters\Cors.php(84): CodeIgniter\HTTP\Cors->addResponseHeaders(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response))
+ 4 SYSTEMPATH\Filters\Filters.php(241): CodeIgniter\Filters\Cors->before(Object(CodeIgniter\HTTP\IncomingRequest), null)
+ 5 SYSTEMPATH\Filters\Filters.php(221): CodeIgniter\Filters\Filters->runBefore([...])
+ 6 SYSTEMPATH\CodeIgniter.php(465): CodeIgniter\Filters\Filters->run('', 'before')
+ 7 SYSTEMPATH\CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(64): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-07-02 23:27:56 --> CodeIgniter\Exceptions\ConfigException: When responding to a credentialed request, the server must not specify the "*" wildcard for the Access-Control-Allow-Origin response-header value.
+[Method: GET, Route: /]
+in SYSTEMPATH\HTTP\Cors.php on line 121.
+ 1 SYSTEMPATH\HTTP\Cors.php(135): CodeIgniter\HTTP\Cors->checkWildcardAndCredentials('allowedOrigins', 'Access-Control-Allow-Origin')
+ 2 SYSTEMPATH\HTTP\Cors.php(211): CodeIgniter\HTTP\Cors->setAllowOrigin(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response))
+ 3 SYSTEMPATH\Filters\Cors.php(84): CodeIgniter\HTTP\Cors->addResponseHeaders(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response))
+ 4 SYSTEMPATH\Filters\Filters.php(241): CodeIgniter\Filters\Cors->before(Object(CodeIgniter\HTTP\IncomingRequest), null)
+ 5 SYSTEMPATH\Filters\Filters.php(221): CodeIgniter\Filters\Filters->runBefore([...])
+ 6 SYSTEMPATH\CodeIgniter.php(465): CodeIgniter\Filters\Filters->run('', 'before')
+ 7 SYSTEMPATH\CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(64): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-07-02 23:28:23 --> CodeIgniter\Exceptions\ConfigException: When responding to a credentialed request, the server must not specify the "*" wildcard for the Access-Control-Allow-Origin response-header value.
+[Method: GET, Route: login]
+in SYSTEMPATH\HTTP\Cors.php on line 121.
+ 1 SYSTEMPATH\HTTP\Cors.php(135): CodeIgniter\HTTP\Cors->checkWildcardAndCredentials('allowedOrigins', 'Access-Control-Allow-Origin')
+ 2 SYSTEMPATH\HTTP\Cors.php(211): CodeIgniter\HTTP\Cors->setAllowOrigin(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response))
+ 3 SYSTEMPATH\Filters\Cors.php(84): CodeIgniter\HTTP\Cors->addResponseHeaders(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response))
+ 4 SYSTEMPATH\Filters\Filters.php(241): CodeIgniter\Filters\Cors->before(Object(CodeIgniter\HTTP\IncomingRequest), null)
+ 5 SYSTEMPATH\Filters\Filters.php(221): CodeIgniter\Filters\Filters->runBefore([...])
+ 6 SYSTEMPATH\CodeIgniter.php(465): CodeIgniter\Filters\Filters->run('login', 'before')
+ 7 SYSTEMPATH\CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(64): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-07-02 23:29:52 --> CodeIgniter\Session\Exceptions\SessionException: Session: Configured save path "C:\xampp\htdocs\turismo-hub\writable\session" is not writable by the PHP process.
+[Method: GET, Route: login]
+in SYSTEMPATH\Session\Handlers\FileHandler.php on line 102.
+ 1 SYSTEMPATH\Session\Handlers\FileHandler.php(102): CodeIgniter\Session\Exceptions\SessionException::forWriteProtectedSavePath('C:\\xampp\\htdocs\\turismo-hub\\writable\\session')
+ 2 [internal function]: CodeIgniter\Session\Handlers\FileHandler->open('C:\\xampp\\htdocs\\turismo-hub\\writable\\session', 'ci_session')
+ 3 SYSTEMPATH\Session\Session.php(625): session_start()
+ 4 SYSTEMPATH\Session\Session.php(120): CodeIgniter\Session\Session->startSession()
+ 5 SYSTEMPATH\Config\Services.php(715): CodeIgniter\Session\Session->start()
+ 6 SYSTEMPATH\Config\BaseService.php(325): CodeIgniter\Config\Services::session(Object(Config\Session), false)
+ 7 SYSTEMPATH\Config\BaseService.php(264): CodeIgniter\Config\BaseService::__callStatic('session', [...])
+ 8 SYSTEMPATH\Config\Services.php(668): CodeIgniter\Config\BaseService::getSharedInstance('session', null)
+ 9 SYSTEMPATH\Config\BaseService.php(334): CodeIgniter\Config\Services::session()
+10 SYSTEMPATH\Config\BaseService.php(203): CodeIgniter\Config\BaseService::__callStatic('session', [])
+11 SYSTEMPATH\Common.php(1078): CodeIgniter\Config\BaseService::get('session')
+12 SYSTEMPATH\Common.php(1051): service('session')
+13 APPPATH\Views\login.php(8): session()
+14 SYSTEMPATH\View\View.php(238): include('C:\\xampp\\htdocs\\turismo-hub\\app\\Views\\login.php')
+15 SYSTEMPATH\View\View.php(241): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+16 SYSTEMPATH\Common.php(1250): CodeIgniter\View\View->render('login', [], true)
+17 APPPATH\Controllers\Home.php(11): view('login')
+18 SYSTEMPATH\CodeIgniter.php(951): App\Controllers\Home->index()
+19 SYSTEMPATH\CodeIgniter.php(497): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Home))
+20 SYSTEMPATH\CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+21 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+22 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+23 FCPATH\index.php(64): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-07-02 23:32:08 --> CodeIgniter\View\Exceptions\ViewException: Invalid file: "login.php"
+[Method: GET, Route: login]
+in SYSTEMPATH\Exceptions\FrameworkException.php on line 39.
+ 1 SYSTEMPATH\View\View.php(226): CodeIgniter\Exceptions\FrameworkException::forInvalidFile('login.php')
+ 2 SYSTEMPATH\Common.php(1250): CodeIgniter\View\View->render('login', [], true)
+ 3 APPPATH\Controllers\Home.php(11): view('login')
+ 4 SYSTEMPATH\CodeIgniter.php(951): App\Controllers\Home->index()
+ 5 SYSTEMPATH\CodeIgniter.php(497): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Home))
+ 6 SYSTEMPATH\CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(64): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-07-02 23:33:29 --> CodeIgniter\View\Exceptions\ViewException: Invalid file: "login.php"
+[Method: GET, Route: login]
+in SYSTEMPATH\Exceptions\FrameworkException.php on line 39.
+ 1 SYSTEMPATH\View\View.php(226): CodeIgniter\Exceptions\FrameworkException::forInvalidFile('login.php')
+ 2 SYSTEMPATH\Common.php(1250): CodeIgniter\View\View->render('login', [], true)
+ 3 APPPATH\Controllers\Home.php(11): view('login')
+ 4 SYSTEMPATH\CodeIgniter.php(951): App\Controllers\Home->index()
+ 5 SYSTEMPATH\CodeIgniter.php(497): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Home))
+ 6 SYSTEMPATH\CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(64): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-07-02 23:33:45 --> CodeIgniter\Session\Exceptions\SessionException: Session: Configured save path "C:\xampp\htdocs\turismo-hub\writable\session" is not writable by the PHP process.
+[Method: GET, Route: login]
+in SYSTEMPATH\Session\Handlers\FileHandler.php on line 102.
+ 1 SYSTEMPATH\Session\Handlers\FileHandler.php(102): CodeIgniter\Session\Exceptions\SessionException::forWriteProtectedSavePath('C:\\xampp\\htdocs\\turismo-hub\\writable\\session')
+ 2 [internal function]: CodeIgniter\Session\Handlers\FileHandler->open('C:\\xampp\\htdocs\\turismo-hub\\writable\\session', 'ci_session')
+ 3 SYSTEMPATH\Session\Session.php(625): session_start()
+ 4 SYSTEMPATH\Session\Session.php(120): CodeIgniter\Session\Session->startSession()
+ 5 SYSTEMPATH\Config\Services.php(715): CodeIgniter\Session\Session->start()
+ 6 SYSTEMPATH\Config\BaseService.php(325): CodeIgniter\Config\Services::session(Object(Config\Session), false)
+ 7 SYSTEMPATH\Config\BaseService.php(264): CodeIgniter\Config\BaseService::__callStatic('session', [...])
+ 8 SYSTEMPATH\Config\Services.php(668): CodeIgniter\Config\BaseService::getSharedInstance('session', null)
+ 9 SYSTEMPATH\Config\BaseService.php(334): CodeIgniter\Config\Services::session()
+10 SYSTEMPATH\Config\BaseService.php(203): CodeIgniter\Config\BaseService::__callStatic('session', [])
+11 SYSTEMPATH\Common.php(1078): CodeIgniter\Config\BaseService::get('session')
+12 SYSTEMPATH\Common.php(1051): service('session')
+13 APPPATH\Views\login.php(158): session()
+14 SYSTEMPATH\View\View.php(238): include('C:\\xampp\\htdocs\\turismo-hub\\app\\Views\\login.php')
+15 SYSTEMPATH\View\View.php(241): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+16 SYSTEMPATH\Common.php(1250): CodeIgniter\View\View->render('login', [], true)
+17 APPPATH\Controllers\Home.php(11): view('login')
+18 SYSTEMPATH\CodeIgniter.php(951): App\Controllers\Home->index()
+19 SYSTEMPATH\CodeIgniter.php(497): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Home))
+20 SYSTEMPATH\CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+21 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+22 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+23 FCPATH\index.php(64): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-07-02 23:37:03 --> CodeIgniter\Session\Exceptions\SessionException: Session: Configured save path "C:\xampp\htdocs\turismo-hub\writable\session" is not writable by the PHP process.
+[Method: GET, Route: login]
+in SYSTEMPATH\Session\Handlers\FileHandler.php on line 102.
+ 1 SYSTEMPATH\Session\Handlers\FileHandler.php(102): CodeIgniter\Session\Exceptions\SessionException::forWriteProtectedSavePath('C:\\xampp\\htdocs\\turismo-hub\\writable\\session')
+ 2 [internal function]: CodeIgniter\Session\Handlers\FileHandler->open('C:\\xampp\\htdocs\\turismo-hub\\writable\\session', 'ci_session')
+ 3 SYSTEMPATH\Session\Session.php(625): session_start()
+ 4 SYSTEMPATH\Session\Session.php(120): CodeIgniter\Session\Session->startSession()
+ 5 SYSTEMPATH\Config\Services.php(715): CodeIgniter\Session\Session->start()
+ 6 SYSTEMPATH\Config\BaseService.php(325): CodeIgniter\Config\Services::session(Object(Config\Session), false)
+ 7 SYSTEMPATH\Config\BaseService.php(264): CodeIgniter\Config\BaseService::__callStatic('session', [...])
+ 8 SYSTEMPATH\Config\Services.php(668): CodeIgniter\Config\BaseService::getSharedInstance('session', null)
+ 9 SYSTEMPATH\Config\BaseService.php(334): CodeIgniter\Config\Services::session()
+10 SYSTEMPATH\Config\BaseService.php(203): CodeIgniter\Config\BaseService::__callStatic('session', [])
+11 SYSTEMPATH\Common.php(1078): CodeIgniter\Config\BaseService::get('session')
+12 SYSTEMPATH\Common.php(1051): service('session')
+13 APPPATH\Views\login.php(158): session()
+14 SYSTEMPATH\View\View.php(238): include('C:\\xampp\\htdocs\\turismo-hub\\app\\Views\\login.php')
+15 SYSTEMPATH\View\View.php(241): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+16 SYSTEMPATH\Common.php(1250): CodeIgniter\View\View->render('login', [], true)
+17 APPPATH\Controllers\Home.php(11): view('login')
+18 SYSTEMPATH\CodeIgniter.php(951): App\Controllers\Home->index()
+19 SYSTEMPATH\CodeIgniter.php(497): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Home))
+20 SYSTEMPATH\CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+21 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+22 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+23 FCPATH\index.php(64): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-07-02 23:37:05 --> CodeIgniter\Session\Exceptions\SessionException: Session: Configured save path "C:\xampp\htdocs\turismo-hub\writable\session" is not writable by the PHP process.
+[Method: GET, Route: login]
+in SYSTEMPATH\Session\Handlers\FileHandler.php on line 102.
+ 1 SYSTEMPATH\Session\Handlers\FileHandler.php(102): CodeIgniter\Session\Exceptions\SessionException::forWriteProtectedSavePath('C:\\xampp\\htdocs\\turismo-hub\\writable\\session')
+ 2 [internal function]: CodeIgniter\Session\Handlers\FileHandler->open('C:\\xampp\\htdocs\\turismo-hub\\writable\\session', 'ci_session')
+ 3 SYSTEMPATH\Session\Session.php(625): session_start()
+ 4 SYSTEMPATH\Session\Session.php(120): CodeIgniter\Session\Session->startSession()
+ 5 SYSTEMPATH\Config\Services.php(715): CodeIgniter\Session\Session->start()
+ 6 SYSTEMPATH\Config\BaseService.php(325): CodeIgniter\Config\Services::session(Object(Config\Session), false)
+ 7 SYSTEMPATH\Config\BaseService.php(264): CodeIgniter\Config\BaseService::__callStatic('session', [...])
+ 8 SYSTEMPATH\Config\Services.php(668): CodeIgniter\Config\BaseService::getSharedInstance('session', null)
+ 9 SYSTEMPATH\Config\BaseService.php(334): CodeIgniter\Config\Services::session()
+10 SYSTEMPATH\Config\BaseService.php(203): CodeIgniter\Config\BaseService::__callStatic('session', [])
+11 SYSTEMPATH\Common.php(1078): CodeIgniter\Config\BaseService::get('session')
+12 SYSTEMPATH\Common.php(1051): service('session')
+13 APPPATH\Views\login.php(158): session()
+14 SYSTEMPATH\View\View.php(238): include('C:\\xampp\\htdocs\\turismo-hub\\app\\Views\\login.php')
+15 SYSTEMPATH\View\View.php(241): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+16 SYSTEMPATH\Common.php(1250): CodeIgniter\View\View->render('login', [], true)
+17 APPPATH\Controllers\Home.php(11): view('login')
+18 SYSTEMPATH\CodeIgniter.php(951): App\Controllers\Home->index()
+19 SYSTEMPATH\CodeIgniter.php(497): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Home))
+20 SYSTEMPATH\CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+21 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+22 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+23 FCPATH\index.php(64): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-07-02 23:37:14 --> CodeIgniter\Session\Exceptions\SessionException: Session: Configured save path "C:\xampp\htdocs\turismo-hub\writable\session" is not writable by the PHP process.
+[Method: GET, Route: login]
+in SYSTEMPATH\Session\Handlers\FileHandler.php on line 102.
+ 1 SYSTEMPATH\Session\Handlers\FileHandler.php(102): CodeIgniter\Session\Exceptions\SessionException::forWriteProtectedSavePath('C:\\xampp\\htdocs\\turismo-hub\\writable\\session')
+ 2 [internal function]: CodeIgniter\Session\Handlers\FileHandler->open('C:\\xampp\\htdocs\\turismo-hub\\writable\\session', 'ci_session')
+ 3 SYSTEMPATH\Session\Session.php(625): session_start()
+ 4 SYSTEMPATH\Session\Session.php(120): CodeIgniter\Session\Session->startSession()
+ 5 SYSTEMPATH\Config\Services.php(715): CodeIgniter\Session\Session->start()
+ 6 SYSTEMPATH\Config\BaseService.php(325): CodeIgniter\Config\Services::session(Object(Config\Session), false)
+ 7 SYSTEMPATH\Config\BaseService.php(264): CodeIgniter\Config\BaseService::__callStatic('session', [...])
+ 8 SYSTEMPATH\Config\Services.php(668): CodeIgniter\Config\BaseService::getSharedInstance('session', null)
+ 9 SYSTEMPATH\Config\BaseService.php(334): CodeIgniter\Config\Services::session()
+10 SYSTEMPATH\Config\BaseService.php(203): CodeIgniter\Config\BaseService::__callStatic('session', [])
+11 SYSTEMPATH\Common.php(1078): CodeIgniter\Config\BaseService::get('session')
+12 SYSTEMPATH\Common.php(1051): service('session')
+13 APPPATH\Views\login.php(158): session()
+14 SYSTEMPATH\View\View.php(238): include('C:\\xampp\\htdocs\\turismo-hub\\app\\Views\\login.php')
+15 SYSTEMPATH\View\View.php(241): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+16 SYSTEMPATH\Common.php(1250): CodeIgniter\View\View->render('login', [], true)
+17 APPPATH\Controllers\Home.php(11): view('login')
+18 SYSTEMPATH\CodeIgniter.php(951): App\Controllers\Home->index()
+19 SYSTEMPATH\CodeIgniter.php(497): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Home))
+20 SYSTEMPATH\CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+21 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+22 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+23 FCPATH\index.php(64): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-07-02 23:37:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-02 23:37:54 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2026-07-02 23:38:20 --> ErrorException: preg_match(): Unknown modifier '^'
+[Method: POST, Route: api/login]
+in SYSTEMPATH\HTTP\Cors.php on line 162.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->errorHandler(2, 'preg_match(): Unknown modifier \'^\'', 'C:\\xampp\\htdocs\\turismo-hub\\system\\HTTP\\Cors.php', 162)
+ 2 SYSTEMPATH\HTTP\Cors.php(162): preg_match('#\\A#^http://localhost(:[0-9]+)?$#\\z#', 'http://localhost')
+ 3 SYSTEMPATH\HTTP\Cors.php(211): CodeIgniter\HTTP\Cors->setAllowOrigin(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response))
+ 4 SYSTEMPATH\Filters\Cors.php(84): CodeIgniter\HTTP\Cors->addResponseHeaders(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response))
+ 5 SYSTEMPATH\Filters\Filters.php(241): CodeIgniter\Filters\Cors->before(Object(CodeIgniter\HTTP\IncomingRequest), null)
+ 6 SYSTEMPATH\Filters\Filters.php(221): CodeIgniter\Filters\Filters->runBefore([...])
+ 7 SYSTEMPATH\CodeIgniter.php(465): CodeIgniter\Filters\Filters->run('api/login', 'before')
+ 8 SYSTEMPATH\CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(64): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-07-02 23:38:22 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2026-07-02 23:38:27 --> ErrorException: preg_match(): Unknown modifier '^'
+[Method: POST, Route: api/login]
+in SYSTEMPATH\HTTP\Cors.php on line 162.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->errorHandler(2, 'preg_match(): Unknown modifier \'^\'', 'C:\\xampp\\htdocs\\turismo-hub\\system\\HTTP\\Cors.php', 162)
+ 2 SYSTEMPATH\HTTP\Cors.php(162): preg_match('#\\A#^http://localhost(:[0-9]+)?$#\\z#', 'http://localhost')
+ 3 SYSTEMPATH\HTTP\Cors.php(211): CodeIgniter\HTTP\Cors->setAllowOrigin(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response))
+ 4 SYSTEMPATH\Filters\Cors.php(84): CodeIgniter\HTTP\Cors->addResponseHeaders(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response))
+ 5 SYSTEMPATH\Filters\Filters.php(241): CodeIgniter\Filters\Cors->before(Object(CodeIgniter\HTTP\IncomingRequest), null)
+ 6 SYSTEMPATH\Filters\Filters.php(221): CodeIgniter\Filters\Filters->runBefore([...])
+ 7 SYSTEMPATH\CodeIgniter.php(465): CodeIgniter\Filters\Filters->run('api/login', 'before')
+ 8 SYSTEMPATH\CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(64): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-07-02 23:38:31 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-02 23:38:56 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-02 23:40:33 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-02 23:49:59 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-02 23:50:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-02 23:50:59 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-02 23:51:00 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.

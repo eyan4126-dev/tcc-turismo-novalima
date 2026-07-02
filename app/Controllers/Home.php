@@ -8,7 +8,7 @@ class Home extends BaseController
     {
         
         #return view('minha_primeira_pagina');
-         return view('welcome_message');
+         return view('login');
 
     }
 

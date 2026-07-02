@@ -6,48 +6,57 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 
-// Rotas de Teste / Boas-vindas
-$routes->get('/', 'Home::index');
-$routes->get('teste', 'Home::teste');
+/*
+ ====================================================================
+  1. ROTAS DE EXIBIÇÃO DE TELAS (VIEW - GET)
+ ====================================================================
+*/
+
+// Rota raiz "/" vai direto para a tela de login
+$routes->get('/', 'AuthController::index');
+$routes->get('login', 'AuthController::index');
+
+// Rota para abrir o formulário da pesquisa do turista
+// Exemplo de acesso: localhost/turismo-hub/public/pesquisa
+$routes->get('pesquisa', 'PesquisaController::index');
+
 
 /*
  ====================================================================
-  1. ROTAS PÚBLICAS (Acessíveis por qualquer um / Sem Filtro)
+  2. ROTAS PÚBLICAS DA API (PROCESSAMENTO - POST)
  ====================================================================
 */
 $routes->group('api', function ($routes) {
-    // Autenticação
+
+    // Processa os dados digitados no formulário de login (view login)
     $routes->post('login', 'AuthController::login');
     $routes->post('logout', 'AuthController::logout');
 
-    // Cadastro Inicial do Lojista (Gera o status 'pendente')
-    $routes->post('solicitar-cadastro', 'AuthController::registrarPendente');
+    // Recebe o formulário de pré-cadastro (solicitado na tela de login)
+    $routes->post('registrar-lojista', 'AuthController::registrarPendente');
 
-    // Coleta do Turista (Waron envia os dados do QR Code para cá)
+    // Recebe as respostas que o Waron estruturou no formulário do turista (view pesquisa)
     $routes->post('pesquisa', 'PesquisaController::salvar');
 });
 
+
 /*
  ====================================================================
-  2. GRUPO ADMINISTRATIVO (Prefeitura - Protegido por Filtro)
+  3. ROTAS FUTURAS (Comentadas para não dar erro de Controller Ausente)
  ====================================================================
-*/
+ * Quando vocês criarem as telas do Admin e do Lojista, basta remover os
+ * comentários '/*' das seções abaixo para ativar os filtros de segurança.
+ */
+
+/*
 $routes->group('api/admin', ['filter' => 'authAdmin'], function ($routes) {
-    $routes->get('dashboard', 'AdminController::index');          // Dashboard com gráficos e filtros
-    $routes->get('aprovacoes', 'AdminController::listarPendentes'); // Lista lojistas pendentes
-    $routes->put('aprovar/(:num)', 'AdminController::aprovarLojista/$1'); // Aprova o lojista pelo ID
-    $routes->get('relatorios', 'AdminController::exportarCSV');    // Exportação para ICMS Turismo
-
-    // [ADICIONADO] Criação de locais fixos ou eventos sazonais protegida por login
-    $routes->post('salvar-local', 'AdminController::salvarLocalOuEvento');
+    $routes->get('dashboard', 'AdminController::index');
+    $routes->get('aprovacoes', 'AdminController::listarPendentes');
+    $routes->put('aprovar/(:num)', 'AdminController::aprovarLojista/$1');
 });
 
-/*
- ====================================================================
-  3. GRUPO DO EMPREENDEDOR (Lojista Ativo - Protegido por Filtro)
- ====================================================================
-*/
 $routes->group('api/painel', ['filter' => 'authLojista'], function ($routes) {
-    $routes->get('meu-negocio', 'LojistaController::index');      // Dados do estabelecimento dele
-    $routes->post('ocupacao', 'LojistaController::lancarInsumo');  // [UNIFICADO] Lançamento semanal
+    $routes->get('meu-negocio', 'LojistaController::index');
+    $routes->post('ocupacao', 'LojistaController::lancarInsumo');
 });
+*/
