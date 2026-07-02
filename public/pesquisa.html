@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turismo Hub - Pesquisa</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a3f6f 0%, #0d2137 100%);
+            min-height: 100vh;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .progress {
+            height: 6px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .progress-bar {
+            background-color: #38bdf8;
+        }
+
+        .card-step {
+            background: rgba(255, 255, 255, 0.95);
+            color: #0d2137;
+            border-radius: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            display: none;
+            transition: all 0.3s ease;
+        }
+
+        .card-step.active {
+            display: block;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        /* Cards de Seleção Visual (Gamificação) */
+        .selectable-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #fff;
+            height: 100%;
+        }
+
+        .selectable-card:hover {
+            transform: translateY(-3px);
+            border-color: #38bdf8;
+            background-color: #f0f9ff;
+        }
+
+        .selectable-card.selected {
+            border-color: #1a3f6f;
+            background-color: #e0f2fe;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.5);
+        }
+
+        .selectable-card i {
+            font-size: 2rem;
+            color: #1a3f6f;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Régua do NPS Interativa */
+        .nps-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .nps-btn {
+            flex: 1;
+            min-width: 35px;
+            height: 45px;
+            border: 2px solid #e2e8f0;
+            background: #fff;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nps-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .nps-btn.detrator.selected {
+            background-color: #ef4444;
+            color: #fff;
+            border-color: #dc2626;
+        }
+
+        .nps-btn.neutro.selected {
+            background-color: #f59e0b;
+            color: #fff;
+            border-color: #d97706;
+        }
+
+        .nps-btn.promotor.selected {
+            background-color: #22c55e;
+            color: #fff;
+            border-color: #16a34a;
+        }
+
+        /* Estrelas */
+        .star-rating {
+            direction: rtl;
+            display: inline-flex;
+        }
+
+        .star-rating input {
+            display: none;
+        }
+
+        .star-rating label {
+            color: #cbd5e1;
+            font-size: 2.5rem;
+            padding: 0 0.3rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .star-rating label:hover,
+        .star-rating label:hover~label,
+        .star-rating input:checked~label {
+            color: #f59e0b;
+        }
+
+        /* Autocomplete da Cidade */
+        .autocomplete-suggestions {
+            position: absolute;
+            z-index: 1000;
+            background: #fff;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            margin-top: 2px;
+        }
+
+        .suggestion-item {
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+        }
+
+        .suggestion-item:hover {
+            background-color: #e0f2fe;
+            color: #0369a1;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-7 col-lg-6">
+
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between text-sm mb-1">
+                        <span class="text-white-50">Pesquisa Turística</span>
+                        <span id="progressText" class="fw-bold text-info">Passo 1 de 4</span>
+                    </div>
+                    <div class="progress">
+                        <div id="progressBar" class="progress-bar" role="progressbar" style="width: 25%;"></div>
+                    </div>
+                </div>
+
+                <div id="alertContainer"></div>
+
+                <form id="formInovador">
+                    <input type="hidden" id="id_estabelecimento" name="id_estabelecimento">
+
+                    <div class="card-step active p-4" id="step1">
+                        <h4 class="fw-bold mb-3"><i
+                                class="fa-solid fa-map-location-dot text-primary me-2"></i>Boas-vindas! Vamos começar?
+                        </h4>
+
+                        <div class="mb-4 position-relative">
+                            <label class="form-label fw-semibold">De qual cidade/estado ou país você é?</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i
+                                        class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                                <input type="text" class="form-control border-start-0" id="busca_cidade"
+                                    autocomplete="off" placeholder="Busque e selecione a cidade...">
+                            </div>
+                            <div id="suggestions" class="autocomplete-suggestions d-none"></div>
+                            <input type="hidden" id="cidade_origem">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold mb-3">Qual o principal motivo da sua visita?</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="selectable-card" data-input="motivo" data-value="lazer">
+                                        <i class="fa-solid fa-umbrella-beach"></i>
+                                        <div class="fw-bold text-secondary">Lazer / Férias</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="selectable-card" data-input="motivo" data-value="negocios">
+                                        <i class="fa-solid fa-briefcase"></i>
+                                        <div class="fw-bold text-secondary">Negócios</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="selectable-card" data-input="motivo" data-value="parentes_amigos">
+                                        <i class="fa-solid fa-people-roof"></i>
+                                        <div class="fw-bold text-secondary">Amigos/Parentes</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="selectable-card" data-input="motivo" data-value="outro">
+                                        <i class="fa-solid fa-route"></i>
+                                        <div class="fw-bold text-secondary">Outro Motivo</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="motivo_visita">
+                        </div>
+
+                        <div class="text-end mt-4">
+                            <button type="button" class="btn btn-primary px-4 fw-bold rounded-pill"
+                                onclick="nextStep(2)">Avançar <i class="fa-solid fa-arrow-right ms-1"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="card-step p-4" id="step2">
+                        <h4 class="fw-bold mb-4"><i class="fa-solid fa-clock text-primary me-2"></i>Sobre a sua estadia
+                        </h4>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold mb-3">Quanto tempo você pretende ficar na
+                                cidade?</label>
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <div class="selectable-card" data-input="permanencia" data-value="bate_volta">
+                                        <i class="fa-solid fa-bolt"></i>
+                                        <div class="fw-bold text-secondary">Bate e Volta</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="selectable-card" data-input="permanencia" data-value="dormir">
+                                        <i class="fa-solid fa-moon"></i>
+                                        <div class="fw-bold text-secondary">Vou Pernoitar</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="tempo_permanencia">
+                        </div>
+
+                        <div class="mb-3 d-none" id="subHospedagem">
+                            <label class="form-label fw-semibold mb-2">Onde você está se hospedando? <span
+                                    class="text-danger">*</span></label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="selectable-card py-3 px-1" data-input="hospedagem"
+                                        data-value="hotel_pousada">
+                                        <i class="fa-solid fa-hotel" style="font-size:1.3rem"></i>
+                                        <div class="small fw-bold text-secondary">Hotel / Pousada</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="selectable-card py-3 px-1" data-input="hospedagem"
+                                        data-value="airbnb_aluguel">
+                                        <i class="fa-solid fa-house-user" style="font-size:1.3rem"></i>
+                                        <div class="small fw-bold text-secondary">Airbnb / Aluguel</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="selectable-card py-3 px-1" data-input="hospedagem"
+                                        data-value="casa_amigos_parentes">
+                                        <i class="fa-solid fa-user-group" style="font-size:1.3rem"></i>
+                                        <div class="small fw-bold text-secondary">Amigos / Parentes</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="selectable-card py-3 px-1" data-input="hospedagem" data-value="outro">
+                                        <i class="fa-solid fa-bed-pulse" style="font-size:1.3rem"></i>
+                                        <div class="small fw-bold text-secondary">Outro Local</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="local_hospedagem">
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" class="btn btn-outline-secondary px-4 fw-bold rounded-pill"
+                                onclick="prevStep(1)"><i class="fa-solid fa-arrow-left me-1"></i> Voltar</button>
+                            <button type="button" class="btn btn-primary px-4 fw-bold rounded-pill"
+                                onclick="nextStep(3)">Avançar <i class="fa-solid fa-arrow-right ms-1"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="card-step p-4" id="step3">
+                        <h4 class="fw-bold mb-4"><i class="fa-solid fa-wallet text-primary me-2"></i>Planejamento
+                            Financeiro</h4>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold mb-3">Qual o seu gasto médio estimado por pessoa nesta
+                                visita?</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="selectable-card" data-input="gasto" data-value="0_50">
+                                        <div class="fw-bold text-dark">Até R$ 50</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="selectable-card" data-input="gasto" data-value="51_100">
+                                        <div class="fw-bold text-dark">R$ 51 - R$ 100</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="selectable-card" data-input="gasto" data-value="101_200">
+                                        <div class="fw-bold text-dark">R$ 101 - R$ 200</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="selectable-card" data-input="gasto" data-value="201_plus">
+                                        <div class="fw-bold text-dark">Mais de R$ 201</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="faixa_gasto">
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" class="btn btn-outline-secondary px-4 fw-bold rounded-pill"
+                                onclick="prevStep(2)"><i class="fa-solid fa-arrow-left me-1"></i> Voltar</button>
+                            <button type="button" class="btn btn-primary px-4 fw-bold rounded-pill"
+                                onclick="nextStep(4)">Avançar <i class="fa-solid fa-arrow-right ms-1"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="card-step p-4" id="step4">
+                        <h4 class="fw-bold mb-4"><i class="fa-solid fa-ranking-star text-primary me-2"></i>Sua Opinião
+                            Final</h4>
+
+                        <div class="mb-4 text-center">
+                            <label class="form-label fw-semibold d-block text-start">Como você avalia sua experiência
+                                geral aqui?</label>
+                            <div class="star-rating">
+                                <input type="radio" id="star5" name="satisfacao_estrelas" value="5" /><label for="star5"
+                                    class="fa-solid fa-star"></label>
+                                <input type="radio" id="star4" name="satisfacao_estrelas" value="4" /><label for="star4"
+                                    class="fa-solid fa-star"></label>
+                                <input type="radio" id="star3" name="satisfacao_estrelas" value="3" /><label for="star3"
+                                    class="fa-solid fa-star"></label>
+                                <input type="radio" id="star2" name="satisfacao_estrelas" value="2" /><label for="star2"
+                                    class="fa-solid fa-star"></label>
+                                <input type="radio" id="star1" name="satisfacao_estrelas" value="1" /><label for="star1"
+                                    class="fa-solid fa-star"></label>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold mb-2">Qual a chance de você recomendar esta
+                                cidade/evento para amigos ou familiares?</label>
+                            <div class="nps-container"></div>
+                            <input type="hidden" id="nps_val">
+                            <div class="d-flex justify-content-between text-muted small mt-1">
+                                <span>0 (Jamais)</span>
+                                <span>10 (Com certeza)</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" class="btn btn-outline-secondary px-4 fw-bold rounded-pill"
+                                onclick="prevStep(3)"><i class="fa-solid fa-arrow-left me-1"></i> Voltar</button>
+                            <button type="submit" class="btn btn-success px-5 fw-bold rounded-pill"
+                                id="btnSubmit">Finalizar ✨</button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let cidadeSelecionadaVerdadeira = false;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const idEst = urlParams.get('id');
+            if (idEst) { document.getElementById('id_estabelecimento').value = idEst; }
+            else { alert("QR Code Inválido."); }
+
+            configurarCardsSelecao();
+            construirNps();
+            configurarAutocompleteCidades();
+        });
+
+        function showStep(step) {
+            document.querySelectorAll('.card-step').forEach(el => el.classList.remove('active'));
+            document.getElementById(`step${step}`).classList.add('active');
+            currentStep = step;
+            document.getElementById('progressText').innerText = `Passo ${step} de 4`;
+            document.getElementById('progressBar').style.width = `${step * 25}%`;
+        }
+
+        function nextStep(step) {
+            // --- TRAVAS ESTRITAS DO PASSO 1 ---
+            if (currentStep === 1 && step === 2) {
+                const inputTexto = document.getElementById('busca_cidade').value.trim();
+
+                if (!cidadeSelecionadaVerdadeira || !document.getElementById('cidade_origem').value || inputTexto !== document.getElementById('cidade_origem').value) {
+                    alert("Por favor, selecione uma das cidades sugeridas na lista de pesquisa.");
+                    return;
+                }
+                if (!document.getElementById('motivo_visita').value) {
+                    alert("Por favor, escolha o motivo da sua visita clicando em um dos cards visuais.");
+                    return;
+                }
+            }
+
+            // --- TRAVAS ESTRITAS DO PASSO 2 ---
+            if (currentStep === 2 && step === 3) {
+                const permanencia = document.getElementById('tempo_permanencia').value;
+                if (!permanencia) {
+                    alert("Por favor, escolha quanto tempo você pretende ficar clicando em um dos cards.");
+                    return;
+                }
+                if (permanencia === 'dormir' && !document.getElementById('local_hospedagem').value) {
+                    alert("Como você vai pernoitar, é obrigatório selecionar onde está hospedado antes de avançar.");
+                    return;
+                }
+            }
+
+            // --- TRAVAS ESTRITAS DO PASSO 3 ---
+            if (currentStep === 3 && step === 4) {
+                if (!document.getElementById('faixa_gasto').value) {
+                    alert("Por favor, selecione sua faixa de gasto médio estimada antes de avançar.");
+                    return;
+                }
+            }
+
+            showStep(step);
+        }
+
+        function prevStep(step) { showStep(step); }
+
+        function configurarCardsSelecao() {
+            document.querySelectorAll('.selectable-card').forEach(card => {
+                card.addEventListener('click', function () {
+                    const tipoInput = this.getAttribute('data-input');
+                    const valor = this.getAttribute('data-value');
+
+                    document.querySelectorAll(`.selectable-card[data-input="${tipoInput}"]`).forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+
+                    if (tipoInput === 'motivo') document.getElementById('motivo_visita').value = valor;
+                    if (tipoInput === 'gasto') document.getElementById('faixa_gasto').value = valor;
+
+                    if (tipoInput === 'permanencia') {
+                        document.getElementById('tempo_permanencia').value = valor;
+                        if (valor === 'dormir') {
+                            document.getElementById('subHospedagem').classList.remove('d-none');
+                        } else {
+                            document.getElementById('subHospedagem').classList.add('d-none');
+                            document.getElementById('local_hospedagem').value = "";
+                            document.querySelectorAll('.selectable-card[data-input="hospedagem"]').forEach(c => c.classList.remove('selected'));
+                        }
+                    }
+                    if (tipoInput === 'hospedagem') document.getElementById('local_hospedagem').value = valor;
+                });
+            });
+        }
+
+        function construirNps() {
+            const container = document.querySelector('.nps-container');
+            for (let i = 0; i <= 10; i++) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'nps-btn';
+                btn.innerText = i;
+                if (i <= 6) btn.classList.add('detrator');
+                else if (i <= 8) btn.classList.add('neutro');
+                else btn.classList.add('promotor');
+
+                btn.addEventListener('click', function () {
+                    document.querySelectorAll('.nps-btn').forEach(b => b.classList.remove('selected'));
+                    this.classList.add('selected');
+                    document.getElementById('nps_val').value = i;
+                });
+                container.appendChild(btn);
+            }
+        }
+
+        function configurarAutocompleteCidades() {
+            const input = document.getElementById('busca_cidade');
+            const suggestionsContainer = document.getElementById('suggestions');
+
+            input.addEventListener('input', async function () {
+                cidadeSelecionadaVerdadeira = false;
+                const busca = this.value.trim();
+                if (busca.length < 3) { suggestionsContainer.classList.add('d-none'); return; }
+
+                try {
+                    const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/municipios?view=completa`);
+                    const municipios = await response.json();
+                    const filtrados = municipios.filter(m => m.nome.toLowerCase().includes(busca.toLowerCase())).slice(0, 5);
+
+                    if (filtrados.length > 0) {
+                        suggestionsContainer.innerHTML = '';
+                        filtrados.forEach(m => {
+                            const item = document.createElement('div');
+                            item.className = 'suggestion-item';
+                            const stringFormatada = `${m.nome} - ${m.microrregiao.mesorregiao.UF.sigla}`;
+                            item.innerText = stringFormatada;
+
+                            item.addEventListener('click', function () {
+                                input.value = stringFormatada;
+                                document.getElementById('cidade_origem').value = stringFormatada;
+                                cidadeSelecionadaVerdadeira = true;
+                                suggestionsContainer.classList.add('d-none');
+                            });
+                            suggestionsContainer.appendChild(item);
+                        });
+                        suggestionsContainer.classList.remove('d-none');
+                    } else {
+                        suggestionsContainer.classList.add('d-none');
+                    }
+                } catch (e) {
+                    cidadeSelecionadaVerdadeira = true;
+                    document.getElementById('cidade_origem').value = busca;
+                }
+            });
+
+            document.addEventListener('click', function (e) {
+                if (e.target !== input) suggestionsContainer.classList.add('d-none');
+            });
+        }
+
+        document.getElementById('formInovador').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const estrela = document.querySelector('input[name="satisfacao_estrelas"]:checked');
+            if (!estrela || document.getElementById('nps_val').value === "") {
+                alert("Por favor, preencha as avaliações de estrelas e a nota de recomendação.");
+                return;
+            }
+
+            const btn = document.getElementById('btnSubmit');
+            btn.disabled = true;
+            btn.innerText = "Registrando...";
+
+            const payload = {
+                id_estabelecimento: parseInt(document.getElementById('id_estabelecimento').value),
+                cidade_origem: document.getElementById('cidade_origem').value,
+                tempo_permanencia: document.getElementById('tempo_permanencia').value,
+                local_hospedagem: document.getElementById('tempo_permanencia').value === 'dormir' ? document.getElementById('local_hospedagem').value : null,
+                faixa_gasto: document.getElementById('faixa_gasto').value,
+                satisfacao_estrelas: parseInt(estrela.value),
+                nps: parseInt(document.getElementById('nps_val').value),
+                motivo_visita: document.getElementById('motivo_visita').value
+            };
+
+            try {
+                const response = await fetch('/api/pesquisa', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    document.getElementById('alertContainer').innerHTML = `<div class="alert alert-success p-4 border-0 rounded-4 text-center"><i class="fa-solid fa-circle-check fa-3x mb-2 text-success"></i><h5>Experiência Registrada!</h5><p class="small mb-0">Obrigado por colaborar com o monitoramento turístico.</p></div>`;
+                    document.getElementById('formInovador').innerHTML = '';
+                } else {
+                    alert("Erro interno ao salvar dados. Verifique as validações.");
+                    btn.disabled = false;
+                    btn.innerText = "Finalizar ✨";
+                }
+            } catch (error) {
+                alert("Não foi possível conectar ao servidor.");
+                btn.disabled = false;
+                btn.innerText = "Finalizar ✨";
+            }
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

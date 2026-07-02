@@ -10,11 +10,10 @@ class LojistaAuthFilter implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
-        // Se não estiver logado ou se não for lojista, barra
-        if (!session()->get('isLogged') || session()->get('role') !== 'lojista') {
+        if (!session()->get('isLogged') || session()->get('role_usuario') !== 'lojista') {
             return service('response')
                 ->setStatusCode(401)
-                ->setJSON(['error' => 'Acesso negado. Área restrita ao lojista.']);
+                ->setJSON(['status' => 'error', 'error' => 'Acesso negado. Área restrita ao lojista ativo.']);
         }
     }
 
