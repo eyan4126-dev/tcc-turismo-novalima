@@ -2,150 +2,206 @@
 
 namespace App\Controllers;
 
+use App\Controllers\BaseController;
 use App\Models\UsuarioModel;
-use App\Models\EstabelecimentoModel;
-use CodeIgniter\RESTful\ResourceController;
 
-class AdminController extends ResourceController
+class AdminController extends BaseController
 {
-    protected $format = 'json';
+    protected $helpers = ['url'];
 
-    // Lista lojistas aguardando aprovação da prefeitura
-    public function listarPendentes()
-    {
-        $userModel = new UsuarioModel();
-        $pendentes = $userModel->where('status_usuario', 'pendente')->findAll();
-        return $this->respond(['status' => 'success', 'data' => $pendentes], 200);
-    }
-
-    // Aprova o lojista e ativa seu perfil
-    public function aprovarLojista($id = null)
-    {
-        $userModel = new UsuarioModel();
-        $usuario = $userModel->find($id);
-
-        if (!$usuario) {
-            return $this->failNotFound('Usuário não encontrado.');
-        }
-
-        $userModel->update($id, ['status_usuario' => 'ativo']);
-
-        return $this->respond([
-            'status' => 'success',
-            'message' => 'Lojista aprovado e ativado com sucesso.'
-        ], 200);
-    }
-
-    // Dashboard Estatístico com distribuição percentual por Faixas de Gasto e Filtro Sazonal
     public function index()
     {
         $db = \Config\Database::connect();
+        $userModel = new UsuarioModel();
+
+        // 1. Filtro de Status Implícito: Apenas dados vinculados a usuários ATIVOS
         $idEvento = $this->request->getGet('id_evento');
 
-        // Builders Iniciais
-        $builderPesquisa = $db->table('pesquisa p');
-        $builderOcupacao = $db->table('fluxos_ocupacao f');
+        // Seleção de filtros de evento sazonal para carregar no dropdown da View
+        $eventosFiltro = $db->table('estabelecimento_evento ee')
+            ->join('usuario u', 'u.id_usuario = ee.id_usuario')
+            ->where('u.status_usuario', 'ativo')
+            ->where('ee.tipo', 'evento')
+            ->get()->getResultArray() ?? [];
 
-        // Se houver um ID de evento passado pelo filtro do Waron, buscamos os limites de data dele
-        if ($idEvento) {
-            $evento = $db->table('estabelecimento_evento')
-                ->where('id_estabelecimento', $idEvento)
-                ->where('tipo', 'evento')
-                ->get()
-                ->getRowArray();
+        // Inicialização de estrutura de KPIs em conformidade com as regras de cálculo do TCC v2
+        $kpis = ['impacto_economico' => 0, 'volume_turistico' => 0, 'ocupacao_hoteleira' => 0, 'satisfacao_media' => 0, 'nps' => 0];
+        $charts = [
+            'cidades' => ['labels' => json_encode([]), 'valores' => json_encode([])],
+            'setores' => ['labels' => json_encode([]), 'valores' => json_encode([])],
+            'motivos' => ['labels' => json_encode([]), 'valores' => json_encode([])],
+            'hospedagem' => ['labels' => json_encode([]), 'valores' => json_encode([])]
+        ];
 
-            if ($evento) {
-                // Filtra as pesquisas estritamente dentro do período da festa e associadas a ela
-                $builderPesquisa->where('p.id_estabelecimento', $idEvento);
-                if ($evento['data_inicio']) $builderPesquisa->where('p.respondido_em >=', $evento['data_inicio'] . ' 00:00:00');
-                if ($evento['data_fim'])    $builderPesquisa->where('p.respondido_em <=', $evento['data_fim'] . ' 23:59:59');
+        if ($db->tableExists('pesquisa')) {
+            // Montagem da query base com filtros implícitos estruturados
+            $builder = $db->table('pesquisa p')
+                ->join('estabelecimento_evento ee', 'ee.id_estabelecimento = p.id_estabelecimento')
+                ->join('usuario u', 'u.id_usuario = ee.id_usuario')
+                ->where('u.status_usuario', 'ativo');
+
+            if ($idEvento) {
+                $builder->where('ee.id_estabelecimento', $idEvento);
             }
-        } else {
-            // Se não houver filtro, o painel exibe apenas os dados dos estabelecimentos do tipo 'fixo'
-            $builderPesquisa->join('estabelecimento_evento e', 'e.id_estabelecimento = p.id_estabelecimento')
-                ->where('e.tipo', 'fixo');
 
-            $builderOcupacao->join('estabelecimento_evento e', 'e.id_estabelecimento = f.id_estabelecimento')
-                ->where('e.tipo', 'fixo');
+            // --- CÁLCULO DE KPIs ---
+            // 1. Impacto Econômico: SUM(valor_gasto_estimado) + Fluxos de lojistas
+            $kpis['impacto_economico'] = $builder->selectSum('p.valor_gasto_estimado')->get()->getRowArray()['valor_gasto_estimado'] ?? 0;
+
+            // 2. Volume Turístico Geral (Pesquisas + Fluxos)
+            $totalRespostas = $db->table('pesquisa p')
+                ->join('estabelecimento_evento ee', 'ee.id_estabelecimento = p.id_estabelecimento')
+                ->join('usuario u', 'u.id_usuario = ee.id_usuario')
+                ->where('u.status_usuario', 'ativo')
+                ->countAllResults();
+            $kpis['volume_turistico'] = $totalRespostas;
+
+            // 3. Taxa de Ocupação Hoteleira
+            if ($db->tableExists('fluxos_ocupacao')) {
+                $hotelQuery = $db->table('fluxos_ocupacao fo')
+                    ->join('estabelecimento_evento ee', 'ee.id_estabelecimento = fo.id_estabelecimento')
+                    ->join('usuario u', 'u.id_usuario = ee.id_usuario')
+                    ->where('u.status_usuario', 'ativo')
+                    ->where('ee.setor', 'hospedagem')
+                    ->selectSum('fo.quartos_ocupados', 'oc')
+                    ->selectSum('fo.capacidade_maxima_quartos', 'cap')
+                    ->get()->getRowArray();
+                if (($hotelQuery['cap'] ?? 0) > 0) {
+                    $kpis['ocupacao_hoteleira'] = round(($hotelQuery['oc'] / $hotelQuery['cap']) * 100, 1);
+                }
+            }
+
+            // 4. Índice de Satisfação Média (Estrelas)
+            $kpis['satisfacao_media'] = round($db->table('pesquisa p')
+                ->join('estabelecimento_evento ee', 'ee.id_estabelecimento = p.id_estabelecimento')
+                ->join('usuario u', 'u.id_usuario = ee.id_usuario')
+                ->where('u.status_usuario', 'ativo')
+                ->selectAvg('p.satisfacao_estrelas')
+                ->get()->getRowArray()['satisfacao_estrelas'] ?? 0, 1);
+
+            // 5. Cálculo Convencional de Mercado para NPS (% Promotores - % Detratores)
+            $npsData = $db->table('pesquisa p')
+                ->join('estabelecimento_evento ee', 'ee.id_estabelecimento = p.id_estabelecimento')
+                ->join('usuario u', 'u.id_usuario = ee.id_usuario')
+                ->where('u.status_usuario', 'ativo')
+                ->select('p.nps')->get()->getResultArray();
+            if (count($npsData) > 0) {
+                $p = 0;
+                $d = 0;
+                foreach ($npsData as $n) {
+                    if ($n['nps'] >= 9) $p++;
+                    if ($n['nps'] <= 6) $d++;
+                }
+                $kpis['nps'] = round((($p - $d) / count($npsData)) * 100);
+            }
+
+            // --- GRÁFICOS COMPORTAMENTAIS (População dos Arrays de Exibição) ---
+            // Cidades Origem (Top 5)
+            $cidades = $db->table('pesquisa p')->join('estabelecimento_evento ee', 'ee.id_estabelecimento = p.id_estabelecimento')->join('usuario u', 'u.id_usuario = ee.id_usuario')->where('u.status_usuario', 'ativo')->select('p.cidade_origem, COUNT(*) as total')->groupBy('p.cidade_origem')->orderBy('total', 'DESC')->limit(5)->get()->getResultArray();
+            $charts['cidades'] = ['labels' => json_encode(array_column($cidades, 'cidade_origem')), 'valores' => json_encode(array_map('intval', array_column($cidades, 'total')))];
+
+            // Setores
+            $setores = $db->table('pesquisa p')->join('estabelecimento_evento ee', 'ee.id_estabelecimento = p.id_estabelecimento')->join('usuario u', 'u.id_usuario = ee.id_usuario')->where('u.status_usuario', 'ativo')->select('ee.setor, COUNT(*) as total')->groupBy('ee.setor')->get()->getResultArray();
+            $charts['setores'] = ['labels' => json_encode(array_column($setores, 'setor')), 'valores' => json_encode(array_map('intval', array_column($setores, 'total')))];
+
+            // Motivos da Visita
+            $motivos = $db->table('pesquisa p')->join('estabelecimento_evento ee', 'ee.id_estabelecimento = p.id_estabelecimento')->join('usuario u', 'u.id_usuario = ee.id_usuario')->where('u.status_usuario', 'ativo')->select('p.motivo_visita, COUNT(*) as total')->groupBy('p.motivo_visita')->get()->getResultArray();
+            $charts['motivos'] = ['labels' => json_encode(array_column($motivos, 'motivo_visita')), 'valores' => json_encode(array_map('intval', array_column($motivos, 'total')))];
+
+            // Perfil de Hospedagem (Apenas tempo_permanencia = 'dormir')
+            $hosp = $db->table('pesquisa p')->join('estabelecimento_evento ee', 'ee.id_estabelecimento = p.id_estabelecimento')->join('usuario u', 'u.id_usuario = ee.id_usuario')->where('u.status_usuario', 'ativo')->where('p.tempo_permanencia', 'dormir')->select('p.local_hospedagem, COUNT(*) as total')->groupBy('p.local_hospedagem')->get()->getResultArray();
+            $charts['hospedagem'] = ['labels' => json_encode(array_column($hosp, 'local_hospedagem')), 'valores' => json_encode(array_map('intval', array_column($hosp, 'total')))];
         }
 
-        // 1. Coleta e Distribuição de Faixas de Gasto (Pizza/Barras no Front)
-        $pesquisasClone = clone $builderPesquisa;
-        $gastosResult = $pesquisasClone->select('p.faixa_gasto, COUNT(*) as total')
-            ->groupBy('p.faixa_gasto')
-            ->get()
-            ->getResultArray();
+        // Carrega o Onboarding das solicitações pendentes de Lojistas
+        $solicitacoes = $db->table('usuario u')
+            ->join('estabelecimento_evento ee', 'ee.id_usuario = u.id_usuario')
+            ->where('u.status_usuario', 'pendente')
+            ->where('u.role_usuario', 'lojista')
+            ->get()->getResultArray() ?? [];
 
-        // 2. Média de Satisfação e cálculo puro de NPS
-        $npsClone = clone $builderPesquisa;
-        $npsData = $npsClone->select('p.nps, p.satisfacao_estrelas')->get()->getResultArray();
-
-        $totalRespostas = count($npsData);
-        $promotores = 0;
-        $detratores = 0;
-        $somaEstrelas = 0;
-
-        foreach ($npsData as $row) {
-            $somaEstrelas += $row['satisfacao_estrelas'];
-            if ($row['nps'] >= 9) $promotores++;
-            if ($row['nps'] <= 6) $detratores++;
-        }
-
-        $npsGeral = $totalRespostas > 0 ? (($promotores - $detratores) / $totalRespostas) * 180 : 0;
-        $mediaEstrelas = $totalRespostas > 0 ? ($somaEstrelas / $totalRespostas) : 0;
-
-        // 3. Volume total de clientes monitorados (Vem de fluxos_ocupacao se for Macro/Fixo)
-        $totalClientes = 0;
-        if (!$idEvento) {
-            $totalClientes = $builderOcupacao->selectSum('f.volume_clientes', 'total')->get()->getRowArray()['total'] ?? 0;
-        } else {
-            // Em eventos, o volume de público é medido pelo volume de formulários respondidos passivamente
-            $totalClientes = $totalRespostas;
-        }
-
-        return $this->respond([
-            'status' => 'success',
-            'filtros_aplicados' => [
-                'id_evento' => $idEvento ?? 'Geral Macro'
-            ],
-            'metrics' => [
-                'total_clientes_detectados' => (int)$totalClientes,
-                'media_satisfacao_estrelas'  => round($mediaEstrelas, 2),
-                'nps_score'                 => round($npsGeral, 2),
-                'distribuicao_gastos'       => $gastosResult
-            ]
-        ], 200);
+        return view('admin', [
+            'eventosFiltro' => $eventosFiltro,
+            'kpis' => $kpis,
+            'charts' => $charts,
+            'solicitacoes' => $solicitacoes
+        ]);
     }
 
-    // Exportação de Dados Unificados para o ICMS Turismo
-    public function exportarCSV()
+    public function estabelecimentos()
     {
         $db = \Config\Database::connect();
-        $query = $db->table('pesquisa p')
-            ->select('p.id_pesquisa, e.razao_social, p.cidade_origem, p.tempo_permanencia, p.faixa_gasto, p.satisfacao_estrelas, p.respondido_em')
-            ->join('estabelecimento_evento e', 'e.id_estabelecimento = p.id_estabelecimento')
-            ->get()
-            ->getResultArray();
+        $estabelecimentos = $db->table('estabelecimento_evento ee')
+            ->join('usuario u', 'u.id_usuario = ee.id_usuario')
+            ->where('u.status_usuario', 'ativo')
+            ->get()->getResultArray() ?? [];
 
-        $filename = "relatorio_icms_turismo_" . date('Ymd') . ".csv";
+        return view('estabelecimentos', ['estabelecimentos' => $estabelecimentos]);
+    }
 
-        header("Content-Description: File Transfer");
-        header("Content-Disposition: attachment; filename=$filename");
-        header("Content-Type: text/csv; charset=UTF-8");
+    public function qrcodes()
+    {
+        $db = \Config\Database::connect();
+        $qrcodes = $db->table('estabelecimento_evento ee')
+            ->join('usuario u', 'u.id_usuario = ee.id_usuario')
+            ->where('u.status_usuario', 'ativo')
+            ->get()->getResultArray() ?? [];
 
-        $output = fopen("php://output", "w");
+        return view('qrcodes', ['qrcodes' => $qrcodes]);
+    }
 
-        // Bom para o Excel abrir com acentuação correta em PT-BR
-        fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
+    public function salvarDireto()
+    {
+        $db = \Config\Database::connect();
+        $db->transStart();
 
-        // Cabeçalho do CSV
-        fputcsv($output, ['ID Pesquisa', 'Local/Evento', 'Cidade Origem', 'Permanência', 'Faixa Gasto', 'Estrelas', 'Data']);
+        // 1. Cria o usuário do tipo admin associado ao cadastro direto efetuado
+        $db->table('usuario')->insert([
+            'nome_responsavel' => 'Funcionário Prefeitura (Admin)',
+            'email' => 'admin_direto_' . time() . '@novalima.mg.gov.br',
+            'senha' => password_hash(bin2hex(random_bytes(4)), PASSWORD_BCRYPT),
+            'role_usuario' => 'admin',
+            'status_usuario' => 'ativo' // Ativado imediatamente
+        ]);
+        $idUsuario = $db->insertID();
 
-        foreach ($query as $row) {
-            fputcsv($output, $row);
-        }
+        // 2. Persiste o estabelecimento/ponto gerando o token_qr_code criptográfico seguro
+        $db->table('estabelecimento_evento')->insert([
+            'id_usuario' => $idUsuario,
+            'razao_social' => $this->request->getPost('razao_social'),
+            'cnpj' => null, // Conforme especificação: NULL para cadastros públicos da prefeitura
+            'telefone' => $this->request->getPost('telefone'),
+            'setor' => $this->request->getPost('setor'),
+            'token_qr_code' => bin2hex(random_bytes(10)), // Token não sequencial de alta entropia
+            'tipo' => $this->request->getPost('tipo'),
+            'data_inicio' => $this->request->getPost('data_inicio') ?: null,
+            'data_fim' => $this->request->getPost('data_fim') ?: null,
+        ]);
 
-        fclose($output);
-        exit;
+        $db->transComplete();
+        return redirect()->to('/estabelecimentos');
+    }
+
+    public function aprovarLojista($id = null)
+    {
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        $db->table('usuario')->where('id_usuario', $id)->update(['status_usuario' => 'ativo']);
+
+        // Gera o token de segurança para o QR Code no momento exato de sua ativação
+        $db->table('estabelecimento_evento')->where('id_usuario', $id)->update([
+            'token_qr_code' => bin2hex(random_bytes(10))
+        ]);
+
+        $db->transComplete();
+        return redirect()->to('/admin');
+    }
+
+    public function recusarLojista($id = null)
+    {
+        $db = \Config\Database::connect();
+        $db->table('usuario')->where('id_usuario', $id)->update(['status_usuario' => 'suspenso']);
+        return redirect()->to('/admin');
     }
 }

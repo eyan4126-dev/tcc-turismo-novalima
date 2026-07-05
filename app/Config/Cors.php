@@ -16,7 +16,7 @@ class Cors extends BaseConfig
      */
     public array $default = [
         'allowedOrigins'         => [],
-        'allowedOriginsPatterns' => ['#^http://localhost(:[0-9]+)?$#'], // Captura localhost com ou sem porta
+        'allowedOriginsPatterns' => [''], // Captura localhost com ou sem porta
         'allowedHeaders'         => ['*'],
         'allowedMethods'         => ['*'],
         'exposedHeaders'         => [],

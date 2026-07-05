@@ -4,32 +4,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Turismo Hub - Pesquisa</title>
+    <title>iNovaTour - Pesquisa Turística</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
         body {
-            background: linear-gradient(135deg, #1a3f6f 0%, #0d2137 100%);
+            background-color: #F8F9FA;
+            /* Fundo Governamental Ultraclaro */
             min-height: 100vh;
-            color: #fff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #1A1D20;
+            /* Texto Alfa em Grafite de Alto Contraste */
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Faixa com o degradê arco-íris característico da identidade visual de Nova Lima */
+        .top-identity-bar {
+            height: 12px;
+            background: linear-gradient(90deg, #FF5722 0%, #7B1FA2 35%, #0288D1 70%, #2E7D32 100%);
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1050;
+        }
+
+        /* Container da Logo do iNovaTour */
+        .brand-logo-container {
+            width: 80px;
+            height: 80px;
+            background-color: #FFFFFF;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 2px solid #E2E8F0;
+            margin: 0 auto 1.5rem auto;
+        }
+
+        .brand-logo-container img {
+            width: 75%;
+            height: auto;
+            object-fit: contain;
         }
 
         .progress {
-            height: 6px;
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 3px;
+            height: 8px;
+            background-color: #E2E8F0;
+            border-radius: 4px;
         }
 
         .progress-bar {
-            background-color: #38bdf8;
+            background: linear-gradient(90deg, #0288D1 0%, #0091EA 100%);
+            /* Azul digital da prefeitura */
         }
 
+        /* Estilo dos Blocos de Serviço Flutuantes (Portal 156 Style) */
         .card-step {
-            background: rgba(255, 255, 255, 0.95);
-            color: #0d2137;
-            border-radius: 20px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            background: #FFFFFF;
+            color: #1A1D20;
+            border-radius: 16px;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
             display: none;
             transition: all 0.3s ease;
         }
@@ -39,37 +77,77 @@
             animation: fadeIn 0.4s ease-in-out;
         }
 
-        /* Cards de Seleção Visual (Gamificação) */
+        /* Títulos de seção baseados na paleta do município */
+        .text-primary-govt {
+            color: #0288D1 !important;
+        }
+
+        /* Cards de Seleção Visual (Gamificação Clean) */
         .selectable-card {
-            border: 2px solid #e2e8f0;
-            border-radius: 15px;
-            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 1.25rem;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s ease;
-            background: #fff;
+            background: #FFFFFF;
             height: 100%;
         }
 
         .selectable-card:hover {
-            transform: translateY(-3px);
-            border-color: #38bdf8;
-            background-color: #f0f9ff;
+            transform: translateY(-2px);
+            border-color: #0288D1;
+            background-color: #F0F9FF;
         }
 
         .selectable-card.selected {
-            border-color: #1a3f6f;
-            background-color: #e0f2fe;
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.5);
+            border-color: #0288D1;
+            background-color: #E0F2FE;
+            box-shadow: 0 0 0 3px rgba(2, 136, 209, 0.2);
         }
 
         .selectable-card i {
-            font-size: 2rem;
-            color: #1a3f6f;
+            font-size: 1.75rem;
+            color: #0288D1;
+            /* Ícones em Azul Digital */
             margin-bottom: 0.5rem;
         }
 
-        /* Régua do NPS Interativa */
+        /* Estilos da Régua de Gasto Arrastável */
+        .price-display {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0288D1;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .custom-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #E2E8F0;
+            outline: none;
+        }
+
+        .custom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #0288D1;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+
+        .custom-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        /* Régua do NPS Interativa Clean */
         .nps-container {
             display: flex;
             justify-content: space-between;
@@ -79,12 +157,13 @@
 
         .nps-btn {
             flex: 1;
-            min-width: 35px;
-            height: 45px;
-            border: 2px solid #e2e8f0;
-            background: #fff;
-            border-radius: 8px;
-            font-weight: bold;
+            min-width: 32px;
+            height: 42px;
+            border: 1px solid #E2E8F0;
+            background: #FFFFFF;
+            border-radius: 6px;
+            font-weight: 600;
+            color: #4A5568;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
@@ -93,28 +172,31 @@
         }
 
         .nps-btn:hover {
-            transform: scale(1.1);
+            transform: scale(1.08);
+            border-color: #A0AEC0;
         }
 
+        /* Estados ativos do NPS com tons institucionais nítidos */
         .nps-btn.detrator.selected {
-            background-color: #ef4444;
-            color: #fff;
-            border-color: #dc2626;
+            background-color: #DC3545;
+            color: #FFFFFF;
+            border-color: #BD2130;
         }
 
         .nps-btn.neutro.selected {
-            background-color: #f59e0b;
-            color: #fff;
-            border-color: #d97706;
+            background-color: #FFC107;
+            color: #1A1D20;
+            border-color: #D39E00;
         }
 
         .nps-btn.promotor.selected {
-            background-color: #22c55e;
-            color: #fff;
-            border-color: #16a34a;
+            background-color: #00C853;
+            /* Verde Vibrante dos botões municipais */
+            color: #FFFFFF;
+            border-color: #00A644;
         }
 
-        /* Estrelas */
+        /* Estrelas de Evaluation */
         .star-rating {
             direction: rtl;
             display: inline-flex;
@@ -125,9 +207,9 @@
         }
 
         .star-rating label {
-            color: #cbd5e1;
+            color: #E2E8F0;
             font-size: 2.5rem;
-            padding: 0 0.3rem;
+            padding: 0 0.2rem;
             cursor: pointer;
             transition: color 0.2s;
         }
@@ -135,39 +217,65 @@
         .star-rating label:hover,
         .star-rating label:hover~label,
         .star-rating input:checked~label {
-            color: #f59e0b;
+            color: #FFC107;
+            /* Amarelo ouro de avaliação */
         }
 
-        /* Autocomplete da Cidade */
+        /* Autocomplete da Cidade (Clean Mode) */
         .autocomplete-suggestions {
             position: absolute;
             z-index: 1000;
-            background: #fff;
+            background: #FFFFFF;
             width: 100%;
             max-height: 200px;
             overflow-y: auto;
-            border: 1px solid #cbd5e1;
+            border: 1px solid #CBD5E1;
             border-radius: 8px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
             margin-top: 2px;
         }
 
         .suggestion-item {
             padding: 12px;
             cursor: pointer;
-            border-bottom: 1px solid #f1f5f9;
-            color: #334155;
+            border-bottom: 1px solid #F1F5F9;
+            color: #4A5568;
         }
 
         .suggestion-item:hover {
-            background-color: #e0f2fe;
-            color: #0369a1;
+            background-color: #E0F2FE;
+            color: #0288D1;
+        }
+
+        /* Customizações de Botões de Ação Avançar/Voltar */
+        .btn-gov-primary {
+            background-color: #0288D1;
+            border-color: #0288D1;
+            color: #FFFFFF;
+        }
+
+        .btn-gov-primary:hover {
+            background-color: #0071B1;
+            border-color: #0071B1;
+            color: #FFFFFF;
+        }
+
+        /* Call To Action Principal (Verde Vibrante Oficial) */
+        .btn-gov-success {
+            background-color: #00C853 !important;
+            border-color: #00C853 !important;
+            color: #FFFFFF !important;
+        }
+
+        .btn-gov-success:hover {
+            background-color: #00A644 !important;
+            border-color: #00A644 !important;
         }
 
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(8px);
             }
 
             to {
@@ -180,14 +288,20 @@
 
 <body>
 
-    <div class="container py-5">
+    <div class="top-identity-bar"></div>
+
+    <div class="container py-5 mt-3">
         <div class="row justify-content-center">
             <div class="col-md-7 col-lg-6">
 
+                <div class="brand-logo-container">
+                    <img src="public/logo.png" alt="iNovaTour Logo">
+                </div>
+
                 <div class="mb-4">
                     <div class="d-flex justify-content-between text-sm mb-1">
-                        <span class="text-white-50">Pesquisa Turística</span>
-                        <span id="progressText" class="fw-bold text-info">Passo 1 de 4</span>
+                        <span class="text-muted small fw-medium">Pesquisa de Fluxo Turístico</span>
+                        <span id="progressText" class="fw-bold text-primary-govt small">Passo 1 de 4</span>
                     </div>
                     <div class="progress">
                         <div id="progressBar" class="progress-bar" role="progressbar" style="width: 25%;"></div>
@@ -201,15 +315,17 @@
 
                     <div class="card-step active p-4" id="step1">
                         <h4 class="fw-bold mb-3"><i
-                                class="fa-solid fa-map-location-dot text-primary me-2"></i>Boas-vindas! Vamos começar?
+                                class="fa-solid fa-map-location-dot text-primary-govt me-2"></i>Boas-vindas! Vamos
+                            começar?
                         </h4>
 
                         <div class="mb-4 position-relative">
-                            <label class="form-label fw-semibold">De qual cidade/estado ou país você é?</label>
+                            <label class="form-label fw-semibold text-secondary small">De qual cidade/estado ou país
+                                você é?</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-white"><i
+                                <span class="input-group-text bg-white border-end-0"><i
                                         class="fa-solid fa-magnifying-glass text-muted"></i></span>
-                                <input type="text" class="form-control border-start-0" id="busca_cidade"
+                                <input type="text" class="form-control border-start-0 ps-1" id="busca_cidade"
                                     autocomplete="off" placeholder="Busque e selecione a cidade...">
                             </div>
                             <div id="suggestions" class="autocomplete-suggestions d-none"></div>
@@ -217,30 +333,31 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-semibold mb-3">Qual o principal motivo da sua visita?</label>
+                            <label class="form-label fw-semibold text-secondary small mb-3">Qual o principal motivo da
+                                sua visita?</label>
                             <div class="row g-2">
                                 <div class="col-6">
                                     <div class="selectable-card" data-input="motivo" data-value="lazer">
                                         <i class="fa-solid fa-umbrella-beach"></i>
-                                        <div class="fw-bold text-secondary">Lazer / Férias</div>
+                                        <div class="fw-bold text-muted small">Lazer / Férias</div>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="selectable-card" data-input="motivo" data-value="negocios">
                                         <i class="fa-solid fa-briefcase"></i>
-                                        <div class="fw-bold text-secondary">Negócios</div>
+                                        <div class="fw-bold text-muted small">Negócios</div>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="selectable-card" data-input="motivo" data-value="parentes_amigos">
                                         <i class="fa-solid fa-people-roof"></i>
-                                        <div class="fw-bold text-secondary">Amigos/Parentes</div>
+                                        <div class="fw-bold text-muted small">Amigos/Parentes</div>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="selectable-card" data-input="motivo" data-value="outro">
                                         <i class="fa-solid fa-route"></i>
-                                        <div class="fw-bold text-secondary">Outro Motivo</div>
+                                        <div class="fw-bold text-muted small">Outro Motivo</div>
                                     </div>
                                 </div>
                             </div>
@@ -248,29 +365,31 @@
                         </div>
 
                         <div class="text-end mt-4">
-                            <button type="button" class="btn btn-primary px-4 fw-bold rounded-pill"
+                            <button type="button" class="btn btn-gov-primary px-4 fw-bold rounded-pill"
                                 onclick="nextStep(2)">Avançar <i class="fa-solid fa-arrow-right ms-1"></i></button>
                         </div>
                     </div>
 
                     <div class="card-step p-4" id="step2">
-                        <h4 class="fw-bold mb-4"><i class="fa-solid fa-clock text-primary me-2"></i>Sobre a sua estadia
+                        <h4 class="fw-bold mb-4"><i class="fa-solid fa-clock text-primary-govt me-2"></i>Sobre a sua
+                            estadia
                         </h4>
 
                         <div class="mb-4">
-                            <label class="form-label fw-semibold mb-3">Quanto tempo você pretende ficar na
+                            <label class="form-label fw-semibold text-secondary small mb-3">Quanto tempo você pretende
+                                ficar na
                                 cidade?</label>
                             <div class="row g-3">
                                 <div class="col-6">
                                     <div class="selectable-card" data-input="permanencia" data-value="bate_volta">
                                         <i class="fa-solid fa-bolt"></i>
-                                        <div class="fw-bold text-secondary">Bate e Volta</div>
+                                        <div class="fw-bold text-muted small">Bate e Volta</div>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="selectable-card" data-input="permanencia" data-value="dormir">
                                         <i class="fa-solid fa-moon"></i>
-                                        <div class="fw-bold text-secondary">Vou Pernoitar</div>
+                                        <div class="fw-bold text-muted small">Vou Pernoitar</div>
                                     </div>
                                 </div>
                             </div>
@@ -278,34 +397,34 @@
                         </div>
 
                         <div class="mb-3 d-none" id="subHospedagem">
-                            <label class="form-label fw-semibold mb-2">Onde você está se hospedando? <span
-                                    class="text-danger">*</span></label>
+                            <label class="form-label fw-semibold text-secondary small mb-2">Onde você está se
+                                hospedando? <span class="text-danger">*</span></label>
                             <div class="row g-2">
                                 <div class="col-6">
                                     <div class="selectable-card py-3 px-1" data-input="hospedagem"
                                         data-value="hotel_pousada">
                                         <i class="fa-solid fa-hotel" style="font-size:1.3rem"></i>
-                                        <div class="small fw-bold text-secondary">Hotel / Pousada</div>
+                                        <div class="small fw-bold text-muted">Hotel / Pousada</div>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="selectable-card py-3 px-1" data-input="hospedagem"
                                         data-value="airbnb_aluguel">
                                         <i class="fa-solid fa-house-user" style="font-size:1.3rem"></i>
-                                        <div class="small fw-bold text-secondary">Airbnb / Aluguel</div>
+                                        <div class="small fw-bold text-muted">Airbnb / Aluguel</div>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="selectable-card py-3 px-1" data-input="hospedagem"
                                         data-value="casa_amigos_parentes">
                                         <i class="fa-solid fa-user-group" style="font-size:1.3rem"></i>
-                                        <div class="small fw-bold text-secondary">Amigos / Parentes</div>
+                                        <div class="small fw-bold text-muted">Amigos / Parentes</div>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="selectable-card py-3 px-1" data-input="hospedagem" data-value="outro">
                                         <i class="fa-solid fa-bed-pulse" style="font-size:1.3rem"></i>
-                                        <div class="small fw-bold text-secondary">Outro Local</div>
+                                        <div class="small fw-bold text-muted">Outro Local</div>
                                     </div>
                                 </div>
                             </div>
@@ -315,57 +434,48 @@
                         <div class="d-flex justify-content-between mt-4">
                             <button type="button" class="btn btn-outline-secondary px-4 fw-bold rounded-pill"
                                 onclick="prevStep(1)"><i class="fa-solid fa-arrow-left me-1"></i> Voltar</button>
-                            <button type="button" class="btn btn-primary px-4 fw-bold rounded-pill"
+                            <button type="button" class="btn btn-gov-primary px-4 fw-bold rounded-pill"
                                 onclick="nextStep(3)">Avançar <i class="fa-solid fa-arrow-right ms-1"></i></button>
                         </div>
                     </div>
 
                     <div class="card-step p-4" id="step3">
-                        <h4 class="fw-bold mb-4"><i class="fa-solid fa-wallet text-primary me-2"></i>Planejamento
+                        <h4 class="fw-bold mb-4"><i class="fa-solid fa-wallet text-primary-govt me-2"></i>Planejamento
                             Financeiro</h4>
 
                         <div class="mb-3">
-                            <label class="form-label fw-semibold mb-3">Qual o seu gasto médio estimado por pessoa nesta
+                            <label class="form-label fw-semibold text-secondary small mb-3">Qual o seu gasto médio
+                                estimado por pessoa nesta
                                 visita?</label>
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <div class="selectable-card" data-input="gasto" data-value="0_50">
-                                        <div class="fw-bold text-dark">Até R$ 50</div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="selectable-card" data-input="gasto" data-value="51_100">
-                                        <div class="fw-bold text-dark">R$ 51 - R$ 100</div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="selectable-card" data-input="gasto" data-value="101_200">
-                                        <div class="fw-bold text-dark">R$ 101 - R$ 200</div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="selectable-card" data-input="gasto" data-value="201_plus">
-                                        <div class="fw-bold text-dark">Mais de R$ 201</div>
-                                    </div>
+
+                            <div class="text-center my-4 px-2">
+                                <span id="budget-value" class="price-display">R$ 50</span>
+                                <input type="range" id="budget-slider" min="0" max="500" step="10" value="50"
+                                    class="custom-slider">
+                                <div class="d-flex justify-content-between text-muted small mt-2">
+                                    <span>R$ 0</span>
+                                    <span>R$ 500+</span>
                                 </div>
                             </div>
-                            <input type="hidden" id="faixa_gasto">
+                            <input type="hidden" id="faixa_gasto" value="50">
                         </div>
 
                         <div class="d-flex justify-content-between mt-4">
                             <button type="button" class="btn btn-outline-secondary px-4 fw-bold rounded-pill"
                                 onclick="prevStep(2)"><i class="fa-solid fa-arrow-left me-1"></i> Voltar</button>
-                            <button type="button" class="btn btn-primary px-4 fw-bold rounded-pill"
+                            <button type="button" class="btn btn-gov-primary px-4 fw-bold rounded-pill"
                                 onclick="nextStep(4)">Avançar <i class="fa-solid fa-arrow-right ms-1"></i></button>
                         </div>
                     </div>
 
                     <div class="card-step p-4" id="step4">
-                        <h4 class="fw-bold mb-4"><i class="fa-solid fa-ranking-star text-primary me-2"></i>Sua Opinião
+                        <h4 class="fw-bold mb-4"><i class="fa-solid fa-ranking-star text-primary-govt me-2"></i>Sua
+                            Opinião
                             Final</h4>
 
                         <div class="mb-4 text-center">
-                            <label class="form-label fw-semibold d-block text-start">Como você avalia sua experiência
+                            <label class="form-label fw-semibold d-block text-start text-secondary small">Como você
+                                avalia sua experiência
                                 geral aqui?</label>
                             <div class="star-rating">
                                 <input type="radio" id="star5" name="satisfacao_estrelas" value="5" /><label for="star5"
@@ -382,11 +492,13 @@
                         </div>
 
                         <div class="mb-4">
-                            <label class="form-label fw-semibold mb-2">Qual a chance de você recomendar esta
+                            <label class="form-label fw-semibold text-secondary small mb-2">Qual a chance de você
+                                recomendar esta
                                 cidade/evento para amigos ou familiares?</label>
                             <div class="nps-container"></div>
                             <input type="hidden" id="nps_val">
-                            <div class="d-flex justify-content-between text-muted small mt-1">
+                            <div class="d-flex justify-content-between text-muted small mt-1"
+                                style="font-size: 0.75rem;">
                                 <span>0 (Jamais)</span>
                                 <span>10 (Com certeza)</span>
                             </div>
@@ -395,7 +507,7 @@
                         <div class="d-flex justify-content-between mt-4">
                             <button type="button" class="btn btn-outline-secondary px-4 fw-bold rounded-pill"
                                 onclick="prevStep(3)"><i class="fa-solid fa-arrow-left me-1"></i> Voltar</button>
-                            <button type="submit" class="btn btn-success px-5 fw-bold rounded-pill"
+                            <button type="submit" class="btn btn-gov-success px-5 fw-bold rounded-pill"
                                 id="btnSubmit">Finalizar ✨</button>
                         </div>
                     </div>
@@ -418,6 +530,7 @@
             configurarCardsSelecao();
             construirNps();
             configurarAutocompleteCidades();
+            configurarSliderGasto();
         });
 
         function showStep(step) {
@@ -479,7 +592,6 @@
                     this.classList.add('selected');
 
                     if (tipoInput === 'motivo') document.getElementById('motivo_visita').value = valor;
-                    if (tipoInput === 'gasto') document.getElementById('faixa_gasto').value = valor;
 
                     if (tipoInput === 'permanencia') {
                         document.getElementById('tempo_permanencia').value = valor;
@@ -493,6 +605,30 @@
                     }
                     if (tipoInput === 'hospedagem') document.getElementById('local_hospedagem').value = valor;
                 });
+            });
+        }
+
+        // LÓGICA E ATUALIZAÇÃO DA RÉGUA DE GASTOS
+        function configurarSliderGasto() {
+            const slider = document.getElementById('budget-slider');
+            const display = document.getElementById('budget-value');
+            const hiddenInput = document.getElementById('faixa_gasto');
+
+            slider.addEventListener('input', function () {
+                let valor = parseInt(this.value);
+                hiddenInput.value = valor;
+
+                let valorFormatado = valor.toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
+                    maximumFractionDigits: 0
+                });
+
+                if (valor === parseInt(this.max)) {
+                    display.innerText = valorFormatado + "+";
+                } else {
+                    display.innerText = valorFormatado;
+                }
             });
         }
 
@@ -601,7 +737,7 @@
                     btn.innerText = "Finalizar ✨";
                 }
             } catch (error) {
-                alert("Não foi possível conectar ao servidor.");
+                alert("Erro de conexão ao salvar os dados.");
                 btn.disabled = false;
                 btn.innerText = "Finalizar ✨";
             }

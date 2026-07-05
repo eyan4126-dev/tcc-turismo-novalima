@@ -2,44 +2,48 @@
 
 namespace App\Controllers;
 
-use App\Models\FluxoOcupacaoModel;
-use CodeIgniter\RESTful\ResourceController;
+use App\Controllers\BaseController;
 
-class LojistaController extends ResourceController
+class LojistaController extends BaseController
 {
-    protected $format = 'json';
-
-    // Exibe os dados do estabelecimento vinculado ao lojista logado e seu histórico
     public function index()
     {
-        $idUsuarioLogado = session()->get('id_usuario');
-        $db = \Config\Database::connect();
+        // Exemplo de resgate do ID do estabelecimento logado via sessão
+        // $idEstabelecimento = session()->get('id_estabelecimento');
 
-        // Encontra o estabelecimento do lojista
-        $estabelecimento = $db->table('estabelecimento_evento')
-            ->where('id_usuario', $idUsuarioLogado)
-            ->get()
-            ->getRowArray();
+        // KPIs fictícios focados no estabelecimento dele
+        $data['kpis'] = [
+            'impacto_economico' => 14250.80,
+            'volume_turistico' => 384,
+            'satisfacao_media' => 4.7,
+            'nps' => 78
+        ];
 
-        if (!$estabelecimento) {
-            return $this->failNotFound('Nenhum estabelecimento vinculado a esta conta de lojista.');
-        }
-
-        // Puxa o histórico de lançamentos dele
-        $fluxoModel = new FluxoOcupacaoModel();
-        $historico = $fluxoModel->where('id_estabelecimento', $estabelecimento['id_estabelecimento'])
-            ->orderBy('data_referencia', 'DESC')
-            ->findAll();
-
-        return $this->respond([
-            'status' => 'success',
-            'estabelecimento' => [
-                'id_estabelecimento' => $estabelecimento['id_estabelecimento'],
-                'razao_social'       => $estabelecimento['razao_social'],
-                'setor'              => $estabelecimento['setor'],
-                'token_qr_code'      => $estabelecimento['token_qr_code']
+        // Gráficos estruturados e enxutos baseados nas colunas reais da pesquisa
+        $data['charts'] = [
+            'motivos' => [
+                'labels' => json_encode(['Lazer/Turismo', 'Negócios', 'Eventos', 'Parentes/Amigos']),
+                'valores' => json_encode([210, 45, 98, 31])
             ],
-            'historico_lancamentos' => $historico
-        ], 200);
+            'origem' => [
+                'labels' => json_encode(['São Paulo', 'Belo Horizonte', 'Rio de Janeiro', 'Vitória', 'Outras']),
+                'valores' => json_encode([150, 120, 64, 30, 20])
+            ]
+        ];
+
+        return view('lojista/dashboard', $data);
+    }
+
+    public function qrcode()
+    {
+        // Dados básicos que existem no seu banco para o lojista conferir e baixar o QR
+        $data['estabelecimento'] = [
+            'razao_social' => 'Restaurante Sabor & Arte',
+            'cnpj' => '12.345.678/0001-99',
+            'setor' => 'Alimentação / Gastronomia',
+            'qr_code_url' => 'public/qrcodes/exemplo.png' // Caminho do QR Code gerado na aprovação
+        ];
+
+        return view('lojista/qrcode', $data);
     }
 }
