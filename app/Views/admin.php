@@ -29,7 +29,7 @@
 
         body::before {
             content: "";
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
@@ -50,6 +50,10 @@
             box-shadow: 4px 0 15px rgba(0, 0, 0, 0.03);
             z-index: 100;
             padding-top: 30px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
         }
 
         #content {
@@ -152,11 +156,13 @@
 </head>
 
 <body>
+    <div class="top-bar"></div>
+
     <div class="wrapper">
         <nav id="sidebar">
             <div class="sidebar-header mb-4">
                 <div class="brand-logo-container">
-                    <img src="public\logo.png" alt="iNovaTour Logo">
+                    <img src="<?= base_url('public/logo.png') ?>" alt="iNovaTour Logo">
                 </div>
                 <span class="fw-extrabold text-nl-purple h4 tracking-tight" style="font-weight:800;">
                     iNova<span style="font-weight:400; color:var(--nl-text-dark);">Tour</span>
@@ -198,8 +204,10 @@
                 </div>
                 <div class="col-md-3">
                     <select name="periodo" class="form-select" onchange="this.form.submit()">
-                        <option value="atual">Mês Corrente (Padrão)</option>
-                        <option value="historico">Todo o Histórico</option>
+                        <option value="atual" <?= request()->getGet('periodo') === 'atual' ? 'selected' : '' ?>>Mês
+                            Corrente (Padrão)</option>
+                        <option value="historico" <?= request()->getGet('periodo') === 'historico' ? 'selected' : '' ?>>
+                            Todo o Histórico</option>
                     </select>
                 </div>
                 <div class="col-md-5">
@@ -218,18 +226,19 @@
             <div class="report-container">
                 <h5 class="fw-bold mb-2" style="color: var(--nl-purple);"><i
                         class="fa-solid fa-file-export me-2"></i>Módulo Fiscal: Exportação de Relatórios Estaduais</h5>
-                <p class="text-muted small mb-4">Insira o intervalo cronológico para gerar as matrizes em formato plano
-                    CSV delimitado por ponto e vírgula.</p>
+                <p class="text-muted small mb-4">Insira o intervalo cronológico para gerar as matrizes em conformidade
+                    com o ICMS Turismo e Sismapa.</p>
 
-                <form method="GET" action="" id="formExportadoresFiscais">
+                <form method="POST" action="" id="formExportadoresFiscais">
+                    <?= csrf_field() ?>
                     <div class="row g-3 align-items-end">
                         <div class="col-md-3">
                             <label class="form-label small fw-bold text-secondary">Data Inicial:</label>
-                            <input type="date" name="data_inicio" class="form-control" required>
+                            <input type="date" name="data_inicio" id="data_inicio" class="form-control" required>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small fw-bold text-secondary">Data Final:</label>
-                            <input type="date" name="data_fim" class="form-control" required>
+                            <input type="date" name="data_fim" id="data_fim" class="form-control" required>
                         </div>
                         <div class="col-md-3">
                             <button type="submit"
@@ -297,7 +306,8 @@
                         <div>
                             <span class="text-muted small d-block fw-semibold mb-1">NPS Geral</span>
                             <h3 class="fw-bold mb-0 <?= $kpis['nps'] >= 50 ? 'text-success' : 'text-warning' ?>">
-                                <?= $kpis['nps'] ?></h3>
+                                <?= $kpis['nps'] ?>
+                            </h3>
                         </div>
                         <div class="metric-icon" style="background: #EAF4FF; color: #0099FF;"><i
                                 class="fa-solid fa-heart"></i></div>
@@ -361,22 +371,24 @@
                                 foreach ($solicitacoes as $sol): ?>
                                     <tr>
                                         <td>
-                                            <div class="fw-bold"><?= esc($sol['nome_responsavel']) ?></div><span
-                                                class="text-muted small"><?= esc($sol['email']) ?></span>
+                                            <div class="fw-bold"><?= esc($sol['nome_responsavel']) ?></div>
+                                            <span class="text-muted small"><?= esc($sol['email']) ?></span>
                                         </td>
                                         <td>
-                                            <div class="fw-bold"><?= esc($sol['razao_social']) ?></div><span
-                                                class="text-muted small"><?= esc($sol['cnpj']) ?></span>
+                                            <div class="fw-bold"><?= esc($sol['razao_social']) ?></div>
+                                            <span class="text-muted small"><?= esc($sol['cnpj']) ?></span>
                                         </td>
                                         <td><span class="badge bg-secondary"><?= esc($sol['setor']) ?></span></td>
                                         <td class="text-end">
                                             <form action="<?= base_url('admin/aprovar/' . $sol['id_usuario']) ?>" method="POST"
                                                 class="d-inline">
+                                                <?= csrf_field() ?>
                                                 <button class="btn btn-sm btn-success fw-bold me-1"><i
                                                         class="fa-solid fa-check me-1"></i> Ativar e Gerar QR</button>
                                             </form>
                                             <form action="<?= base_url('admin/recusar/' . $sol['id_usuario']) ?>" method="POST"
                                                 class="d-inline">
+                                                <?= csrf_field() ?>
                                                 <button class="btn btn-sm btn-outline-danger fw-bold"><i
                                                         class="fa-solid fa-xmark"></i></button>
                                             </form>
@@ -397,9 +409,14 @@
     </div>
 
     <script>
-        // Altera dinamicamente o destino do action conforme o botão clicado
         function definirMetodoExportacao(urlAlvo) {
-            document.getElementById('formExportadoresFiscais').action = urlAlvo;
+            const form = document.getElementById('formExportadoresFiscais');
+            const dataInicio = document.getElementById('data_inicio').value;
+            const dataFim = document.getElementById('data_fim').value;
+
+            if (dataInicio && dataFim) {
+                form.action = urlAlvo;
+            }
         }
 
         const configPadrao = {
@@ -407,6 +424,7 @@
             maintainAspectRatio: false
         };
 
+        // Renderização dos Gráficos do Chart.js (Mantidos intactos)
         const ctxCidades = document.getElementById('chartCidades').getContext('2d');
         new Chart(ctxCidades, {
             type: 'bar',
@@ -420,9 +438,7 @@
             },
             options: {
                 ...configPadrao,
-                plugins: {
-                    legend: { display: false }
-                }
+                plugins: { legend: { display: false } }
             }
         });
 

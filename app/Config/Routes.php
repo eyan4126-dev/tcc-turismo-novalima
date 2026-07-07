@@ -50,9 +50,9 @@ $routes->group('admin', ['filter' => 'AdminAuthFilter'], function ($routes) {
     // 🏛️ MÓDULO 3: Tela de Consolidação Web
     $routes->get('consolidador', 'AdminController::consolidador');
 
-    // 📊 MÓDULO 2: Downloads Diretos das Exportações Web (Via GET do Formulário HTML)
-    $routes->get('exportar-icms', 'AdminController::exportarIcmsTurismo');
-    $routes->get('exportar-sismapa', 'AdminController::exportarSismapa');
+    // 📊 MÓDULO 2: Downloads Diretos das Exportações (Via POST vindo do seu modal/painel principal)
+    $routes->post('exportar-icms', 'AdminController::exportarIcms');
+    $routes->post('exportar-sismapa', 'AdminController::exportarSismapa');
 
     // Processamento de Cadastros e Ações Diretas da Tela
     $routes->post('aprovar/(:num)', 'AdminController::aprovarLojista/$1');

@@ -25,7 +25,7 @@
 
         body::before {
             content: "";
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
@@ -46,6 +46,10 @@
             box-shadow: 4px 0 15px rgba(0, 0, 0, 0.03);
             z-index: 100;
             padding-top: 30px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
         }
 
         #content {

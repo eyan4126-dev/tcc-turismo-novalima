@@ -29,7 +29,7 @@
 
         body::before {
             content: "";
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
@@ -50,6 +50,10 @@
             box-shadow: 4px 0 15px rgba(0, 0, 0, 0.03);
             z-index: 100;
             padding-top: 30px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
         }
 
         #content {
@@ -117,6 +121,15 @@
             height: 100%;
         }
 
+        .card-chart-data {
+            background: #FFFFFF;
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(93, 70, 210, 0.04);
+            padding: 24px;
+            height: 25%;
+        }
+
         .chart-container {
             position: relative;
             height: 260px;
@@ -174,6 +187,48 @@
                 <h2 class="fw-bold mb-1" style="color: var(--nl-purple);">Seu Estabelecimento</h2>
                 <p class="text-muted small mb-0">Métricas e insights gerados através dos escaneamentos do seu QR Code.
                 </p>
+            </div>
+
+            <?php if (session()->getFlashdata('sucesso')): ?>
+                <div class="alert alert-success fw-bold mb-4 border-0 shadow-sm"><i
+                        class="fa-solid fa-circle-check me-2"></i><?= session()->getFlashdata('sucesso') ?></div>
+            <?php endif; ?>
+            <?php if (session()->getFlashdata('erro')): ?>
+                <div class="alert alert-danger fw-bold mb-4 border-0 shadow-sm"><i
+                        class="fa-solid fa-circle-exclamation me-2"></i><?= session()->getFlashdata('erro') ?></div>
+            <?php endif; ?>
+
+            <div class="card-chart-data mb-4">
+                <h6 class="fw-bold mb-2" style="color: var(--nl-purple);"><i
+                        class="fa-solid fa-hotel me-2"></i>Lançamento de Fluxo Ocupacional</h6>
+                <p class="text-muted small mb-4">Informe o volume total de hóspedes e a taxa de quartos ocupados do mês
+                    correspondente.</p>
+
+                <form action="<?= base_url('api/painel/ocupacao') ?>" method="POST">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-secondary">Mês de Referência:</label>
+                            <input type="month" name="mes_referencia" class="form-control" required
+                                value="<?= date('Y-m') ?>">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-secondary">Total de Hóspedes
+                                (Check-ins):</label>
+                            <input type="number" name="total_hospedes" class="form-control" min="0" required
+                                placeholder="Ex: 142">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-secondary">Taxa Média de Ocupação (%):</label>
+                            <input type="number" name="taxa_ocupacao" class="form-control" min="0" max="100" required
+                                placeholder="Ex: 75">
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-success w-100 fw-bold">
+                                <i class="fa-solid fa-paper-plane me-2"></i>Enviar Dados
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
 
             <div class="row g-4 mb-4">

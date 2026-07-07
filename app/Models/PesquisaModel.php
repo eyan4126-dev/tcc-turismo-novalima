@@ -49,9 +49,9 @@ class PesquisaModel extends Model
 
     public function getDadosFiscaisPorPeriodo($dataInicio, $dataFim)
     {
-        return $this->where('created_at >=', $dataInicio . ' 00:00:00')
-            ->where('created_at <=', $dataFim . ' 23:59:59')
-            ->orderBy('created_at', 'ASC')
+        return $this->where('respondido_em >=', $dataInicio . ' 00:00:00')
+            ->where('respondido_em <=', $dataFim . ' 23:59:59')
+            ->orderBy('respondido_em', 'ASC')
             ->findAll();
     }
 

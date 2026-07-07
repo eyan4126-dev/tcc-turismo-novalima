@@ -27,7 +27,7 @@
 
         body::before {
             content: "";
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
@@ -48,6 +48,10 @@
             box-shadow: 4px 0 15px rgba(0, 0, 0, 0.03);
             z-index: 100;
             padding-top: 30px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
         }
 
         #content {
@@ -125,7 +129,7 @@
             <ul class="nav flex-column nav-sidebar">
                 <li class="nav-item">
                     <a href="<?= base_url('admin') ?>" class="nav-link <?= url_is('admin') ? 'active' : '' ?>">
-                        <i class="fa-solid fa-chart-pie"></i> Dashboard
+                        <i class="fa-solid fa-chart-pie"></i> Painel Gerencial
                     </a>
                 </li>
                 <li class="nav-item">
