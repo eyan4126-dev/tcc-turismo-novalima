@@ -19,6 +19,7 @@ class PesquisaModel extends Model
         'tempo_permanencia',
         'local_hospedagem',
         'faixa_gasto',
+        'valor_gasto_estimado',
         'satisfacao_estrelas',
         'nps',
         'motivo_visita'

@@ -463,7 +463,9 @@
                                 </div>
                                 <div class="form-text text-muted small mt-2">Digite o valor incluindo os centavos.</div>
                             </div>
-                            <input type="hidden" id="faixa_gasto" value="0.00">
+
+                            <input type="hidden" id="faixa_gasto" name="valor_gasto_estimado" value="0.00"><input
+                                type="hidden" id="faixa_gasto" value="0.00">
                         </div>
 
                         <div class="d-flex justify-content-between mt-4">
@@ -643,7 +645,7 @@
             });
         }
 
-        // Função de máscara monetária dinâmica atualizada para tratar centavos à direita
+        // Função de máscara monetária dinâmica para tratar centavos à direita
         function configurarInputGastoCentavos() {
             const inputVisivel = document.getElementById('gasto_input_pix');
             const hiddenInput = document.getElementById('faixa_gasto');
@@ -754,21 +756,32 @@
             btn.disabled = true;
             btn.innerText = "Registrando...";
 
+            // Forçamos a captura do valor do elemento de forma limpa e direta
+            const valorRaw = document.getElementById('faixa_gasto').value;
+            const valorFloat = parseFloat(valorRaw);
+
             const payload = {
                 id_estabelecimento: document.getElementById('id_estabelecimento').value,
                 cidade_origem: document.getElementById('cidade_origem').value,
                 tempo_permanencia: document.getElementById('tempo_permanencia').value,
                 local_hospedagem: document.getElementById('tempo_permanencia').value === 'dormir' ? document.getElementById('local_hospedagem').value : null,
-                faixa_gasto: parseFloat(document.getElementById('faixa_gasto').value) || 0.00, // Envia como float nativo (ex: 125.50)
+
+                // Enviamos estritamente a chave que a validação do Back-end exige
+                valor_gasto_estimado: isNaN(valorFloat) ? 0.00 : valorFloat,
+
                 satisfacao_estrelas: parseInt(estrela.value),
                 nps: parseInt(document.getElementById('nps_val').value),
                 motivo_visita: document.getElementById('motivo_visita').value
             };
 
             try {
+                // Como o back-end exige JSON, mantemos a estrutura original limpa
                 const response = await fetch('<?= base_url('api/pesquisa') ?>', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
                     body: JSON.stringify(payload)
                 });
 

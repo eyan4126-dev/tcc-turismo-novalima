@@ -1,18 +1,45 @@
-*/config/development
-*/logs/log-*.php
-!*/logs/index.html
-*/cache/*
-!system/cache/*
-!*/cache/index.html
-!*/cache/.htaccess
+# =====================================================================
+# INOVATOUR - GITIGNORE (SEM NODE/NPM)
+# =====================================================================
 
-user_guide_src/build/*
-user_guide_src/cilexer/build/*
-user_guide_src/cilexer/dist/*
-user_guide_src/cilexer/pycilexer.egg-info/*
+# --- CodeIgniter 4 / PHP Especificidades ---
+/writable/cache/*
+/writable/debugbar/*
+/writable/logs/*
+/writable/session/*
+!/writable/cache/index.html
+!/writable/debugbar/index.html
+!/writable/logs/index.html
+!/writable/session/index.html
 
-#codeigniter 3
-application/logs/*
-!application/logs/index.html
-!application/logs/.htaccess
+# Arquivos de Configuração Sensíveis (NUNCA enviar ao Git)
+.env
+.env.backup
+.env.production
+.env.development
+
+# Pasta Vendor do Composer (Dependências Back-end)
 /vendor/
+composer.lock
+
+# --- Uploads e Arquivos Dinâmicos de Teste ---
+/public/uploads/*
+!/public/uploads/index.html
+
+# --- Ambientes de Desenvolvimento e IDEs ---
+# VS Code
+.vscode/
+*.code-workspace
+
+# PhpStorm / IntelliJ
+.idea/
+
+# Arquivos de Sistema Operacional
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# --- Logs e Dumps de Banco ---
+*.log
+*.sql
+*.sqlite
