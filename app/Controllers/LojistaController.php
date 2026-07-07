@@ -11,8 +11,18 @@ class LojistaController extends BaseController
     {
         $db = \Config\Database::connect();
 
-        // RECUPERA O LOJISTA LOGADO PELA SESSÃO REAL DO SISTEMA
-        $idUsuarioLogado = session()->get('id_usuario') ?? 1; // Fallback temporário para testes se necessário
+        // 1. RECUPERA O LOJISTA LOGADO PELA SESSÃO REAL (Usando 'id' conforme grava seu AuthController)
+        $idUsuarioLogado = session()->get('id');
+
+        // 2. BUSCA O ESTABELECIMENTO PARA COLETAR O SETOR REAL DO ENUM DO BANCO
+        // Cruzamos o ID da sessão para garantir que pegamos o local correto e passamos para a View
+        $estabelecimentoLogado = $db->table('estabelecimento_evento') // Ajuste para 'estabelecimento_evento' ou o nome exato da sua tabela
+            ->where('id_usuario', $idUsuarioLogado)
+            ->get()
+            ->getRowArray();
+
+        // Fallback caso não encontre o vínculo no banco, para não quebrar a página
+        $setorReal = $estabelecimentoLogado['setor'] ?? 'outro';
 
         // Filtro Temporal enviado pelo form da View do Lojista
         $periodo = $this->request->getGet('periodo') ?? 'atual';
@@ -37,8 +47,8 @@ class LojistaController extends BaseController
                     ->where('ee.id_usuario', $idUsuarioLogado);
 
                 if ($periodo === 'atual') {
-                    $builder->where("COALESCE(p.respondido_em, p.created_at) >=", date('Y-m-01 00:00:00'))
-                        ->where("COALESCE(p.respondido_em, p.created_at) <=", date('Y-m-t 23:59:59'));
+                    $builder->where("COALESCE(p.respondido_em, p.respondido_em) >=", date('Y-m-01 00:00:00'))
+                        ->where("COALESCE(p.respondido_em, p.respondido_em) <=", date('Y-m-t 23:59:59'));
                 }
                 return $builder;
             };
@@ -92,12 +102,13 @@ class LojistaController extends BaseController
             $charts['hospedagem'] = ['labels' => json_encode(array_column($hosp, 'local_hospedagem')), 'valores' => json_encode(array_map('intval', array_column($hosp, 'total')))];
         }
 
+        // 3. ENVIA TUDO PARA A VIEW, INCLUINDO O SETOR REAL MAREADO DO ENUM
         return view('lojista/dashboard', [
             'kpis' => $kpis,
-            'charts' => $charts
+            'charts' => $charts,
+            'setorLojista' => $setorReal
         ]);
     }
-
     public function qrcode()
     {
         $estabelecimentoModel = new EstabelecimentoModel();
@@ -124,5 +135,57 @@ class LojistaController extends BaseController
         $data['estabelecimento'] = $estabelecimento;
 
         return view('lojista/qrcode', $data);
+    }
+
+    public function lancarOcupacao()
+    {
+        $db = \Config\Database::connect();
+        $fluxoModel = new \App\Models\FluxoOcupacaoModel();
+
+        // 1. Recupera o ID do lojista logado na sessão (usando a correção que fizemos antes)
+        $idUsuarioLogado = session()->get('id_usuario') ?? session()->get('id');
+
+        // 2. Busca o id_estabelecimento associado a esse usuário logado
+        $estabelecimento = $db->table('estabelecimento_evento') // Ajuste o nome dessa tabela se for diferente
+            ->where('id_usuario', $idUsuarioLogado)
+            ->get()
+            ->getRowArray();
+
+        if (!$estabelecimento) {
+            return redirect()->back()->with('error', 'Estabelecimento não vinculado ao seu usuário.');
+        }
+
+        // 3. Captura e formata a data_referencia recebida do input "month" (YYYY-MM) para o padrão DATE (YYYY-MM-DD)
+        $mesAno = $this->request->getPost('data_referencia'); // ex: "2026-07"
+        $dataReferenciaFormatted = $mesAno . '-01'; // vira "2026-07-01"
+
+        // 4. Prepara o Payload para a tabela
+        $payload = [
+            'id_estabelecimento' => $estabelecimento['id_estabelecimento'],
+            'volume_clientes' => (int) $this->request->getPost('volume_clientes'),
+            'quartos_ocupados' => (int) $this->request->getPost('quartos_ocupados'),
+            'capacidade_maxima_quartos' => (int) $this->request->getPost('capacidade_maxima_quartos'),
+            'data_referencia' => $dataReferenciaFormatted
+        ];
+
+        try {
+            // Validação contra duplicidade: Verifica se este estabelecimento já enviou o fechamento deste mês específico
+            $registroExistente = $fluxoModel->where('id_estabelecimento', $estabelecimento['id_estabelecimento'])
+                ->where('data_referencia', $dataReferenciaFormatted)
+                ->first();
+
+            if ($registroExistente) {
+                // Se já existir dados para esse mês, atualiza (Sobrescreve)
+                $fluxoModel->update($registroExistente['id_fluxos'], $payload);
+                return redirect()->back()->with('success', 'Dados de desempenho operacional atualizados com sucesso!');
+            } else {
+                // Se for o primeiro envio do mês, insere uma nova linha
+                $fluxoModel->insert($payload);
+                return redirect()->back()->with('success', 'Dados de desempenho operacional gravados com sucesso!');
+            }
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Erro interno ao salvar: ' . $e->getMessage());
+        }
     }
 }

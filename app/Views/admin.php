@@ -104,7 +104,6 @@
             border-left-color: var(--nl-purple);
         }
 
-        /* Ajustes finos para escala 100% */
         .card-metric {
             background: #FFFFFF;
             border: none;
@@ -156,8 +155,6 @@
 </head>
 
 <body>
-    <div class="top-bar"></div>
-
     <div class="wrapper">
         <nav id="sidebar">
             <div class="sidebar-header mb-4">
@@ -174,7 +171,7 @@
                 <li class="nav-item">
                     <a href="<?= base_url('admin') ?>"
                         class="nav-link <?= url_is('admin') || url_is('admin/dashboard') ? 'active' : '' ?>">
-                        <i class="fa-solid fa-chart-pie"></i> Painel Gerencial
+                        <i class="fa-solid fa-chart-pie"></i> Painel de Controle
                     </a>
                 </li>
                 <li class="nav-item">
@@ -204,8 +201,7 @@
                 </div>
                 <div class="col-md-3">
                     <select name="periodo" class="form-select" onchange="this.form.submit()">
-                        <option value="atual" <?= request()->getGet('periodo') === 'atual' ? 'selected' : '' ?>>Mês
-                            Corrente (Padrão)</option>
+                        <option value="atual" <?= (request()->getGet('periodo') ?? 'atual') === 'atual' ? 'selected' : '' ?>>Mês Corrente (Padrão)</option>
                         <option value="historico" <?= request()->getGet('periodo') === 'historico' ? 'selected' : '' ?>>
                             Todo o Histórico</option>
                     </select>
@@ -274,7 +270,7 @@
                     <div class="card-metric d-flex align-items-center justify-content-between">
                         <div>
                             <span class="text-muted small d-block fw-semibold mb-1">Volume Turístico</span>
-                            <h3 class="fw-bold mb-0"><?= $kpis['volume_turistico'] ?></h3>
+                            <h3 class="fw-bold mb-0"><?= number_format($kpis['volume_turistico'], 0, '', '.') ?></h3>
                         </div>
                         <div class="metric-icon" style="background: var(--nl-purple-light); color: var(--nl-purple);"><i
                                 class="fa-solid fa-users"></i></div>
@@ -305,7 +301,8 @@
                     <div class="card-metric d-flex align-items-center justify-content-between">
                         <div>
                             <span class="text-muted small d-block fw-semibold mb-1">NPS Geral</span>
-                            <h3 class="fw-bold mb-0 <?= $kpis['nps'] >= 50 ? 'text-success' : 'text-warning' ?>">
+                            <h3
+                                class="fw-bold mb-0 <?= $kpis['nps'] >= 50 ? 'text-success' : ($kpis['nps'] >= 0 ? 'text-warning' : 'text-danger') ?>">
                                 <?= $kpis['nps'] ?>
                             </h3>
                         </div>
@@ -327,7 +324,7 @@
                 </div>
                 <div class="col-md-6">
                     <div class="card-chart">
-                        <h6 class="fw-bold mb-3" style="color: var(--nl-purple);">Distribuição Financeira por Setor</h6>
+                        <h6 class="fw-bold mb-3" style="color: var(--nl-purple);">Participação por Setor Comercial</h6>
                         <div class="chart-container">
                             <canvas id="chartSetores"></canvas>
                         </div>
@@ -371,23 +368,23 @@
                                 foreach ($solicitacoes as $sol): ?>
                                     <tr>
                                         <td>
-                                            <div class="fw-bold"><?= esc($sol['nome_responsavel']) ?></div>
-                                            <span class="text-muted small"><?= esc($sol['email']) ?></span>
+                                            <div class="fw-bold"><?= esc($sol['nome_responsavel'] ?? 'Não Informado') ?></div>
+                                            <span class="text-muted small"><?= esc($sol['email'] ?? '') ?></span>
                                         </td>
                                         <td>
                                             <div class="fw-bold"><?= esc($sol['razao_social']) ?></div>
-                                            <span class="text-muted small"><?= esc($sol['cnpj']) ?></span>
+                                            <span class="text-muted small"><?= esc($sol['cnpj'] ?? 'Sem CNPJ') ?></span>
                                         </td>
                                         <td><span class="badge bg-secondary"><?= esc($sol['setor']) ?></span></td>
                                         <td class="text-end">
-                                            <form action="<?= base_url('admin/aprovar/' . $sol['id_usuario']) ?>" method="POST"
-                                                class="d-inline">
+                                            <form action="<?= base_url('admin/aprovarLojista/' . $sol['id_usuario']) ?>"
+                                                method="POST" class="d-inline">
                                                 <?= csrf_field() ?>
                                                 <button class="btn btn-sm btn-success fw-bold me-1"><i
                                                         class="fa-solid fa-check me-1"></i> Ativar e Gerar QR</button>
                                             </form>
-                                            <form action="<?= base_url('admin/recusar/' . $sol['id_usuario']) ?>" method="POST"
-                                                class="d-inline">
+                                            <form action="<?= base_url('admin/recusarLojista/' . $sol['id_usuario']) ?>"
+                                                method="POST" class="d-inline">
                                                 <?= csrf_field() ?>
                                                 <button class="btn btn-sm btn-outline-danger fw-bold"><i
                                                         class="fa-solid fa-xmark"></i></button>
@@ -413,7 +410,6 @@
             const form = document.getElementById('formExportadoresFiscais');
             const dataInicio = document.getElementById('data_inicio').value;
             const dataFim = document.getElementById('data_fim').value;
-
             if (dataInicio && dataFim) {
                 form.action = urlAlvo;
             }
@@ -421,23 +417,30 @@
 
         const configPadrao = {
             responsive: true,
-            maintainAspectRatio: false
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { boxWidth: 12, font: { family: 'Inter' } }
+                }
+            }
         };
 
-        // Renderização dos Gráficos do Chart.js (Mantidos intactos)
         const ctxCidades = document.getElementById('chartCidades').getContext('2d');
         new Chart(ctxCidades, {
             type: 'bar',
             data: {
                 labels: <?= $charts['cidades']['labels'] ?>,
                 datasets: [{
-                    indexAxis: 'y',
+                    label: 'Amostras',
                     data: <?= $charts['cidades']['valores'] ?>,
-                    backgroundColor: '#5D46D2'
+                    backgroundColor: '#5D46D2',
+                    borderRadius: 4
                 }]
             },
             options: {
                 ...configPadrao,
+                indexAxis: 'y',
                 plugins: { legend: { display: false } }
             }
         });
@@ -449,7 +452,7 @@
                 labels: <?= $charts['setores']['labels'] ?>,
                 datasets: [{
                     data: <?= $charts['setores']['valores'] ?>,
-                    backgroundColor: ['#5D46D2', '#E6007E', '#00D369', '#0099FF']
+                    backgroundColor: ['#5D46D2', '#E6007E', '#00D369', '#0099FF', '#FFA800']
                 }]
             },
             options: configPadrao
@@ -462,7 +465,7 @@
                 labels: <?= $charts['motivos']['labels'] ?>,
                 datasets: [{
                     data: <?= $charts['motivos']['valores'] ?>,
-                    backgroundColor: ['#FF5500', '#5D46D2', '#0099FF', '#6C757D']
+                    backgroundColor: ['#FF5500', '#5D46D2', '#0099FF', '#6C757D', '#E6007E']
                 }]
             },
             options: configPadrao
@@ -475,7 +478,7 @@
                 labels: <?= $charts['hospedagem']['labels'] ?>,
                 datasets: [{
                     data: <?= $charts['hospedagem']['valores'] ?>,
-                    backgroundColor: ['#E6007E', '#5D46D2', '#00D369', '#FFA800']
+                    backgroundColor: ['#E6007E', '#5D46D2', '#00D369', '#FFA800', '#6C757D']
                 }]
             },
             options: configPadrao

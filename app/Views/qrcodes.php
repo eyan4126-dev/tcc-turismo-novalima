@@ -189,15 +189,20 @@
                                             <span class="qr-token-box"><?= esc($qr['token_qr_code']) ?></span>
                                         </td>
                                         <td>
-                                            <span class="text-muted small">
-                                                <?= base_url('pesquisa?token=' . $qr['token_qr_code']) ?>
-                                            </span>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <?php $fullUrl = base_url('pesquisa?token=' . $qr['token_qr_code']); ?>
+                                                <span class="text-muted small text-break"><?= $fullUrl ?></span>
+
+                                                <button type="button" class="btn btn-link p-0 text-secondary btn-copy-url"
+                                                    data-url="<?= $fullUrl ?>" title="Copiar URL"
+                                                    onclick="copiarUrlParaTransferencia(this)">
+                                                    <i class="fa-regular fa-copy"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                         <td class="text-end">
                                             <?php
-                                            // Monta o link que será lido pelo celular do turista
                                             $urlDestinoTurista = base_url('pesquisa?token=' . $qr['token_qr_code']);
-                                            // Envia o link para a API gerar a imagem em tamanho grande (400x400) pronta para impressão
                                             $apiLinkQr = "https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=" . urlencode($urlDestinoTurista);
                                             ?>
                                             <button
@@ -214,7 +219,11 @@
                                         <div class="fw-bold">Reserva Particular do Patrimônio Natural (RPPN)</div>
                                     </td>
                                     <td><span class="qr-token-box">a8f92b7c4e13d96e5fa1</span></td>
-                                    <td><span class="text-muted small">.../pesquisa?token=a8f92b7c4e13d96e5fa1</span></td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="text-muted small">.../pesquisa?token=a8f92b7c4e13d96e5fa1</span>
+                                        </div>
+                                    </td>
                                     <td class="text-end">
                                         <button class="btn btn-sm btn-dark fw-bold" disabled>Imprimir Tag</button>
                                     </td>
@@ -222,6 +231,30 @@
                             <?php endif; ?>
                         </tbody>
                     </table>
+
+                    <script>
+                        function copiarUrlParaTransferencia(botao) {
+                            const url = botao.getAttribute('data-url');
+
+                            if (!url) return;
+
+                            // Utiliza a API nativa do navegador para colar na área de transferência
+                            navigator.clipboard.writeText(url).then(() => {
+                                // Altera o ícone para feedback visual positivo
+                                const icone = botao.querySelector('i');
+                                icone.className = 'fa-solid fa-check text-success';
+                                botao.setAttribute('title', 'Copiado!');
+
+                                // Retorna ao estado original após 2 segundos
+                                setTimeout(() => {
+                                    icone.className = 'fa-regular fa-copy';
+                                    botao.setAttribute('title', 'Copiar URL');
+                                }, 2000);
+                            }).catch(err => {
+                                console.error('Erro ao copiar a URL: ', err);
+                            });
+                        }
+                    </script>
                 </div>
             </div>
         </div>

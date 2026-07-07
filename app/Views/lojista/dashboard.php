@@ -4,14 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel do Lojista - iNovaTour</title>
+    <title>Portal do Lojista - iNovaTour</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --nl-purple: #5D46D2;
-            --nl-purple-dark: #402cb3;
             --nl-purple-light: #ECE9FC;
             --nl-magenta: #E6007E;
             --nl-green-neon: #00D369;
@@ -107,9 +106,14 @@
         .card-metric {
             background: #FFFFFF;
             border: none;
-            border-radius: 16px;
+            border-radius: 12px;
             box-shadow: 0 4px 20px rgba(93, 70, 210, 0.04);
-            padding: 24px;
+            padding: 16px 20px;
+            height: 100%;
+        }
+
+        .card-metric h3 {
+            font-size: 1.4rem !important;
         }
 
         .card-chart {
@@ -121,15 +125,6 @@
             height: 100%;
         }
 
-        .card-chart-data {
-            background: #FFFFFF;
-            border: none;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(93, 70, 210, 0.04);
-            padding: 24px;
-            height: 25%;
-        }
-
         .chart-container {
             position: relative;
             height: 260px;
@@ -137,13 +132,21 @@
         }
 
         .metric-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.3rem;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .card-chart-data {
+            background: #FFFFFF;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(93, 70, 210, 0.04);
+            padding: 25px;
         }
     </style>
 </head>
@@ -183,11 +186,20 @@
         </nav>
 
         <div id="content">
-            <div class="mb-5">
-                <h2 class="fw-bold mb-1" style="color: var(--nl-purple);">Seu Estabelecimento</h2>
-                <p class="text-muted small mb-0">Métricas e insights gerados através dos escaneamentos do seu QR Code.
-                </p>
-            </div>
+            <form method="GET" action="<?= base_url('lojista/dashboard') ?>" class="row g-3 mb-5 align-items-center">
+                <div class="col-md-8">
+                    <h2 class="fw-bold mb-1" style="color: var(--nl-purple);">Seu Estabelecimento</h2>
+                    <p class="text-muted small mb-0">Métricas estratégicas reais e comportamento de consumo dos seus
+                        clientes.</p>
+                </div>
+                <div class="col-md-4">
+                    <select name="periodo" class="form-select" onchange="this.form.submit()">
+                        <option value="atual" <?= (request()->getGet('periodo') ?? 'atual') === 'atual' ? 'selected' : '' ?>>Mês Corrente (Padrão)</option>
+                        <option value="historico" <?= request()->getGet('periodo') === 'historico' ? 'selected' : '' ?>>
+                            Todo o Histórico</option>
+                    </select>
+                </div>
+            </form>
 
             <?php if (session()->getFlashdata('sucesso')): ?>
                 <div class="alert alert-success fw-bold mb-4 border-0 shadow-sm"><i
@@ -198,30 +210,70 @@
                         class="fa-solid fa-circle-exclamation me-2"></i><?= session()->getFlashdata('erro') ?></div>
             <?php endif; ?>
 
-            <div class="card-chart-data mb-4">
-                <h6 class="fw-bold mb-2" style="color: var(--nl-purple);"><i
-                        class="fa-solid fa-hotel me-2"></i>Lançamento de Fluxo Ocupacional</h6>
-                <p class="text-muted small mb-4">Informe o volume total de hóspedes e a taxa de quartos ocupados do mês
-                    correspondente.</p>
+            <div class="card-chart-data mb-5">
+                <h6 class="fw-bold mb-2" style="color: var(--nl-purple);">
+                    <i class="fa-solid fa-hotel me-2"></i>Lançamento de Desempenho e Fluxo Operacional
+                </h6>
+                <p class="text-muted small mb-4">
+                    Informe o fechamento estatístico do mês para fins de consolidação dos indicadores turísticos do
+                    município.
+                </p>
 
                 <form action="<?= base_url('api/painel/ocupacao') ?>" method="POST">
+                    <?= csrf_field() ?>
                     <div class="row g-3 align-items-end">
                         <div class="col-md-3">
                             <label class="form-label small fw-bold text-secondary">Mês de Referência:</label>
-                            <input type="month" name="mes_referencia" class="form-control" required
+                            <input type="month" name="data_referencia" class="form-control" required
                                 value="<?= date('Y-m') ?>">
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold text-secondary">Total de Hóspedes
-                                (Check-ins):</label>
-                            <input type="number" name="total_hospedes" class="form-control" min="0" required
-                                placeholder="Ex: 142">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold text-secondary">Taxa Média de Ocupação (%):</label>
-                            <input type="number" name="taxa_ocupacao" class="form-control" min="0" max="100" required
-                                placeholder="Ex: 75">
-                        </div>
+
+                        <?php if ($setorLojista === 'hospedagem'): ?>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-bold text-secondary">Total de Hóspedes:</label>
+                                <input type="number" name="volume_clientes" class="form-control" min="0" required
+                                    placeholder="Ex: 350">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-bold text-secondary">Quartos Ocupados (Noites):</label>
+                                <input type="number" name="quartos_ocupados" class="form-control" min="0" required
+                                    placeholder="Ex: 120">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-bold text-secondary">Capacidade de Quartos:</label>
+                                <input type="number" name="capacidade_maxima_quartos" class="form-control" min="0" required
+                                    placeholder="Ex: 200">
+                            </div>
+
+                        <?php elseif ($setorLojista === 'alimentacao_comercio'): ?>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold text-secondary">Total de Clientes Atendidos:</label>
+                                <input type="number" name="volume_clientes" class="form-control" min="0" required
+                                    placeholder="Ex: 850">
+                            </div>
+                            <input type="hidden" name="quartos_ocupados" value="0">
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold text-secondary">Capacidade Máxima de
+                                    Lugares/Vendas:</label>
+                                <input type="number" name="capacidade_maxima_quartos" class="form-control" min="0" required
+                                    placeholder="Ex: 1500">
+                            </div>
+
+                        <?php else: // Recursos Naturais, Culturais ou Outros ?>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold text-secondary">Volume Total de Visitantes:</label>
+                                <input type="number" name="volume_clientes" class="form-control" min="0" required
+                                    placeholder="Ex: 400">
+                            </div>
+                            <input type="hidden" name="quartos_ocupados" value="0">
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold text-secondary">Capacidade Máxima de
+                                    Carga/Dia:</label>
+                                <input type="number" name="capacidade_maxima_quartos" class="form-control" min="0" required
+                                    placeholder="Ex: 500">
+                            </div>
+                        <?php endif; ?>
+
                         <div class="col-md-3">
                             <button type="submit" class="btn btn-success w-100 fw-bold">
                                 <i class="fa-solid fa-paper-plane me-2"></i>Enviar Dados
@@ -231,61 +283,69 @@
                 </form>
             </div>
 
-            <div class="row g-4 mb-4">
-                <div class="col-md-3">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-5 g-3 mb-5">
+                <div class="col">
                     <div class="card-metric d-flex align-items-center justify-content-between">
                         <div>
-                            <span class="text-muted small d-block fw-semibold mb-1">Impacto Estimado</span>
-                            <h3 class="fw-bold mb-0">R$
-                                <?= number_format($kpis['impacto_economico'], 2, ',', '.') ?>
+                            <span class="text-muted small d-block fw-semibold mb-1">Seu Faturamento</span>
+                            <h3 class="fw-bold mb-0">R$ <?= number_format($kpis['faturamento_estimado'], 2, ',', '.') ?>
                             </h3>
                         </div>
                         <div class="metric-icon" style="background: #E6F9ED; color: var(--nl-green-neon);"><i
                                 class="fa-solid fa-money-bill-wave"></i></div>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col">
                     <div class="card-metric d-flex align-items-center justify-content-between">
                         <div>
-                            <span class="text-muted small d-block fw-semibold mb-1">Total de Visitas</span>
-                            <h3 class="fw-bold mb-0">
-                                <?= $kpis['volume_turistico'] ?>
-                            </h3>
+                            <span class="text-muted small d-block fw-semibold mb-1">Clientes Capturados</span>
+                            <h3 class="fw-bold mb-0"><?= number_format($kpis['volume_clientes'], 0, '', '.') ?></h3>
                         </div>
                         <div class="metric-icon" style="background: var(--nl-purple-light); color: var(--nl-purple);"><i
                                 class="fa-solid fa-users"></i></div>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col">
                     <div class="card-metric d-flex align-items-center justify-content-between">
                         <div>
-                            <span class="text-muted small d-block fw-semibold mb-1">Média de Satisfação</span>
-                            <h3 class="fw-bold mb-0">
-                                <?= $kpis['satisfacao_media'] ?> <i class="fa-solid fa-star text-warning fs-5"></i>
-                            </h3>
+                            <span class="text-muted small d-block fw-semibold mb-1">Ticket Médio</span>
+                            <h3 class="fw-bold mb-0">R$ <?= number_format($kpis['ticket_medio'], 2, ',', '.') ?></h3>
+                        </div>
+                        <div class="metric-icon" style="background: #EAF4FF; color: #0099FF;"><i
+                                class="fa-solid fa-calculator"></i></div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card-metric d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small d-block fw-semibold mb-1">Satisfação Clientes</span>
+                            <h3 class="fw-bold mb-0"><?= $kpis['satisfacao_exclusiva'] ?> <i
+                                    class="fa-solid fa-star text-warning fs-6"></i></h3>
                         </div>
                         <div class="metric-icon" style="background: #FFF9E6; color: #FFA800;"><i
                                 class="fa-solid fa-star"></i></div>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col">
                     <div class="card-metric d-flex align-items-center justify-content-between">
                         <div>
-                            <span class="text-muted small d-block fw-semibold mb-1">NPS do Local</span>
-                            <h3 class="fw-bold mb-0 text-success">
-                                <?= $kpis['nps'] ?>
+                            <span class="text-muted small d-block fw-semibold mb-1">Seu NPS</span>
+                            <h3
+                                class="fw-bold mb-0 <?= $kpis['nps_proprio'] >= 50 ? 'text-success' : ($kpis['nps_proprio'] >= 0 ? 'text-warning' : 'text-danger') ?>">
+                                <?= $kpis['nps_proprio'] ?>
                             </h3>
                         </div>
-                        <div class="metric-icon" style="background: #EAF4FF; color: #0099FF;"><i
+                        <div class="metric-icon" style="background: #FFF5F5; color: var(--nl-magenta);"><i
                                 class="fa-solid fa-heart"></i></div>
                     </div>
                 </div>
             </div>
 
-            <div class="row g-4">
+            <div class="row g-4 mb-4">
                 <div class="col-md-6">
                     <div class="card-chart">
-                        <h6 class="fw-bold mb-3" style="color: var(--nl-purple);">Motivo da Visita dos Clientes</h6>
+                        <h6 class="fw-bold mb-3" style="color: var(--nl-purple);">Motivo da Visita dos Seus Clientes
+                        </h6>
                         <div class="chart-container">
                             <canvas id="chartMotivosLojista"></canvas>
                         </div>
@@ -293,9 +353,27 @@
                 </div>
                 <div class="col-md-6">
                     <div class="card-chart">
-                        <h6 class="fw-bold mb-3" style="color: var(--nl-purple);">Principais Cidades de Origem</h6>
+                        <h6 class="fw-bold mb-3" style="color: var(--nl-purple);">Principais Cidades de Origem Emissoras
+                        </h6>
                         <div class="chart-container">
                             <canvas id="chartOrigemLojista"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card-chart">
+                        <h6 class="fw-bold mb-3" style="color: var(--nl-purple);">Perfil de Estadia (Dorme na cidade?)
+                        </h6>
+                        <div class="chart-container">
+                            <canvas id="chartPermanenciaLojista"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card-chart">
+                        <h6 class="fw-bold mb-3" style="color: var(--nl-purple);">Onde o Seu Cliente se Hospeda</h6>
+                        <div class="chart-container">
+                            <canvas id="chartHospedagemLojista"></canvas>
                         </div>
                     </div>
                 </div>
@@ -306,7 +384,13 @@
     <script>
         const configPadrao = {
             responsive: true,
-            maintainAspectRatio: false
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { boxWidth: 12, font: { family: 'Inter' } }
+                }
+            }
         };
 
         const ctxMotivos = document.getElementById('chartMotivosLojista').getContext('2d');
@@ -316,7 +400,7 @@
                 labels: <?= $charts['motivos']['labels'] ?>,
                 datasets: [{
                     data: <?= $charts['motivos']['valores'] ?>,
-                    backgroundColor: ['#FF5500', '#5D46D2', '#0099FF', '#6C757D']
+                    backgroundColor: ['#FF5500', '#5D46D2', '#0099FF', '#6C757D', '#E6007E']
                 }]
             },
             options: configPadrao
@@ -326,11 +410,41 @@
         new Chart(ctxOrigem, {
             type: 'bar',
             data: {
-                labels: <?= $charts['origem']['labels'] ?>,
+                labels: <?= $charts['cidades']['labels'] ?>,
                 datasets: [{
-                    label: 'Visitantes',
-                    data: <?= $charts['origem']['valores'] ?>,
-                    backgroundColor: '#E6007E'
+                    label: 'Clientes',
+                    data: <?= $charts['cidades']['valores'] ?>,
+                    backgroundColor: '#E6007E',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                ...configPadrao,
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        const ctxPermanencia = document.getElementById('chartPermanenciaLojista').getContext('2d');
+        new Chart(ctxPermanencia, {
+            type: 'pie',
+            data: {
+                labels: <?= $charts['permanencia']['labels'] ?>,
+                datasets: [{
+                    data: <?= $charts['permanencia']['valores'] ?>,
+                    backgroundColor: ['#00D369', '#FFA800']
+                }]
+            },
+            options: configPadrao
+        });
+
+        const ctxHospedagem = document.getElementById('chartHospedagemLojista').getContext('2d');
+        new Chart(ctxHospedagem, {
+            type: 'polarArea',
+            data: {
+                labels: <?= $charts['hospedagem']['labels'] ?>,
+                datasets: [{
+                    data: <?= $charts['hospedagem']['valores'] ?>,
+                    backgroundColor: ['#5D46D2', '#E6007E', '#00D369', '#0099FF', '#6C757D']
                 }]
             },
             options: configPadrao
