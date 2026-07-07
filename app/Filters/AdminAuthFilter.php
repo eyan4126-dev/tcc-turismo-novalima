@@ -10,12 +10,14 @@ class AdminAuthFilter implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
-        if (!session()->get('isLogged') || session()->get('role_usuario') !== 'admin') {
-            return service('response')
-                ->setStatusCode(401)
-                ->setJSON(['status' => 'error', 'error' => 'Acesso negado. Apenas administradores da prefeitura.']);
+        // Ajustado para 'role' para coincidir com o que é salvo no AuthController
+        if (!session()->get('isLogged') || session()->get('role') !== 'admin') {
+            session()->setFlashdata('error', 'Acesso negado. Área restrita a administradores.');
+            return redirect()->to(base_url('login'));
         }
     }
 
-    public function after(RequestInterface $request, ResponseInterface $response, $arguments = null) {}
+    public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
+    {
+    }
 }

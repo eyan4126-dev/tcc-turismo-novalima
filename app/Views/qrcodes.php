@@ -59,8 +59,8 @@
         }
 
         .brand-logo-container {
-            width: 80px;
-            height: 80px;
+            width: 130px;
+            height: 130px;
             background-color: #FFFFFF;
             border-radius: 50%;
             display: flex;
@@ -118,7 +118,7 @@
         <nav id="sidebar">
             <div class="sidebar-header mb-4">
                 <div class="brand-logo-container">
-                    <img src="public\logo.png" alt="iNovaTour Logo">
+                    <img src="<?= base_url('public/logo.png') ?>" alt="iNovaTour Logo">
                 </div>
                 <span class="fw-extrabold text-nl-purple h4 tracking-tight" style="font-weight:800;">
                     iNova<span style="font-weight:400; color:var(--nl-text-dark);">Tour</span>
@@ -133,12 +133,14 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="<?= base_url('estabelecimentos') ?>" class="nav-link <?= url_is('estabelecimentos') ? 'active' : '' ?>">
+                    <a href="<?= base_url('estabelecimentos') ?>"
+                        class="nav-link <?= url_is('estabelecimentos') ? 'active' : '' ?>">
                         <i class="fa-solid fa-store"></i> Estabelecimentos
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="<?= base_url('qrcodes') ?>" class="nav-link <?= url_is('qrcodes') ? 'active' : '' ?>">
+                    <a href="<?= base_url('admin/qrcodes') ?>"
+                        class="nav-link <?= url_is('admin/qrcodes') || url_is('qrcodes') ? 'active' : '' ?>">
                         <i class="fa-solid fa-qrcode"></i> QR Codes Gerados
                     </a>
                 </li>
@@ -154,12 +156,14 @@
             <div class="d-flex justify-content-between align-items-center mb-5">
                 <div>
                     <h2 class="fw-bold mb-1" style="color: var(--nl-purple);">Tokens e Distribuição de Mídias</h2>
-                    <p class="text-muted small mb-0">Segurança de identificação por token não sequencial ativo nas URLs de pesquisa.</p>
+                    <p class="text-muted small mb-0">Segurança de identificação por token não sequencial ativo nas URLs
+                        de pesquisa.</p>
                 </div>
             </div>
 
             <div class="table-container">
-                <h5 class="fw-bold mb-4" style="color: var(--nl-purple);">Mídias de Coleta Ativas</h5>
+                <h5 class="fw-bold mb-4" style="color: var(--nl-purple);"><i class="fa-solid fa-qrcode me-2"></i>Mídias
+                    de Coleta Ativas</h5>
                 <div class="table-responsive">
                     <table class="table align-middle">
                         <thead>
@@ -171,26 +175,45 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if (!empty($qrcodes)): foreach ($qrcodes as $qr): ?>
+                            <?php if (!empty($qrcodes)): ?>
+                                <?php foreach ($qrcodes as $qr): ?>
                                     <tr>
                                         <td>
                                             <div class="fw-bold"><?= esc($qr['razao_social']) ?></div>
                                         </td>
-                                        <td><span class="qr-token-box"><?= esc($qr['token_qr_code']) ?></span></td>
-                                        <td><span class="text-muted small">.../pesquisa?token=<?= esc($qr['token_qr_code']) ?></span></td>
+                                        <td>
+                                            <span class="qr-token-box"><?= esc($qr['token_qr_code']) ?></span>
+                                        </td>
+                                        <td>
+                                            <span class="text-muted small">
+                                                <?= base_url('pesquisa?token=' . $qr['token_qr_code']) ?>
+                                            </span>
+                                        </td>
                                         <td class="text-end">
-                                            <a href="<?= base_url('qrcodes/exportar/' . $qr['token_qr_code']) ?>" class="btn btn-sm btn-dark fw-bold"><i class="fa-solid fa-download me-1"></i> Imprimir Tag</a>
+                                            <?php
+                                            // Monta o link que será lido pelo celular do turista
+                                            $urlDestinoTurista = base_url('pesquisa?token=' . $qr['token_qr_code']);
+                                            // Envia o link para a API gerar a imagem em tamanho grande (400x400) pronta para impressão
+                                            $apiLinkQr = "https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=" . urlencode($urlDestinoTurista);
+                                            ?>
+                                            <button
+                                                onclick="imprimirTag('<?= esc($qr['razao_social']) ?>', '<?= $apiLinkQr ?>')"
+                                                class="btn btn-sm btn-dark fw-bold">
+                                                <i class="fa-solid fa-print me-1"></i> Imprimir Tag
+                                            </button>
                                         </td>
                                     </tr>
-                                <?php endforeach;
-                            else: ?>
+                                <?php endforeach; ?>
+                            <?php else: ?>
                                 <tr>
                                     <td>
                                         <div class="fw-bold">Reserva Particular do Patrimônio Natural (RPPN)</div>
                                     </td>
                                     <td><span class="qr-token-box">a8f92b7c4e13d96e5fa1</span></td>
                                     <td><span class="text-muted small">.../pesquisa?token=a8f92b7c4e13d96e5fa1</span></td>
-                                    <td class="text-end"><button class="btn btn-sm btn-dark fw-bold" disabled>Imprimir Tag</button></td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-dark fw-bold" disabled>Imprimir Tag</button>
+                                    </td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
@@ -199,6 +222,48 @@
             </div>
         </div>
     </div>
+    <script>
+        function imprimirTag(nomeLocal, urlQrCode) {
+            const janelaImpressao = window.open('', '_blank', 'width=800,height=600');
+            janelaImpressao.document.write(`
+        <html>
+        <head>
+            <title>Imprimir QR Code - iNovaTour</title>
+            <style>
+                body { font-family: 'Inter', sans-serif; text-align: center; padding: 40px; color: #1A1A1A; }
+                .tag-container { border: 4px solid #5D46D2; border-radius: 24px; padding: 40px; max-width: 450px; margin: 0 auto; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+                .logo { font-weight: 800; font-size: 28px; color: #5D46D2; margin-bottom: 10px; }
+                .logo span { font-weight: 400; color: #1A1A1A; }
+                .subtitle { font-size: 14px; color: #6C757D; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 1px; }
+                .qr-code { max-width: 280px; margin: 20px auto; display: block; border: 1px solid #E2E8F0; padding: 10px; border-radius: 12px; }
+                .local-nome { font-size: 22px; font-weight: 700; margin-top: 25px; color: #1A1A1A; }
+                .instrucao { font-size: 14px; color: #5D46D2; font-weight: 600; margin-top: 15px; }
+                @media print {
+                    body { padding: 0; }
+                    .tag-container { box-shadow: none; border-color: #5D46D2; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="tag-container">
+                <div class="logo">iNova<span>Tour</span></div>
+                <div class="subtitle">Guia Turístico Oficial</div>
+                <img class="qr-code" src="${urlQrCode}" alt="QR Code">
+                <div class="local-nome">${nomeLocal}</div>
+                <div class="instrucao">Abra a câmera do celular para escanear e avaliar</div>
+            </div>
+            <script>
+                window.onload = function() {
+                    window.print();
+                    setTimeout(function() { window.close(); }, 500);
+                };
+            <\/script>
+        </body>
+        </html>
+    `);
+            janelaImpressao.document.close();
+        }
+    </script>
 </body>
 
 </html>

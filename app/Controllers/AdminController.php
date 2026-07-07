@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Models\UsuarioModel;
+use App\Models\PesquisaModel;
 
 class AdminController extends BaseController
 {
@@ -15,7 +16,7 @@ class AdminController extends BaseController
         $userModel = new UsuarioModel();
 
         // 1. Filtro de Status Implícito: Apenas dados vinculados a usuários ATIVOS
-        $idEvento = $this->request->getGet('id_evento');
+        $idEvent = $this->request->getGet('id_evento');
 
         // Seleção de filtros de evento sazonal para carregar no dropdown da View
         $eventosFiltro = $db->table('estabelecimento_evento ee')
@@ -40,8 +41,8 @@ class AdminController extends BaseController
                 ->join('usuario u', 'u.id_usuario = ee.id_usuario')
                 ->where('u.status_usuario', 'ativo');
 
-            if ($idEvento) {
-                $builder->where('ee.id_estabelecimento', $idEvento);
+            if ($idEvent) {
+                $builder->where('ee.id_estabelecimento', $idEvent);
             }
 
             // --- CÁLCULO DE KPIs ---
@@ -89,8 +90,10 @@ class AdminController extends BaseController
                 $p = 0;
                 $d = 0;
                 foreach ($npsData as $n) {
-                    if ($n['nps'] >= 9) $p++;
-                    if ($n['nps'] <= 6) $d++;
+                    if ($n['nps'] >= 9)
+                        $p++;
+                    if ($n['nps'] <= 6)
+                        $d++;
                 }
                 $kpis['nps'] = round((($p - $d) / count($npsData)) * 100);
             }
@@ -152,34 +155,43 @@ class AdminController extends BaseController
 
     public function salvarDireto()
     {
+        // Pega a conexão direta com o banco de dados (ignora as travas automáticas do Model)
         $db = \Config\Database::connect();
-        $db->transStart();
+        $builder = $db->table('estabelecimento_evento');
 
-        // 1. Cria o usuário do tipo admin associado ao cadastro direto efetuado
-        $db->table('usuario')->insert([
-            'nome_responsavel' => 'Funcionário Prefeitura (Admin)',
-            'email' => 'admin_direto_' . time() . '@novalima.mg.gov.br',
-            'senha' => password_hash(bin2hex(random_bytes(4)), PASSWORD_BCRYPT),
-            'role_usuario' => 'admin',
-            'status_usuario' => 'ativo' // Ativado imediatamente
-        ]);
-        $idUsuario = $db->insertID();
+        $razaoSocial = $this->request->getPost('razao_social');
+        $setor = $this->request->getPost('setor');
+        $tipo = $this->request->getPost('tipo');
+        $telefone = $this->request->getPost('telefone');
 
-        // 2. Persiste o estabelecimento/ponto gerando o token_qr_code criptográfico seguro
-        $db->table('estabelecimento_evento')->insert([
-            'id_usuario' => $idUsuario,
-            'razao_social' => $this->request->getPost('razao_social'),
-            'cnpj' => null, // Conforme especificação: NULL para cadastros públicos da prefeitura
-            'telefone' => $this->request->getPost('telefone'),
-            'setor' => $this->request->getPost('setor'),
-            'token_qr_code' => bin2hex(random_bytes(10)), // Token não sequencial de alta entropia
-            'tipo' => $this->request->getPost('tipo'),
-            'data_inicio' => $this->request->getPost('data_inicio') ?: null,
-            'data_fim' => $this->request->getPost('data_fim') ?: null,
-        ]);
+        $dataInicio = $this->request->getPost('data_inicio');
+        $dataFim = $this->request->getPost('data_fim');
 
-        $db->transComplete();
-        return redirect()->to('/estabelecimentos');
+        // Estrutura de dados simplificada e direta
+        $dados = [
+            'id_usuario' => null,
+            'razao_social' => $razaoSocial,
+            'cnpj' => null,
+            'telefone' => $telefone,
+            'setor' => $setor,
+            'tipo' => $tipo,
+            'token_qr_code' => md5(uniqid($razaoSocial, true))
+        ];
+
+        if ($tipo === 'evento') {
+            $dados['data_inicio'] = !empty($dataInicio) ? $dataInicio : null;
+            $dados['data_fim'] = !empty($dataFim) ? $dataFim : null;
+        } else {
+            $dados['data_inicio'] = null;
+            $dados['data_fim'] = null;
+        }
+
+        // Insere diretamente via Query Builder
+        if ($builder->insert($dados)) {
+            return redirect()->to(base_url('admin'))->with('sucesso', 'Atrativo/Evento cadastrado com sucesso!');
+        } else {
+            return redirect()->to(base_url('admin'))->with('erro', 'Falha ao salvar no banco de dados.');
+        }
     }
 
     public function aprovarLojista($id = null)
@@ -203,5 +215,113 @@ class AdminController extends BaseController
         $db = \Config\Database::connect();
         $db->table('usuario')->where('id_usuario', $id)->update(['status_usuario' => 'suspenso']);
         return redirect()->to('/admin');
+    }
+
+    // ==========================================
+    //  IMPLEMENTAÇÃO NOVA: MÓDULO DE PRESTAÇÃO
+    // ==========================================
+
+    /**
+     * MÓDULO 2: Renderiza a tela de Prestação de Contas Estaduais
+     */
+    public function prestacaoContas()
+    {
+        return view('admin/prestacao_contas');
+    }
+
+    /**
+     * MÓDULO 2: Exportador Alinhado com o Leiaute do ICMS Turismo
+     */
+    public function exportarIcmsTurismo()
+    {
+        $dataInicio = $this->request->getGet('data_inicio');
+        $dataFim = $this->request->getGet('data_fim');
+
+        if (!$dataInicio || !$dataFim) {
+            return redirect()->back()->with('error', 'Período inválido para exportação fiscal.');
+        }
+
+        $pesquisaModel = new PesquisaModel();
+        $dados = $pesquisaModel->getDadosFiscaisPorPeriodo($dataInicio, $dataFim);
+
+        $nomeArquivo = 'icms_turismo_competencia_' . $dataInicio . '_a_' . $dataFim . '.csv';
+        $this->_configurarHeadersCsv($nomeArquivo);
+
+        $output = fopen("php://output", "w");
+        fwrite($output, "\xEF\xBB\xBF"); // Injeta o BOM para compatibilidade MS Excel em PT-BR
+
+        // Estrutura de colunas exigida para auditorias do critério ICMS Turismo
+        fputcsv($output, ['ID_Amostra', 'Municipio_Origem', 'UF_Origem', 'Permanencia', 'Modalidade_Hospedagem', 'Gasto_Estimado_R$', 'Data_Registro'], ';');
+
+        foreach ($dados as $linha) {
+            $partesOrigem = explode(' - ', $linha['cidade_origem']);
+            $cidade = $partesOrigem[0] ?? $linha['cidade_origem'];
+            $uf = $partesOrigem[1] ?? 'MG';
+
+            fputcsv($output, [
+                $linha['id_pesquisa'],
+                $cidade,
+                $uf,
+                $linha['tempo_permanencia'] === 'dormir' ? 'Pernoite' : 'Bate e Volta',
+                $linha['local_hospedagem'] ?? 'N/A',
+                number_format($linha['faixa_gasto'] ?? $linha['valor_gasto_estimado'] ?? 0, 2, ',', '.'),
+                date('d/m/Y H:i', strtotime($linha['created_at']))
+            ], ';');
+        }
+
+        fclose($output);
+        exit;
+    }
+
+    /**
+     * MÓDULO 2: Exportador Alinhado com a Matriz Sismapa / Secult
+     */
+    public function exportarSismapa()
+    {
+        $dataInicio = $this->request->getGet('data_inicio');
+        $dataFim = $this->request->getGet('data_fim');
+
+        if (!$dataInicio || !$dataFim) {
+            return redirect()->back()->with('error', 'Período inválido para exportação Sismapa.');
+        }
+
+        $pesquisaModel = new PesquisaModel();
+        $dados = $pesquisaModel->getDadosFiscaisPorPeriodo($dataInicio, $dataFim);
+
+        $nomeArquivo = 'sismapa_matriz_fluxo_' . date('Ymd_His') . '.csv';
+        $this->_configurarHeadersCsv($nomeArquivo);
+
+        $output = fopen("php://output", "w");
+        fwrite($output, "\xEF\xBB\xBF");
+
+        // Layout de exportação para Inventário de Mapeamento Regional Sismapa
+        fputcsv($output, ['ID_Registro', 'ID_Estabelecimento_Coleta', 'Localidade_Turista', 'Motivacao_Visita', 'Tempo_Estadia', 'Grau_Satisfacao', 'Pontuacao_NPS'], ';');
+
+        foreach ($dados as $linha) {
+            fputcsv($output, [
+                $linha['id_pesquisa'],
+                $linha['id_estabelecimento'],
+                $linha['cidade_origem'],
+                $linha['motivo_visita'],
+                $linha['tempo_permanencia'],
+                $linha['satisfacao_estrelas'],
+                $linha['nps']
+            ], ';');
+        }
+
+        fclose($output);
+        exit;
+    }
+
+    /**
+     * Método auxiliar privado para gerenciar os cabeçalhos HTTP de download do arquivo CSV
+     */
+    private function _configurarHeadersCsv($nomeArquivo)
+    {
+        header("Content-Description: File Transfer");
+        header("Content-Disposition: attachment; filename=$nomeArquivo");
+        header("Content-Type: text/csv; charset=UTF-8");
+        header("Pragma: no-cache");
+        header("Expires: 0");
     }
 }

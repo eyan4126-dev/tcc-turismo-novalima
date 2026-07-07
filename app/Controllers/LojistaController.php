@@ -3,14 +3,12 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Models\EstabelecimentoModel; // Importante para buscar os dados reais
 
 class LojistaController extends BaseController
 {
     public function index()
     {
-        // Exemplo de resgate do ID do estabelecimento logado via sessão
-        // $idEstabelecimento = session()->get('id_estabelecimento');
-
         // KPIs fictícios focados no estabelecimento dele
         $data['kpis'] = [
             'impacto_economico' => 14250.80,
@@ -36,13 +34,28 @@ class LojistaController extends BaseController
 
     public function qrcode()
     {
-        // Dados básicos que existem no seu banco para o lojista conferir e baixar o QR
-        $data['estabelecimento'] = [
-            'razao_social' => 'Restaurante Sabor & Arte',
-            'cnpj' => '12.345.678/0001-99',
-            'setor' => 'Alimentação / Gastronomia',
-            'qr_code_url' => 'public/qrcodes/exemplo.png' // Caminho do QR Code gerado na aprovação
-        ];
+        $estabelecimentoModel = new EstabelecimentoModel();
+
+        // Tenta resgatar o ID por qualquer um dos nomes que o seu Login possa ter usado
+        $id_usuario_logado = session()->get('id_usuario')
+            ?? session()->get('id')
+            ?? session()->get('id_user');
+
+        // Se mesmo testando os 3 nomes ainda vier vazio, vamos avisar exatamente o que está na sessão
+        if (!$id_usuario_logado) {
+            return "Erro de Sessão: Não foi encontrado nenhum ID de usuário logado. Conteúdo atual da sessão: " . print_r(session()->get(), true);
+        }
+
+        // Busca na tabela estabelecimento_evento usando o ID recuperado
+        $estabelecimento = $estabelecimentoModel->where('id_usuario', $id_usuario_logado)->first();
+
+        // Se o ID existir mas não achar o vínculo
+        if (!$estabelecimento) {
+            return "Erro de Vínculo: O usuário com o ID (" . esc($id_usuario_logado) . ") está logado, mas nenhuma linha na tabela 'estabelecimento_evento' aponta para este ID.";
+        }
+
+        // Passa o estabelecimento real encontrado ("Artesanatos de Nova Lima") para a View
+        $data['estabelecimento'] = $estabelecimento;
 
         return view('lojista/qrcode', $data);
     }

@@ -64,8 +64,8 @@
         }
 
         .brand-logo-container {
-            width: 80px;
-            height: 80px;
+            width: 130px;
+            height: 130px;
             background-color: #FFFFFF;
             border-radius: 50%;
             display: flex;

@@ -20,19 +20,21 @@ class Filters extends BaseFilters
      * make reading things nicer and simpler.
      */
     public array $aliases = [
-        'csrf'          => CSRF::class,
-        'toolbar'       => DebugToolbar::class,
-        'honeypot'      => Honeypot::class,
-        'invalidchars'  => InvalidChars::class,
+        'csrf' => CSRF::class,
+        'toolbar' => DebugToolbar::class,
+        'honeypot' => Honeypot::class,
+        'invalidchars' => InvalidChars::class,
         'secureheaders' => SecureHeaders::class,
-        'cors'          => Cors::class,
-        'forcehttps'    => ForceHTTPS::class,
-        'pagecache'     => PageCache::class,
-        'performance'   => PerformanceMetrics::class,
+        'cors' => Cors::class,
+        'forcehttps' => ForceHTTPS::class,
+        'pagecache' => PageCache::class,
+        'performance' => PerformanceMetrics::class,
 
         // Seus filtros de autenticação customizados
-        'authAdmin'     => \App\Filters\AdminAuthFilter::class,
-        'authLojista'   => \App\Filters\LojistaAuthFilter::class,
+        'authAdmin' => \App\Filters\AdminAuthFilter::class,
+        'authLojista' => \App\Filters\LojistaAuthFilter::class,
+        'AdminAuthFilter' => \App\Filters\AdminAuthFilter::class,
+        'LojistaAuthFilter' => \App\Filters\LojistaAuthFilter::class,
     ];
 
     /**
@@ -68,5 +70,26 @@ class Filters extends BaseFilters
     ];
 
     public array $methods = [];
-    public array $filters = [];
+
+    /**
+     * Aqui estava o problema! Mapeando os filtros diretamente nas URLs para blindar o sistema.
+     */
+    public array $filters = [
+        'AdminAuthFilter' => [
+            'before' => [
+                'admin',
+                'admin/*',
+                'estabelecimentos',
+                'qrcodes',
+                'api/admin/*'
+            ]
+        ],
+        'LojistaAuthFilter' => [
+            'before' => [
+                'lojista',
+                'lojista/*',
+                'api/painel/*'
+            ]
+        ],
+    ];
 }

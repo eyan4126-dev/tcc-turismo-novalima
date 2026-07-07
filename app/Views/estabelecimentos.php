@@ -62,8 +62,8 @@
         }
 
         .brand-logo-container {
-            width: 80px;
-            height: 80px;
+            width: 130px;
+            height: 130px;
             background-color: #FFFFFF;
             border-radius: 50%;
             display: flex;
@@ -129,7 +129,8 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="<?= base_url('estabelecimentos') ?>" class="nav-link <?= url_is('estabelecimentos') ? 'active' : '' ?>">
+                    <a href="<?= base_url('estabelecimentos') ?>"
+                        class="nav-link <?= url_is('estabelecimentos') ? 'active' : '' ?>">
                         <i class="fa-solid fa-store"></i> Estabelecimentos
                     </a>
                 </li>
@@ -150,46 +151,63 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h2 class="fw-bold mb-1" style="color: var(--nl-purple);">Base Unificada de Estabelecimentos</h2>
-                    <p class="text-muted small">Gerenciamento de lojistas privados ativos e cadastro direto de patrimônios públicos.</p>
+                    <p class="text-muted small">Gerenciamento de lojistas privados ativos e cadastro direto de
+                        patrimônios públicos.</p>
                 </div>
             </div>
 
             <div class="form-container">
-                <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-plus-circle me-2"></i>Cadastrar Ponto Natural, Cultural ou Evento Próprio (Prefeitura)</h5>
-                <form action="<?= base_url('estabelecimentos/salvar-direto') ?>" method="POST" class="row g-3">
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold">Nome do Ponto/Evento (Razão Social)</label>
-                        <input type="text" name="razao_social" class="form-select-sm form-control" required placeholder="Ex: Cachoeira de Santo Antônio">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label small fw-bold">Setor Oficial</label>
-                        <select name="setor" class="form-select" required>
-                            <option value="natural">Natural (Atrativo)</option>
-                            <option value="cultural">Cultural (Patrimônio)</option>
-                            <option value="hospedagem">Hospedagem</option>
-                            <option value="alimentacao_comercio">Alimentação / Comércio</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label small fw-bold">Tipo</label>
-                        <select name="tipo" class="form-select" id="tipoCadastro" onchange="toggleDatas(this.value)" required>
-                            <option value="fixo">Fixo Permanente</option>
-                            <option value="evento">Evento Sazonal</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2" id="divInicio" style="display:none;">
-                        <label class="form-label small fw-bold">Data Início</label>
-                        <input type="date" name="data_inicio" class="form-control">
-                    </div>
-                    <div class="col-md-2" id="divFim" style="display:none;">
-                        <label class="form-label small fw-bold">Data Fim</label>
-                        <input type="date" name="data_fim" class="form-control">
-                    </div>
-                    <input type="hidden" name="telefone" value="3135414334">
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100 fw-bold"><i class="fa-solid fa-save me-1"></i> Gravar e Ativar</button>
-                    </div>
-                </form>
+                <div class="report-container">
+                    <h5 class="fw-bold mb-2" style="color: var(--nl-purple);"><i
+                            class="fa-solid fa-circle-plus me-2"></i>Cadastrar Ponto Natural, Cultural ou Evento Próprio
+                        (Prefeitura)</h5>
+                    <p class="text-muted small mb-4">Insira os dados básicos do atrativo municipal para geração imediata
+                        do QR Code de coleta de dados.</p>
+
+                    <form action="<?= base_url('estabelecimentos/salvar-direto') ?>" method="POST">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-secondary">Nome do Ponto/Evento (Razão
+                                    Social):</label>
+                                <input type="text" name="razao_social" class="form-control" required
+                                    placeholder="Ex: Cachoeira de Santo Antônio">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-bold text-secondary">Setor Oficial:</label>
+                                <select name="setor" class="form-select" required>
+                                    <option value="natural">Natural (Atrativo)</option>
+                                    <option value="cultural">Cultural (Patrimônio)</option>
+                                    <option value="hospedagem">Hospedagem</option>
+                                    <option value="alimentacao_comercio">Alimentação / Comércio</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-bold text-secondary">Tipo:</label>
+                                <select name="tipo" class="form-select" id="tipoCadastro"
+                                    onchange="toggleDatas(this.value)" required>
+                                    <option value="fixo">Fixo Permanente</option>
+                                    <option value="evento">Evento Sazonal</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2" id="divInicio" style="display:none;">
+                                <label class="form-label small fw-bold text-secondary">Data Início:</label>
+                                <input type="date" name="data_inicio" class="form-control">
+                            </div>
+                            <div class="col-md-2" id="divFim" style="display:none;">
+                                <label class="form-label small fw-bold text-secondary">Data Fim:</label>
+                                <input type="date" name="data_fim" class="form-control">
+                            </div>
+
+                            <input type="hidden" name="telefone" value="3135414334">
+
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-success w-100 fw-bold">
+                                    <i class="fa-solid fa-floppy-disk me-2"></i>Gravar e Ativar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
 
             <div class="table-container">
@@ -205,26 +223,35 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if (!empty($estabelecimentos)): foreach ($estabelecimentos as $est): ?>
+                            <?php if (!empty($estabelecimentos)):
+                                foreach ($estabelecimentos as $est): ?>
                                     <tr>
                                         <td>
-                                            <div class="fw-bold"><?= esc($est['razao_social']) ?></div><span class="text-muted small"><?= esc($est['cnpj'] ?? 'Isento (Prefeitura)') ?></span>
+                                            <div class="fw-bold"><?= esc($est['razao_social']) ?></div><span
+                                                class="text-muted small"><?= esc($est['cnpj'] ?? 'Isento (Prefeitura)') ?></span>
                                         </td>
-                                        <td><span class="badge bg-light text-dark text-uppercase"><?= esc($est['setor']) ?></span></td>
+                                        <td><span
+                                                class="badge bg-light text-dark text-uppercase"><?= esc($est['setor']) ?></span>
+                                        </td>
                                         <td>
                                             <?php if ($est['tipo'] === 'evento'): ?>
-                                                <span class="badge bg-warning text-dark"><i class="fa-solid fa-calendar-day me-1"></i> Sazonal (<?= date('d/m', strtotime($est['data_inicio'])) ?> a <?= date('d/m', strtotime($est['data_fim'])) ?>)</span>
+                                                <span class="badge bg-warning text-dark"><i
+                                                        class="fa-solid fa-calendar-day me-1"></i> Sazonal
+                                                    (<?= date('d/m', strtotime($est['data_inicio'])) ?> a
+                                                    <?= date('d/m', strtotime($est['data_fim'])) ?>)</span>
                                             <?php else: ?>
                                                 <span class="badge bg-success"><i class="fa-solid fa-building me-1"></i> Fixo</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td><?= esc($est['role_usuario'] === 'admin' ? 'Prefeitura (Direto)' : 'Lojista Credenciado') ?></td>
+                                        <td><?= esc($est['role_usuario'] === 'admin' ? 'Prefeitura (Direto)' : 'Lojista Credenciado') ?>
+                                        </td>
                                     </tr>
                                 <?php endforeach;
                             else: ?>
                                 <tr>
                                     <td>
-                                        <div class="fw-bold">Matriz de Nossa Senhora do Pilar</div><span class="text-muted small">Isento (Prefeitura)</span>
+                                        <div class="fw-bold">Matriz de Nossa Senhora do Pilar</div><span
+                                            class="text-muted small">Isento (Prefeitura)</span>
                                     </td>
                                     <td><span class="badge bg-light text-dark">CULTURAL</span></td>
                                     <td><span class="badge bg-success">Fixo</span></td>

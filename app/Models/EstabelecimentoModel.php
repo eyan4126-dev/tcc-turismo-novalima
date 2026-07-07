@@ -8,6 +8,7 @@ class EstabelecimentoModel extends Model
 {
     protected $table            = 'estabelecimento_evento';
     protected $primaryKey       = 'id_estabelecimento';
+    protected $useTimestamps    = false;
     protected $allowedFields    = [
         'id_usuario',
         'razao_social',

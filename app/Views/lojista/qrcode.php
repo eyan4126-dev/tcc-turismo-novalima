@@ -60,8 +60,8 @@
         }
 
         .brand-logo-container {
-            width: 80px;
-            height: 80px;
+            width: 130px;
+            height: 130px;
             background-color: #FFFFFF;
             border-radius: 50%;
             display: flex;
@@ -159,15 +159,25 @@
                 <div class="col-md-4 text-center">
                     <div class="card-qrcode-box">
                         <h5 class="fw-bold mb-4" style="color: var(--nl-purple);">Display de Balcão</h5>
+
+                        <?php
+                        // Monta a URL de destino da pesquisa que o turista acessará ao ler o QR Code
+                        $urlPesquisa = base_url("pesquisa?token=" . $estabelecimento['token_qr_code']);
+                        // Passa a URL encodada para a API pública gerar o gráfico do QR Code dinamicamente
+                        $apiQrServer = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" . urlencode($urlPesquisa);
+                        ?>
+
                         <div class="qr-display-zone mb-4">
-                            <img src="<?= base_url($estabelecimento['qr_code_url']) ?>" alt="QR Code" class="img-fluid"
+                            <img src="<?= $apiQrServer ?>" alt="QR Code Dinâmico" class="img-fluid"
                                 style="max-width: 200px;">
                         </div>
-                        <a href="<?= base_url($estabelecimento['qr_code_url']) ?>" download="qrcode-inovatour.png"
+
+                        <button
+                            onclick="imprimirTag('<?= esc($estabelecimento['razao_social']) ?>', '<?= $apiQrServer ?>')"
                             class="btn btn-primary btn-sm w-100 fw-bold py-2"
                             style="background-color: var(--nl-purple); border: none;">
-                            <i class="fa-solid fa-download me-2"></i> Baixar Imagem (PNG)
-                        </a>
+                            <i class="fa-solid fa-print me-2"></i> Imprimir Display
+                        </button>
                     </div>
                 </div>
 
@@ -191,9 +201,11 @@
 
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold mb-1">Setor de Atuação</label>
-                            <span class="badge bg-secondary p-2 d-inline-block">
-                                <?= esc($estabelecimento['setor']) ?>
-                            </span>
+                            <div>
+                                <span class="badge bg-secondary p-2 d-inline-block">
+                                    <?= esc($estabelecimento['setor']) ?>
+                                </span>
+                            </div>
                         </div>
 
                         <div class="mt-4 p-3 rounded-3"
@@ -208,6 +220,53 @@
             </div>
         </div>
     </div>
+    <script>
+        function imprimirTag(nomeLocal, urlQrCode) {
+            // Cria uma janela temporária oculta
+            const janelaImpressao = window.open('', '_blank', 'width=800,height=600');
+
+            // Escreve o HTML da Tag de Impressão dentro dela
+            janelaImpressao.document.write(`
+        <html>
+        <head>
+            <title>Imprimir QR Code - iNovaTour</title>
+            <style>
+                body { font-family: 'Inter', sans-serif; text-align: center; padding: 40px; color: #1A1A1A; }
+                .tag-container { border: 4px solid #5D46D2; border-radius: 24px; padding: 40px; max-width: 450px; margin: 0 auto; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+                .logo { font-weight: 800; font-size: 28px; color: #5D46D2; margin-bottom: 10px; }
+                .logo span { font-weight: 400; color: #1A1A1A; }
+                .subtitle { font-size: 14px; color: #6C757D; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 1px; }
+                .qr-code { max-width: 280px; margin: 20px auto; display: block; border: 1px solid #E2E8F0; padding: 10px; border-radius: 12px; }
+                .local-nome { font-size: 22px; font-weight: 700; margin-top: 25px; color: #1A1A1A; }
+                .instrucao { font-size: 14px; color: #5D46D2; font-weight: 600; margin-top: 15px; }
+                @media print {
+                    body { padding: 0; }
+                    .tag-container { box-shadow: none; border-color: #5D46D2; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="tag-container">
+                <div class="logo">iNova<span>Tour</span></div>
+                <div class="subtitle">Guia Turístico Oficial</div>
+                <img class="qr-code" src="${urlQrCode}" alt="QR Code">
+                <div class="local-nome">${nomeLocal}</div>
+                <div class="instrucao">Abra a câmera do celular para escanear e avaliar</div>
+            </div>
+            <script>
+                // Aguarda a imagem do QR Code carregar completamente e abre a tela de impressão
+                window.onload = function() {
+                    window.print();
+                    setTimeout(function() { window.close(); }, 500);
+                };
+            <\/script>
+        </body>
+        </html>
+    `);
+
+            janelaImpressao.document.close();
+        }
+    </script>
 </body>
 
 </html>

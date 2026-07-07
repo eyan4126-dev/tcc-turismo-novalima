@@ -287,6 +287,9 @@
 </head>
 
 <body>
+    <?php
+    $nomeLugar = isset($estabelecimento['razao_social']) ? $estabelecimento['razao_social'] : 'Estabelecimento';
+    ?>
 
     <div class="top-identity-bar"></div>
 
@@ -308,15 +311,15 @@
                     </div>
                 </div>
 
-                <div id="alertContainer"></div>
+                <div class="alertContainer" id="alertContainer"></div>
 
                 <form id="formInovador">
                     <input type="hidden" id="id_estabelecimento" name="id_estabelecimento">
 
                     <div class="card-step active p-4" id="step1">
-                        <h4 class="fw-bold mb-3"><i
-                                class="fa-solid fa-map-location-dot text-primary-govt me-2"></i>Boas-vindas! Vamos
-                            começar?
+                        <h4 class="fw-bold mb-3">
+                            <i class="fa-solid fa-map-location-dot text-primary-govt me-2"></i>Boas-vindas ao
+                            <strong><?= esc($nomeLugar) ?></strong>! Vamos começar?
                         </h4>
 
                         <div class="mb-4 position-relative">
@@ -365,20 +368,19 @@
                         </div>
 
                         <div class="text-end mt-4">
-                            <button type="button" class="btn btn-gov-primary px-4 fw-bold rounded-pill"
-                                onclick="nextStep(2)">Avançar <i class="fa-solid fa-arrow-right ms-1"></i></button>
+                            <button type="button" class="btn btn-gov-primary px-4 fw-bold rounded-pill" id="btnNext1"
+                                onclick="nextStep(2)" disabled>Avançar <i
+                                    class="fa-solid fa-arrow-right ms-1"></i></button>
                         </div>
                     </div>
 
                     <div class="card-step p-4" id="step2">
                         <h4 class="fw-bold mb-4"><i class="fa-solid fa-clock text-primary-govt me-2"></i>Sobre a sua
-                            estadia
-                        </h4>
+                            estadia</h4>
 
                         <div class="mb-4">
                             <label class="form-label fw-semibold text-secondary small mb-3">Quanto tempo você pretende
-                                ficar na
-                                cidade?</label>
+                                ficar na cidade?</label>
                             <div class="row g-3">
                                 <div class="col-6">
                                     <div class="selectable-card" data-input="permanencia" data-value="bate_volta">
@@ -434,8 +436,9 @@
                         <div class="d-flex justify-content-between mt-4">
                             <button type="button" class="btn btn-outline-secondary px-4 fw-bold rounded-pill"
                                 onclick="prevStep(1)"><i class="fa-solid fa-arrow-left me-1"></i> Voltar</button>
-                            <button type="button" class="btn btn-gov-primary px-4 fw-bold rounded-pill"
-                                onclick="nextStep(3)">Avançar <i class="fa-solid fa-arrow-right ms-1"></i></button>
+                            <button type="button" class="btn btn-gov-primary px-4 fw-bold rounded-pill" id="btnNext2"
+                                onclick="nextStep(3)" disabled>Avançar <i
+                                    class="fa-solid fa-arrow-right ms-1"></i></button>
                         </div>
                     </div>
 
@@ -444,39 +447,43 @@
                             Financeiro</h4>
 
                         <div class="mb-3">
-                            <label class="form-label fw-semibold text-secondary small mb-3">Qual o seu gasto médio
-                                estimado por pessoa nesta
-                                visita?</label>
+                            <label class="form-label fw-semibold text-secondary small mb-3">
+                                Qual o seu gasto médio estimado aqui no(a)
+                                <strong><?= esc($nomeLugar) ?></strong>?
+                            </label>
 
-                            <div class="text-center my-4 px-2">
-                                <span id="budget-value" class="price-display">R$ 50</span>
-                                <input type="range" id="budget-slider" min="0" max="500" step="10" value="50"
-                                    class="custom-slider">
-                                <div class="d-flex justify-content-between text-muted small mt-2">
-                                    <span>R$ 0</span>
-                                    <span>R$ 500+</span>
+                            <div class="my-4 mx-auto text-center" style="max-width: 290px;">
+                                <div
+                                    class="input-group input-group-lg border rounded-3 shadow-sm bg-white overflow-hidden">
+                                    <span
+                                        class="input-group-text bg-light border-0 fw-bold text-secondary px-3">R$</span>
+                                    <input type="text" id="gasto_input_pix"
+                                        class="form-control border-0 text-center fw-bold text-primary-govt fs-3 p-2"
+                                        inputmode="numeric" placeholder="0,00" autocomplete="off">
                                 </div>
+                                <div class="form-text text-muted small mt-2">Digite o valor incluindo os centavos.</div>
                             </div>
-                            <input type="hidden" id="faixa_gasto" value="50">
+                            <input type="hidden" id="faixa_gasto" value="0.00">
                         </div>
 
                         <div class="d-flex justify-content-between mt-4">
                             <button type="button" class="btn btn-outline-secondary px-4 fw-bold rounded-pill"
                                 onclick="prevStep(2)"><i class="fa-solid fa-arrow-left me-1"></i> Voltar</button>
-                            <button type="button" class="btn btn-gov-primary px-4 fw-bold rounded-pill"
-                                onclick="nextStep(4)">Avançar <i class="fa-solid fa-arrow-right ms-1"></i></button>
+                            <button type="button" class="btn btn-gov-primary px-4 fw-bold rounded-pill" id="btnNext3"
+                                onclick="nextStep(4)" disabled>Avançar <i
+                                    class="fa-solid fa-arrow-right ms-1"></i></button>
                         </div>
                     </div>
 
                     <div class="card-step p-4" id="step4">
                         <h4 class="fw-bold mb-4"><i class="fa-solid fa-ranking-star text-primary-govt me-2"></i>Sua
-                            Opinião
-                            Final</h4>
+                            Opinião Final</h4>
 
                         <div class="mb-4 text-center">
-                            <label class="form-label fw-semibold d-block text-start text-secondary small">Como você
-                                avalia sua experiência
-                                geral aqui?</label>
+                            <label class="form-label fw-semibold d-block text-start text-secondary small">
+                                Como você avalia sua experiência geral aqui no(a)
+                                <strong><?= esc($nomeLugar) ?></strong>?
+                            </label>
                             <div class="star-rating">
                                 <input type="radio" id="star5" name="satisfacao_estrelas" value="5" /><label for="star5"
                                     class="fa-solid fa-star"></label>
@@ -493,8 +500,7 @@
 
                         <div class="mb-4">
                             <label class="form-label fw-semibold text-secondary small mb-2">Qual a chance de você
-                                recomendar esta
-                                cidade/evento para amigos ou familiares?</label>
+                                recomendar esta cidade/evento para amigos ou familiares?</label>
                             <div class="nps-container"></div>
                             <input type="hidden" id="nps_val">
                             <div class="d-flex justify-content-between text-muted small mt-1"
@@ -523,14 +529,26 @@
 
         document.addEventListener("DOMContentLoaded", function () {
             const urlParams = new URLSearchParams(window.location.search);
-            const idEst = urlParams.get('id');
-            if (idEst) { document.getElementById('id_estabelecimento').value = idEst; }
-            else { alert("QR Code Inválido."); }
+            const tokenEst = urlParams.get('token') || urlParams.get('id');
+
+            if (tokenEst) {
+                document.getElementById('id_estabelecimento').value = tokenEst;
+            }
+            else {
+                document.getElementById('formInovador').style.display = 'none';
+                document.getElementById('alertContainer').innerHTML = `
+                    <div class="alert alert-danger p-4 border-0 rounded-4 text-center">
+                        <i class="fa-solid fa-qrcode fa-3x mb-2 text-danger"></i>
+                        <h5>QR Code Inválido ou Ausente</h5>
+                        <p class="small mb-0">Por favor, faça a leitura do QR Code oficial impresso no estabelecimento.</p>
+                    </div>
+                `;
+            }
 
             configurarCardsSelecao();
             construirNps();
             configurarAutocompleteCidades();
-            configurarSliderGasto();
+            configurarInputGastoCentavos();
         });
 
         function showStep(step) {
@@ -542,37 +560,22 @@
         }
 
         function nextStep(step) {
-            // --- TRAVAS ESTRITAS DO PASSO 1 ---
             if (currentStep === 1 && step === 2) {
                 const inputTexto = document.getElementById('busca_cidade').value.trim();
-
-                if (!cidadeSelecionadaVerdadeira || !document.getElementById('cidade_origem').value || inputTexto !== document.getElementById('cidade_origem').value) {
-                    alert("Por favor, selecione uma das cidades sugeridas na lista de pesquisa.");
-                    return;
-                }
-                if (!document.getElementById('motivo_visita').value) {
-                    alert("Por favor, escolha o motivo da sua visita clicando em um dos cards visuais.");
+                if (!cidadeSelecionadaVerdadeira || !document.getElementById('cidade_origem').value || inputTexto !== document.getElementById('cidade_origem').value || !document.getElementById('motivo_visita').value) {
                     return;
                 }
             }
 
-            // --- TRAVAS ESTRITAS DO PASSO 2 ---
             if (currentStep === 2 && step === 3) {
                 const permanencia = document.getElementById('tempo_permanencia').value;
-                if (!permanencia) {
-                    alert("Por favor, escolha quanto tempo você pretende ficar clicando em um dos cards.");
-                    return;
-                }
-                if (permanencia === 'dormir' && !document.getElementById('local_hospedagem').value) {
-                    alert("Como você vai pernoitar, é obrigatório selecionar onde está hospedado antes de avançar.");
+                if (!permanencia || (permanencia === 'dormir' && !document.getElementById('local_hospedagem').value)) {
                     return;
                 }
             }
 
-            // --- TRAVAS ESTRITAS DO PASSO 3 ---
             if (currentStep === 3 && step === 4) {
-                if (!document.getElementById('faixa_gasto').value) {
-                    alert("Por favor, selecione sua faixa de gasto médio estimada antes de avançar.");
+                if (document.getElementById('faixa_gasto').value === "") {
                     return;
                 }
             }
@@ -581,6 +584,36 @@
         }
 
         function prevStep(step) { showStep(step); }
+
+        function validarCamposPasso() {
+            const cidade = document.getElementById('cidade_origem').value;
+            const motivo = document.getElementById('motivo_visita').value;
+            const inputTextoCidade = document.getElementById('busca_cidade').value.trim();
+
+            if (cidadeSelecionadaVerdadeira && cidade && inputTextoCidade === cidade && motivo) {
+                document.getElementById('btnNext1').disabled = false;
+            } else {
+                document.getElementById('btnNext1').disabled = true;
+            }
+
+            const permanencia = document.getElementById('tempo_permanencia').value;
+            const hospedagem = document.getElementById('local_hospedagem').value;
+
+            if (permanencia === 'bate_volta') {
+                document.getElementById('btnNext2').disabled = false;
+            } else if (permanencia === 'dormir' && hospedagem) {
+                document.getElementById('btnNext2').disabled = false;
+            } else {
+                document.getElementById('btnNext2').disabled = true;
+            }
+
+            const gasto = document.getElementById('faixa_gasto').value;
+            if (gasto !== "" && parseFloat(gasto) >= 0) {
+                document.getElementById('btnNext3').disabled = false;
+            } else {
+                document.getElementById('btnNext3').disabled = true;
+            }
+        }
 
         function configurarCardsSelecao() {
             document.querySelectorAll('.selectable-card').forEach(card => {
@@ -604,31 +637,38 @@
                         }
                     }
                     if (tipoInput === 'hospedagem') document.getElementById('local_hospedagem').value = valor;
+
+                    validarCamposPasso();
                 });
             });
         }
 
-        // LÓGICA E ATUALIZAÇÃO DA RÉGUA DE GASTOS
-        function configurarSliderGasto() {
-            const slider = document.getElementById('budget-slider');
-            const display = document.getElementById('budget-value');
+        // Função de máscara monetária dinâmica atualizada para tratar centavos à direita
+        function configurarInputGastoCentavos() {
+            const inputVisivel = document.getElementById('gasto_input_pix');
             const hiddenInput = document.getElementById('faixa_gasto');
 
-            slider.addEventListener('input', function () {
-                let valor = parseInt(this.value);
-                hiddenInput.value = valor;
+            inputVisivel.addEventListener('input', function () {
+                let valorLimpo = this.value.replace(/\D/g, '');
 
-                let valorFormatado = valor.toLocaleString('pt-BR', {
-                    style: 'currency',
-                    currency: 'BRL',
-                    maximumFractionDigits: 0
+                if (valorLimpo === '') {
+                    hiddenInput.value = "0.00";
+                    this.value = '';
+                    validarCamposPasso();
+                    return;
+                }
+
+                // Transforma a string numérica em um valor com 2 casas decimais (ex: "150" vira 1.50)
+                let valorDecimal = (parseInt(valorLimpo, 10) / 100);
+                hiddenInput.value = valorDecimal.toFixed(2);
+
+                // Formata visualmente para exibição: "1.250,50"
+                this.value = valorDecimal.toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
                 });
 
-                if (valor === parseInt(this.max)) {
-                    display.innerText = valorFormatado + "+";
-                } else {
-                    display.innerText = valorFormatado;
-                }
+                validarCamposPasso();
             });
         }
 
@@ -659,6 +699,8 @@
             input.addEventListener('input', async function () {
                 cidadeSelecionadaVerdadeira = false;
                 const busca = this.value.trim();
+                validarCamposPasso();
+
                 if (busca.length < 3) { suggestionsContainer.classList.add('d-none'); return; }
 
                 try {
@@ -679,6 +721,7 @@
                                 document.getElementById('cidade_origem').value = stringFormatada;
                                 cidadeSelecionadaVerdadeira = true;
                                 suggestionsContainer.classList.add('d-none');
+                                validarCamposPasso();
                             });
                             suggestionsContainer.appendChild(item);
                         });
@@ -689,6 +732,7 @@
                 } catch (e) {
                     cidadeSelecionadaVerdadeira = true;
                     document.getElementById('cidade_origem').value = busca;
+                    validarCamposPasso();
                 }
             });
 
@@ -711,18 +755,18 @@
             btn.innerText = "Registrando...";
 
             const payload = {
-                id_estabelecimento: parseInt(document.getElementById('id_estabelecimento').value),
+                id_estabelecimento: document.getElementById('id_estabelecimento').value,
                 cidade_origem: document.getElementById('cidade_origem').value,
                 tempo_permanencia: document.getElementById('tempo_permanencia').value,
                 local_hospedagem: document.getElementById('tempo_permanencia').value === 'dormir' ? document.getElementById('local_hospedagem').value : null,
-                faixa_gasto: document.getElementById('faixa_gasto').value,
+                faixa_gasto: parseFloat(document.getElementById('faixa_gasto').value) || 0.00, // Envia como float nativo (ex: 125.50)
                 satisfacao_estrelas: parseInt(estrela.value),
                 nps: parseInt(document.getElementById('nps_val').value),
                 motivo_visita: document.getElementById('motivo_visita').value
             };
 
             try {
-                const response = await fetch('/api/pesquisa', {
+                const response = await fetch('<?= base_url('api/pesquisa') ?>', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                     body: JSON.stringify(payload)
@@ -732,7 +776,9 @@
                     document.getElementById('alertContainer').innerHTML = `<div class="alert alert-success p-4 border-0 rounded-4 text-center"><i class="fa-solid fa-circle-check fa-3x mb-2 text-success"></i><h5>Experiência Registrada!</h5><p class="small mb-0">Obrigado por colaborar com o monitoramento turístico.</p></div>`;
                     document.getElementById('formInovador').innerHTML = '';
                 } else {
-                    alert("Erro interno ao salvar dados. Verifique as validações.");
+                    const erroDetalhado = await response.json();
+                    console.error("Erros do Back-end:", erroDetalhado);
+                    alert("Erro de validação: " + (erroDetalhado.messages ? JSON.stringify(erroDetalhado.messages) : "Verifique os dados"));
                     btn.disabled = false;
                     btn.innerText = "Finalizar ✨";
                 }
