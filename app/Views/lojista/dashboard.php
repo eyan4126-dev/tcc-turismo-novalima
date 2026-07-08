@@ -66,23 +66,11 @@
             border-bottom: 1px solid #F0F0F0;
         }
 
-        .brand-logo-container {
-            width: 130px;
-            height: 130px;
-            background-color: #FFFFFF;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            border: 2px solid #E2E8F0;
-            margin: 0 auto 1.5rem auto;
-        }
-
         .brand-logo-container img {
-            width: 75%;
+            width: 35%;
             height: auto;
             object-fit: contain;
+            margin-bottom: 10px;
         }
 
         .nav-sidebar .nav-link {
@@ -156,7 +144,7 @@
         <nav id="sidebar">
             <div class="sidebar-header mb-4">
                 <div class="brand-logo-container">
-                    <img src="<?= base_url('public/logo.png') ?>" alt="iNovaTour Logo">
+                    <img src="<?= base_url('public/new-logo2.png') ?>" alt="iNovaTour Logo">
                 </div>
                 <span class="fw-extrabold text-nl-purple h4 tracking-tight" style="font-weight:800;">
                     iNova<span style="font-weight:400; color:var(--nl-text-dark);">Tour</span>

@@ -60,9 +60,10 @@
         }
 
         .brand-logo-container img {
-            width: 75%;
+            width: 60%;
             height: auto;
             object-fit: contain;
+            margin-bottom: 10px;
         }
 
         .brand-section {
@@ -170,7 +171,7 @@
 
                         <div class="col-md-5 brand-section text-center">
                             <div class="brand-logo-container">
-                                <img src="<?= base_url('public/logo.png') ?>" alt="iNovaTour Logo">
+                                <img src="<?= base_url('public/new-logo2.png') ?>" alt="iNovaTour Logo">
                             </div>
                             <div class="prefeitura-logo-text mb-1">
                                 iNova<br><span style="font-weight: 400;">Tour</span>
