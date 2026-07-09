@@ -24,9 +24,6 @@ ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# 5. Configura o Apache para usar a variável $PORT (Necessário para deploy no Railway/Heroku)
-# O Railway injeta a porta dinamicamente, então o Apache não pode ficar preso na porta 80.
-RUN sed -i 's/80/${PORT}/g' /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf
 
 # 6. Copia os arquivos do projeto para o diretório raiz do Apache no container
 COPY . /var/www/html/
@@ -37,3 +34,9 @@ RUN chown -R www-data:www-data /var/www/html \
 
 # 8. Instala o Composer para gerenciar dependências
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# 9. Configura a porta dinamicamente e inicia o Apache
+# Substituímos a porta 80 do Apache pela variável de ambiente $PORT injetada pelo Railway no momento da inicialização (runtime).
+CMD sed -i "s/Listen 80/Listen ${PORT:-80}/g" /etc/apache2/ports.conf \
+    && sed -i "s/:80/:${PORT:-80}/g" /etc/apache2/sites-available/000-default.conf \
+    && apache2-foreground
