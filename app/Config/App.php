@@ -25,7 +25,7 @@ class App extends BaseConfig
      * E.g.,
      * When your site URL ($baseURL) is 'http://example.com/', and your site
      * also accepts 'http://media.example.com/' and 'http://accounts.example.com/':
-     *     ['media.example.com', 'accounts.example.com']
+     * ['media.example.com', 'accounts.example.com']
      *
      * @var list<string>
      */
@@ -51,9 +51,9 @@ class App extends BaseConfig
      * URI string. The default setting of 'REQUEST_URI' works for most servers.
      * If your links do not seem to work, try one of the other delicious flavors:
      *
-     *  'REQUEST_URI': Uses $_SERVER['REQUEST_URI']
+     * 'REQUEST_URI': Uses $_SERVER['REQUEST_URI']
      * 'QUERY_STRING': Uses $_SERVER['QUERY_STRING']
-     *    'PATH_INFO': Uses $_SERVER['PATH_INFO']
+     * 'PATH_INFO': Uses $_SERVER['PATH_INFO']
      *
      * WARNING: If you set this to 'PATH_INFO', URIs will always be URL-decoded!
      */
@@ -80,6 +80,7 @@ class App extends BaseConfig
     |
     | DO NOT CHANGE THIS UNLESS YOU FULLY UNDERSTAND THE REPERCUSSIONS!!
     |
+    |
     */
     public string $permittedURIChars = 'a-z 0-9~%.:_\-';
 
@@ -93,7 +94,7 @@ class App extends BaseConfig
      * strings (like currency markers, numbers, etc), that your program
      * should run under for this request.
      */
-    public string $defaultLocale = 'en';
+    public string $defaultLocale = 'pt-BR'; // Configurado para Português do Brasil
 
     /**
      * --------------------------------------------------------------------------
@@ -120,7 +121,7 @@ class App extends BaseConfig
      *
      * @var list<string>
      */
-    public array $supportedLocales = ['en'];
+    public array $supportedLocales = ['pt-BR', 'en'];
 
     /**
      * --------------------------------------------------------------------------
@@ -131,9 +132,9 @@ class App extends BaseConfig
      * dates with the date helper, and can be retrieved through app_timezone()
      *
      * @see https://www.php.net/manual/en/timezones.php for list of timezones
-     *      supported by PHP.
+     * supported by PHP.
      */
-    public string $appTimezone = 'UTC';
+    public string $appTimezone = 'America/Sao_Paulo'; // Configurado para o horário oficial de Brasília
 
     /**
      * --------------------------------------------------------------------------
@@ -157,7 +158,7 @@ class App extends BaseConfig
      * secure, the user will be redirected to a secure version of the page
      * and the HTTP Strict Transport Security (HSTS) header will be set.
      */
-    public bool $forceGlobalSecureRequests = false;
+    public bool $forceGlobalSecureRequests = true; // CORREÇÃO CHAVE: Ativado para resolver o aviso de segurança e mixed content!
 
     /**
      * --------------------------------------------------------------------------
@@ -173,10 +174,10 @@ class App extends BaseConfig
      * the HTTP header for the client IP address.
      *
      * Here are some examples:
-     *     [
-     *         '10.0.1.200'     => 'X-Forwarded-For',
-     *         '192.168.5.0/24' => 'X-Real-IP',
-     *     ]
+     * [
+     * '10.0.1.200'     => 'X-Forwarded-For',
+     * '192.168.5.0/24' => 'X-Real-IP',
+     * ]
      *
      * @var array<string, string>
      */
