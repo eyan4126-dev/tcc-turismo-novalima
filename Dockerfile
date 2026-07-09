@@ -2,10 +2,6 @@
 FROM php:8.2-apache
 
 # 1. Instala dependências do sistema necessárias para as extensões PHP
-# libonig-dev -> para mbstring
-# libzip-dev -> para zip
-# libpng-dev, libjpeg-dev, libfreetype-dev -> para gd
-# libicu-dev -> para intl (Obrigatório para CodeIgniter 4)
 RUN apt-get update && apt-get install -y \
     libonig-dev \
     libzip-dev \
@@ -16,8 +12,7 @@ RUN apt-get update && apt-get install -y \
     libicu-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Instala as extensões PHP
-# Configura o GD e instala o intl (necessário no CI4), além das outras extensões
+# 2. Instala as extensões PHP (intl é obrigatório para CI4)
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo pdo_mysql mysqli mbstring zip exif pcntl gd intl
 
@@ -29,11 +24,10 @@ ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# 5. Resolve o problema de múltiplos MPMs no Apache
-# Removemos forçadamente os symlinks de MPMs ativos (que podem vir das instalações do apt) e reativamos apenas o prefork
-RUN rm -f /etc/apache2/mods-enabled/mpm_*.conf \
-    && rm -f /etc/apache2/mods-enabled/mpm_*.load \
-    && a2enmod mpm_prefork
+# 5. Configura o Apache para usar a variável $PORT (Necessário para deploy no Railway/Heroku)
+# O Railway injeta a porta dinamicamente, então o Apache não pode ficar preso na porta 80.
+RUN sed -i 's/80/${PORT}/g' /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf
+
 # 6. Copia os arquivos do projeto para o diretório raiz do Apache no container
 COPY . /var/www/html/
 
