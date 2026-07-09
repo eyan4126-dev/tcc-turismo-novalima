@@ -17,10 +17,12 @@ RUN apt-get update && apt-get install -y \
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo pdo_mysql mysqli mbstring zip exif pcntl gd intl
 
-# CORREÇÃO DO MPM: Desabilita explicitamente todos os outros MPMs após a instalação das extensões PHP,
-# pois o docker-php-ext-install pode reativar o mpm_event durante o processo.
-RUN a2dismod mpm_event mpm_worker 2>/dev/null || true \
-    && a2enmod mpm_prefork
+# CORREÇÃO DO MPM: Remove agressivamente todos os arquivos e symlinks de MPM conflitantes
+# antes de habilitar o mpm_prefork, garantindo que nenhum MPM residual seja carregado.
+RUN rm -f /etc/apache2/mods-enabled/mpm_*.conf /etc/apache2/mods-enabled/mpm_*.load && \
+    rm -f /etc/apache2/mods-available/mpm_event.* /etc/apache2/mods-available/mpm_worker.* && \
+    a2dismod mpm_event mpm_worker 2>/dev/null || true && \
+    a2enmod mpm_prefork
 
 # 3. Habilita o mod_rewrite do Apache para URLs amigáveis
 RUN a2enmod rewrite
