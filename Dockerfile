@@ -30,8 +30,10 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-av
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
 # 5. Resolve o problema de múltiplos MPMs no Apache
-RUN a2dismod mpm_event mpm_worker || true
-
+# Removemos forçadamente os symlinks de MPMs ativos (que podem vir das instalações do apt) e reativamos apenas o prefork
+RUN rm -f /etc/apache2/mods-enabled/mpm_*.conf \
+    && rm -f /etc/apache2/mods-enabled/mpm_*.load \
+    && a2enmod mpm_prefork
 # 6. Copia os arquivos do projeto para o diretório raiz do Apache no container
 COPY . /var/www/html/
 
@@ -40,4 +42,4 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/writable
 
 # 8. Instala o Composer para gerenciar dependências
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
