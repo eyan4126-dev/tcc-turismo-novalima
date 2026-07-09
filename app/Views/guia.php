@@ -206,18 +206,21 @@
 
     <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom py-3">
         <div class="container">
+            <!-- Lado Esquerdo: Logo do iNovaTour -->
             <a class="navbar-brand d-flex align-items-center" href="#">
                 <img src="<?= site_url('new-logo2.png') ?>" alt="iNovaTour" height="40" class="me-2"
                     onerror="this.style.display='none'">
                 <span class="fw-bold text-nl-purple" style="letter-spacing: -0.5px; color: var(--nl-purple);">iNova<span
                         style="font-weight: 400; color: var(--nl-text-dark);">Tour</span></span>
             </a>
-            <span class="navbar-text small fw-bold text-uppercase tracking-wider d-none d-sm-inline-block"
-                style="color: #718096; font-size: 0.75rem; letter-spacing: 1px;">
-                Guia Oficial de Nova Lima
-            </span>
-            <!-- NOVO ACESSO: Botão proeminente para encaminhar o lojista ao Painel / Cadastro -->
-            <div class="ms-auto">
+
+            <!-- Lado Direito: "Guia Oficial" e "Área do Lojista" juntos -->
+            <div class="ms-auto d-flex align-items-center">
+                <span class="navbar-text small fw-bold text-uppercase tracking-wider d-none d-sm-inline-block me-3"
+                    style="color: #718096; font-size: 0.75rem; letter-spacing: 1px;">
+                    Guia Oficial de Nova Lima
+                </span>
+                <!-- Botão proeminente para encaminhar o lojista ao Painel / Cadastro -->
                 <a href="<?= site_url('login') ?>"
                     class="btn btn-nl-outline rounded-pill px-3 py-2 fw-bold text-xs uppercase tracking-wider">
                     <i class="fa-solid fa-store me-1"></i> Área do Lojista
