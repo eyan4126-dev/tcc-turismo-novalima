@@ -142,7 +142,7 @@ class AuthController extends BaseController
     {
         $db = \Config\Database::connect();
 
-        // 1. LIMPEZA TOTAL PREVENTIVA (Evita erros de duplicidade e limpa dados antigos)
+        // 1. LIMPEZA TOTAL PREVENTIVA (Evita conflitos de chaves estrangeiras e duplicidade)
         $db->query('SET FOREIGN_KEY_CHECKS = 0;');
         $db->table('pesquisa')->truncate();
         $db->table('fluxos_ocupacao')->truncate();
@@ -150,7 +150,7 @@ class AuthController extends BaseController
         $db->table('usuario')->truncate();
         $db->query('SET FOREIGN_KEY_CHECKS = 1;');
 
-        // 2. DADOS DA TABELA: usuario (Com hash Bcrypt gerado dinamicamente)
+        // 2. DADOS DA TABELA: usuario (Responsáveis reais/fictícios para estabelecimentos reais)
         $usuarios = [
             [
                 'id_usuario' => 1,
@@ -163,53 +163,89 @@ class AuthController extends BaseController
             ],
             [
                 'id_usuario' => 2,
-                'nome_responsavel' => 'Roberto Vasconcelos',
-                'email' => 'pousada.macacos@gmail.com',
+                'nome_responsavel' => 'Bernardo Guimarães (Comandante)',
+                'email' => 'reserva@valedocomandante.com.br',
                 'senha' => password_hash('senha123', PASSWORD_BCRYPT),
                 'role_usuario' => 'lojista',
                 'status_usuario' => 'ativo',
-                'criado_em' => '2026-06-01 10:15:00'
+                'criado_em' => '2026-06-01 10:00:00'
             ],
             [
                 'id_usuario' => 3,
-                'nome_responsavel' => 'Juliana Gontijo',
-                'email' => 'contato@veredaartesanal.com.br',
+                'nome_responsavel' => 'Gustavo Krug (Krug Bier)',
+                'email' => 'contato@krug.com.br',
                 'senha' => password_hash('senha123', PASSWORD_BCRYPT),
                 'role_usuario' => 'lojista',
                 'status_usuario' => 'ativo',
-                'criado_em' => '2026-06-02 14:30:00'
+                'criado_em' => '2026-06-02 11:30:00'
             ],
             [
                 'id_usuario' => 4,
-                'nome_responsavel' => 'Carlos Alberto Santos',
-                'email' => 'gerencia@hotelalphaville.com.br',
+                'nome_responsavel' => 'Adriana Costa (eSuites)',
+                'email' => 'gerencia@esuiteslagoabr.com.br',
                 'senha' => password_hash('senha123', PASSWORD_BCRYPT),
                 'role_usuario' => 'lojista',
                 'status_usuario' => 'ativo',
-                'criado_em' => '2026-06-03 08:45:00'
+                'criado_em' => '2026-06-03 08:20:00'
             ],
             [
                 'id_usuario' => 5,
-                'nome_responsavel' => 'Beatriz Souza',
-                'email' => 'reservas@gandarealodge.com.br',
+                'nome_responsavel' => 'Rodrigo Macacos (Pousada)',
+                'email' => 'contato@pousadadorodrigo.com.br',
                 'senha' => password_hash('senha123', PASSWORD_BCRYPT),
                 'role_usuario' => 'lojista',
                 'status_usuario' => 'ativo',
-                'criado_em' => '2026-06-04 11:20:00'
+                'criado_em' => '2026-06-04 14:15:00'
             ],
             [
                 'id_usuario' => 6,
-                'nome_responsavel' => 'Felipe Drummond',
-                'email' => 'festival@cervejariacanada.com.br',
+                'nome_responsavel' => 'Felipe Verace (Cervejaria)',
+                'email' => 'comercial@cervejariaverace.com.br',
+                'senha' => password_hash('senha123', PASSWORD_BCRYPT),
+                'role_usuario' => 'lojista',
+                'status_usuario' => 'ativo',
+                'criado_em' => '2026-06-05 09:10:00'
+            ],
+            [
+                'id_usuario' => 7,
+                'nome_responsavel' => 'Amanda Rola-Moça (Guia Local)',
+                'email' => 'amanda.ecoturismo@gmail.com',
+                'senha' => password_hash('senha123', PASSWORD_BCRYPT),
+                'role_usuario' => 'lojista',
+                'status_usuario' => 'ativo',
+                'criado_em' => '2026-06-06 13:40:00'
+            ],
+            [
+                'id_usuario' => 8,
+                'nome_responsavel' => 'Associação de Lojistas de Macacos',
+                'email' => 'comercial@festivaisdemacacos.com.br',
                 'senha' => password_hash('senha123', PASSWORD_BCRYPT),
                 'role_usuario' => 'lojista',
                 'status_usuario' => 'ativo',
                 'criado_em' => '2026-06-15 16:00:00'
             ],
             [
-                'id_usuario' => 7,
-                'nome_responsavel' => 'Aline Ferreira (Pendente)',
-                'email' => 'teste.lojista@outlook.com',
+                'id_usuario' => 9,
+                'nome_responsavel' => 'Coordenador Uaiktoberfest',
+                'email' => 'producao@uaiktoberfest.com.br',
+                'senha' => password_hash('senha123', PASSWORD_BCRYPT),
+                'role_usuario' => 'lojista',
+                'status_usuario' => 'ativo',
+                'criado_em' => '2026-06-18 10:00:00'
+            ],
+            [
+                'id_usuario' => 10,
+                'nome_responsavel' => 'Comissão Organizadora Festa do Cavalo',
+                'email' => 'contato@festadocavalor.com.br',
+                'senha' => password_hash('senha123', PASSWORD_BCRYPT),
+                'role_usuario' => 'lojista',
+                'status_usuario' => 'ativo',
+                'criado_em' => '2026-06-20 08:00:00'
+            ],
+            [
+                'id_usuario' => 11,
+                'nome_responsavel' => 'Clara Albuquerque (Eco-Hostel)',
+                'email' => 'clara.hostelmacacos@outlook.com',
                 'senha' => password_hash('senha123', PASSWORD_BCRYPT),
                 'role_usuario' => 'lojista',
                 'status_usuario' => 'pendente',
@@ -221,14 +257,14 @@ class AuthController extends BaseController
             $db->table('usuario')->insert($u);
         }
 
-        // 3. DADOS DA TABELA: estabelecimento_evento
+        // 3. DADOS DA TABELA: estabelecimento_evento (Pontos, Eventos e Negócios REAIS de Nova Lima)
         $estabelecimentos = [
             [
                 'id_estabelecimento' => 1,
                 'id_usuario' => 2,
-                'razao_social' => 'Pousada do Sol de Macacos Ltda',
+                'razao_social' => 'Pousada Vale do Comandante (Macacos)',
                 'cnpj' => '12.345.678/0001-90',
-                'telefone' => '(31) 98888-1111',
+                'telefone' => '(31) 3547-7500',
                 'setor' => 'hospedagem',
                 'token_qr_code' => '8f7c9e1a2b3c4d5e6f7a',
                 'tipo' => 'fixo',
@@ -238,9 +274,9 @@ class AuthController extends BaseController
             [
                 'id_estabelecimento' => 2,
                 'id_usuario' => 3,
-                'razao_social' => 'Restaurante e Cervejaria Vereda Artesanal (Jardim Canadá)',
+                'razao_social' => 'Cervejaria Krug Bier (Jardim Canadá)',
                 'cnpj' => '98.765.432/0001-10',
-                'telefone' => '(31) 98777-2222',
+                'telefone' => '(31) 3507-0777',
                 'setor' => 'alimentacao_comercio',
                 'token_qr_code' => '1a2b3c4d5e6f7a8b9c0d',
                 'tipo' => 'fixo',
@@ -250,7 +286,7 @@ class AuthController extends BaseController
             [
                 'id_estabelecimento' => 3,
                 'id_usuario' => 4,
-                'razao_social' => 'Hotel Lagoa dos Ingleses Executive',
+                'razao_social' => 'eSuites Spa Lagoa dos Ingleses (Alphaville)',
                 'cnpj' => '45.678.901/0001-22',
                 'telefone' => '(31) 3581-3000',
                 'setor' => 'hospedagem',
@@ -262,10 +298,10 @@ class AuthController extends BaseController
             [
                 'id_estabelecimento' => 4,
                 'id_usuario' => 5,
-                'razao_social' => 'Gandarela Eco Lodge e Aventuras',
+                'razao_social' => 'Pousada do Rodrigo (Macacos)',
                 'cnpj' => '23.456.789/0001-55',
-                'telefone' => '(31) 99111-3333',
-                'setor' => 'natural',
+                'telefone' => '(31) 98845-6232',
+                'setor' => 'hospedagem',
                 'token_qr_code' => '0j9i8h7g6f5e4d3c2b1a',
                 'tipo' => 'fixo',
                 'data_inicio' => null,
@@ -274,14 +310,74 @@ class AuthController extends BaseController
             [
                 'id_estabelecimento' => 5,
                 'id_usuario' => 6,
-                'razao_social' => 'Festival Gastronômico e de Cerveja Artesanal de Nova Lima',
-                'cnpj' => '34.567.890/0001-44',
-                'telefone' => '(31) 99222-4444',
-                'setor' => 'cultural',
+                'razao_social' => 'Cervejaria Verace (Jardim Canadá)',
+                'cnpj' => '54.321.098/0001-44',
+                'telefone' => '(31) 3541-6103',
+                'setor' => 'alimentacao_comercio',
+                'token_qr_code' => '7b6f5e4d3c2b1a0j9i8h',
+                'tipo' => 'fixo',
+                'data_inicio' => null,
+                'data_fim' => null
+            ],
+            [
+                'id_estabelecimento' => 6,
+                'id_usuario' => 7,
+                'razao_social' => 'Bicame de Pedra (Trilha Histórica)',
+                'cnpj' => '11.222.333/0001-44',
+                'telefone' => '(31) 3541-4334', // Prefeitura / Secult
+                'setor' => 'natural',
                 'token_qr_code' => 'bc1de2fg3hi4jk5lm6no',
+                'tipo' => 'fixo',
+                'data_inicio' => null,
+                'data_fim' => null
+            ],
+            [
+                'id_estabelecimento' => 7,
+                'id_usuario' => 7,
+                'razao_social' => 'Parque Natural Rego dos Carrapatos',
+                'cnpj' => '11.222.333/0001-55',
+                'telefone' => '(31) 3541-4334',
+                'setor' => 'natural',
+                'token_qr_code' => 'z9y8x7w6v5u4t3s2r1qp',
+                'tipo' => 'fixo',
+                'data_inicio' => null,
+                'data_fim' => null
+            ],
+            [
+                'id_estabelecimento' => 8,
+                'id_usuario' => 8,
+                'razao_social' => 'Festival de Gastronomia de Macacos 2026',
+                'cnpj' => '44.555.666/0001-77',
+                'telefone' => '(31) 98877-3333',
+                'setor' => 'cultural',
+                'token_qr_code' => 'evt_macacos_2026_xyz',
                 'tipo' => 'evento',
-                'data_inicio' => '2026-07-03',
-                'data_fim' => '2026-07-05'
+                'data_inicio' => '2026-07-10',
+                'data_fim' => '2026-07-12'
+            ],
+            [
+                'id_estabelecimento' => 9,
+                'id_usuario' => 9,
+                'razao_social' => 'Festival Uaiktoberfest de Nova Lima',
+                'cnpj' => '88.999.000/0001-88',
+                'telefone' => '(31) 99122-4444',
+                'setor' => 'cultural',
+                'token_qr_code' => 'evt_uaikt_2026_abc',
+                'tipo' => 'evento',
+                'data_inicio' => '2026-10-15',
+                'data_fim' => '2026-10-18'
+            ],
+            [
+                'id_estabelecimento' => 10,
+                'id_usuario' => 10,
+                'razao_social' => 'Festa do Cavalo de Nova Lima 2026',
+                'cnpj' => '77.888.999/0001-11',
+                'telefone' => '(31) 3541-4334',
+                'setor' => 'cultural',
+                'token_qr_code' => 'evt_cavalo_2026_abc',
+                'tipo' => 'evento',
+                'data_inicio' => '2026-07-15',
+                'data_fim' => '2026-07-19'
             ]
         ];
 
@@ -289,74 +385,588 @@ class AuthController extends BaseController
             $db->table('estabelecimento_evento')->insert($e);
         }
 
-        // 4. DADOS DA TABELA: fluxos_ocupacao
+        // 4. DADOS DA TABELA: fluxos_ocupacao (Fins de semana e picos históricos realistas)
         $fluxos = [
-            [
-                'id_fluxos' => 1,
-                'id_estabelecimento' => 1,
-                'volume_clientes' => 45,
-                'quartos_ocupados' => 12,
-                'capacidade_maxima_quartos' => 15,
-                'data_referencia' => '2026-06-27',
-                'criado_em' => '2026-06-27 22:00:00'
-            ],
-            [
-                'id_fluxos' => 2,
-                'id_estabelecimento' => 1,
-                'volume_clientes' => 55,
-                'quartos_ocupados' => 14,
-                'capacidade_maxima_quartos' => 15,
-                'data_referencia' => '2026-07-04',
-                'criado_em' => '2026-07-04 23:00:00'
-            ],
-            [
-                'id_fluxos' => 3,
-                'id_estabelecimento' => 3,
-                'volume_clientes' => 120,
-                'quartos_ocupados' => 38,
-                'capacidade_maxima_quartos' => 50,
-                'data_referencia' => '2026-06-30',
-                'criado_em' => '2026-06-30 20:00:00'
-            ],
-            [
-                'id_fluxos' => 4,
-                'id_estabelecimento' => 3,
-                'volume_clientes' => 160,
-                'quartos_ocupados' => 47,
-                'capacidade_maxima_quartos' => 50,
-                'data_referencia' => '2026-07-04',
-                'criado_em' => '2026-07-04 21:30:00'
-            ]
+            // Pousada Vale do Comandante (Capacidade Max: 18 suítes luxo)
+            ['id_fluxos' => 1, 'id_estabelecimento' => 1, 'volume_clientes' => 40, 'quartos_ocupados' => 12, 'capacidade_maxima_quartos' => 18, 'data_referencia' => '2026-06-13', 'criado_em' => '2026-06-13 22:00:00'],
+            ['id_fluxos' => 2, 'id_estabelecimento' => 1, 'volume_clientes' => 52, 'quartos_ocupados' => 17, 'capacidade_maxima_quartos' => 18, 'data_referencia' => '2026-06-20', 'criado_em' => '2026-06-20 22:00:00'],
+            ['id_fluxos' => 3, 'id_estabelecimento' => 1, 'volume_clientes' => 56, 'quartos_ocupados' => 18, 'capacidade_maxima_quartos' => 18, 'data_referencia' => '2026-06-27', 'criado_em' => '2026-06-27 22:00:00'],
+            ['id_fluxos' => 4, 'id_estabelecimento' => 1, 'volume_clientes' => 48, 'quartos_ocupados' => 15, 'capacidade_maxima_quartos' => 18, 'data_referencia' => '2026-07-04', 'criado_em' => '2026-07-04 23:00:00'],
+
+            // eSuites Spa Lagoa dos Ingleses (Capacidade Max: 120 quartos)
+            ['id_fluxos' => 5, 'id_estabelecimento' => 3, 'volume_clientes' => 140, 'quartos_ocupados' => 55, 'capacidade_maxima_quartos' => 120, 'data_referencia' => '2026-06-15', 'criado_em' => '2026-06-15 20:00:00'],
+            ['id_fluxos' => 6, 'id_estabelecimento' => 3, 'volume_clientes' => 220, 'quartos_ocupados' => 89, 'capacidade_maxima_quartos' => 120, 'data_referencia' => '2026-06-22', 'criado_em' => '2026-06-22 20:00:00'],
+            ['id_fluxos' => 7, 'id_estabelecimento' => 3, 'volume_clientes' => 280, 'quartos_ocupados' => 112, 'capacidade_maxima_quartos' => 120, 'data_referencia' => '2026-06-29', 'criado_em' => '2026-06-29 20:00:00'],
+            ['id_fluxos' => 8, 'id_estabelecimento' => 3, 'volume_clientes' => 310, 'quartos_ocupados' => 118, 'capacidade_maxima_quartos' => 120, 'data_referencia' => '2026-07-04', 'criado_em' => '2026-07-04 21:30:00'],
+
+            // Pousada do Rodrigo (Capacidade Max: 22 quartos)
+            ['id_fluxos' => 9, 'id_estabelecimento' => 4, 'volume_clientes' => 30, 'quartos_ocupados' => 10, 'capacidade_maxima_quartos' => 22, 'data_referencia' => '2026-06-14', 'criado_em' => '2026-06-14 20:00:00'],
+            ['id_fluxos' => 10, 'id_estabelecimento' => 4, 'volume_clientes' => 54, 'quartos_ocupados' => 20, 'capacidade_maxima_quartos' => 22, 'data_referencia' => '2026-06-28', 'criado_em' => '2026-06-28 20:00:00'],
+            ['id_fluxos' => 11, 'id_estabelecimento' => 4, 'volume_clientes' => 61, 'quartos_ocupados' => 22, 'capacidade_maxima_quartos' => 22, 'data_referencia' => '2026-07-05', 'criado_em' => '2026-07-05 20:00:00'],
+
+            // Cervejarias e Eventos (Não têm quartos/hospedagem, mas têm fluxo de público alto)
+            ['id_fluxos' => 12, 'id_estabelecimento' => 2, 'volume_clientes' => 450, 'quartos_ocupados' => null, 'capacidade_maxima_quartos' => null, 'data_referencia' => '2026-06-20', 'criado_em' => '2026-06-20 23:59:00'],
+            ['id_fluxos' => 13, 'id_estabelecimento' => 2, 'volume_clientes' => 520, 'quartos_ocupados' => null, 'capacidade_maxima_quartos' => null, 'data_referencia' => '2026-06-27', 'criado_em' => '2026-06-27 23:59:00'],
+            ['id_fluxos' => 14, 'id_estabelecimento' => 5, 'volume_clientes' => 380, 'quartos_ocupados' => null, 'capacidade_maxima_quartos' => null, 'data_referencia' => '2026-06-27', 'criado_em' => '2026-06-27 23:59:00'],
+
+            // Fluxos de Picos nos Dias do Festival de Gastronomia de Macacos 2026
+            ['id_fluxos' => 15, 'id_estabelecimento' => 8, 'volume_clientes' => 1500, 'quartos_ocupados' => null, 'capacidade_maxima_quartos' => null, 'data_referencia' => '2026-07-10', 'criado_em' => '2026-07-10 23:00:00'],
+            ['id_fluxos' => 16, 'id_estabelecimento' => 8, 'volume_clientes' => 2800, 'quartos_ocupados' => null, 'capacidade_maxima_quartos' => null, 'data_referencia' => '2026-07-11', 'criado_em' => '2026-07-11 23:00:00'],
+            ['id_fluxos' => 17, 'id_estabelecimento' => 8, 'volume_clientes' => 1900, 'quartos_ocupados' => null, 'capacidade_maxima_quartos' => null, 'data_referencia' => '2026-07-12', 'criado_em' => '2026-07-12 21:00:00'],
+
+            // Fluxo representativo da Festa do Cavalo 2026 (Público de grande porte)
+            ['id_fluxos' => 18, 'id_estabelecimento' => 10, 'volume_clientes' => 2500, 'quartos_ocupados' => null, 'capacidade_maxima_quartos' => null, 'data_referencia' => '2026-07-15', 'criado_em' => '2026-07-15 22:00:00'],
+            ['id_fluxos' => 19, 'id_estabelecimento' => 10, 'volume_clientes' => 4800, 'quartos_ocupados' => null, 'capacidade_maxima_quartos' => null, 'data_referencia' => '2026-07-18', 'criado_em' => '2026-07-18 23:00:00'],
+            ['id_fluxos' => 20, 'id_estabelecimento' => 10, 'volume_clientes' => 3100, 'quartos_ocupados' => null, 'capacidade_maxima_quartos' => null, 'data_referencia' => '2026-07-19', 'criado_em' => '2026-07-19 21:00:00']
         ];
 
         foreach ($fluxos as $f) {
             $db->table('fluxos_ocupacao')->insert($f);
         }
 
-        // 5. DADOS DA TABELA: pesquisa
+        // 5. DADOS DA TABELA: pesquisa (Mais de 40 respostas ultra realistas para gráficos perfeitos)
         $pesquisas = [
-            ['id_pesquisa' => 1, 'id_estabelecimento' => 1, 'cidade_origem' => 'Belo Horizonte - MG', 'tempo_permanencia' => 'dormir', 'local_hospedagem' => 'hotel_pousada', 'valor_gasto_estimado' => 450.00, 'satisfacao_estrelas' => 5, 'nps' => 10, 'motivo_visita' => 'lazer', 'respondido_em' => '2026-06-27 14:20:00'],
-            ['id_pesquisa' => 2, 'id_estabelecimento' => 1, 'cidade_origem' => 'Contagem - MG', 'tempo_permanencia' => 'bate_volta', 'local_hospedagem' => null, 'valor_gasto_estimado' => 180.00, 'satisfacao_estrelas' => 4, 'nps' => 8, 'motivo_visita' => 'lazer', 'respondido_em' => '2026-06-28 11:15:00'],
-            ['id_pesquisa' => 3, 'id_estabelecimento' => 1, 'cidade_origem' => 'Rio de Janeiro - RJ', 'tempo_permanencia' => 'dormir', 'local_hospedagem' => 'hotel_pousada', 'valor_gasto_estimado' => 850.00, 'satisfacao_estrelas' => 5, 'nps' => 9, 'motivo_visita' => 'lazer', 'respondido_em' => '2026-07-04 18:30:00'],
-            ['id_pesquisa' => 4, 'id_estabelecimento' => 2, 'cidade_origem' => 'Belo Horizonte - MG', 'tempo_permanencia' => 'bate_volta', 'local_hospedagem' => null, 'valor_gasto_estimado' => 220.00, 'satisfacao_estrelas' => 5, 'nps' => 10, 'motivo_visita' => 'lazer', 'respondido_em' => '2026-06-26 21:00:00'],
-            ['id_pesquisa' => 5, 'id_estabelecimento' => 2, 'cidade_origem' => 'Nova Lima - MG', 'tempo_permanencia' => 'bate_volta', 'local_hospedagem' => null, 'valor_gasto_estimado' => 110.00, 'satisfacao_estrelas' => 4, 'nps' => 7, 'motivo_visita' => 'outro', 'respondido_em' => '2026-06-27 19:45:00'],
-            ['id_pesquisa' => 6, 'id_estabelecimento' => 2, 'cidade_origem' => 'São Paulo - SP', 'tempo_permanencia' => 'dormir', 'local_hospedagem' => 'airbnb_aluguel', 'valor_gasto_estimado' => 350.00, 'satisfacao_estrelas' => 5, 'nps' => 9, 'motivo_visita' => 'negocios', 'respondido_em' => '2026-07-02 22:10:00'],
-            ['id_pesquisa' => 7, 'id_estabelecimento' => 3, 'cidade_origem' => 'São Paulo - SP', 'tempo_permanencia' => 'dormir', 'local_hospedagem' => 'hotel_pousada', 'valor_gasto_estimado' => 1200.00, 'satisfacao_estrelas' => 4, 'nps' => 8, 'motivo_visita' => 'negocios', 'respondido_em' => '2026-06-29 08:30:00'],
-            ['id_pesquisa' => 8, 'id_estabelecimento' => 3, 'cidade_origem' => 'Belo Horizonte - MG', 'tempo_permanencia' => 'bate_volta', 'local_hospedagem' => null, 'valor_gasto_estimado' => 150.00, 'satisfacao_estrelas' => 5, 'nps' => 10, 'motivo_visita' => 'lazer', 'respondido_em' => '2026-07-04 10:00:00'],
-            ['id_pesquisa' => 9, 'id_estabelecimento' => 3, 'cidade_origem' => 'Betim - MG', 'tempo_permanencia' => 'dormir', 'local_hospedagem' => 'hotel_pousada', 'valor_gasto_estimado' => 500.00, 'satisfacao_estrelas' => 3, 'nps' => 6, 'motivo_visita' => 'parentes_amigos', 'respondido_em' => '2026-07-05 11:15:00'],
-            ['id_pesquisa' => 10, 'id_estabelecimento' => 4, 'cidade_origem' => 'Belo Horizonte - MG', 'tempo_permanencia' => 'bate_volta', 'local_hospedagem' => null, 'valor_gasto_estimado' => 90.00, 'satisfacao_estrelas' => 5, 'nps' => 10, 'motivo_visita' => 'lazer', 'respondido_em' => '2026-06-28 16:00:00'],
-            ['id_pesquisa' => 11, 'id_estabelecimento' => 4, 'cidade_origem' => 'Rio de Janeiro - RJ', 'tempo_permanencia' => 'dormir', 'local_hospedagem' => 'casa_amigos_parentes', 'valor_gasto_estimado' => 300.00, 'satisfacao_estrelas' => 4, 'nps' => 9, 'motivo_visita' => 'parentes_amigos', 'respondido_em' => '2026-07-01 14:45:00'],
-            ['id_pesquisa' => 12, 'id_estabelecimento' => 5, 'cidade_origem' => 'Belo Horizonte - MG', 'tempo_permanencia' => 'bate_volta', 'local_hospedagem' => null, 'valor_gasto_estimado' => 250.00, 'satisfacao_estrelas' => 5, 'nps' => 10, 'motivo_visita' => 'lazer', 'respondido_em' => '2026-07-03 20:15:00'],
-            ['id_pesquisa' => 13, 'id_estabelecimento' => 5, 'cidade_origem' => 'Contagem - MG', 'tempo_permanencia' => 'bate_volta', 'local_hospedagem' => null, 'valor_gasto_estimado' => 190.00, 'satisfacao_estrelas' => 4, 'nps' => 9, 'motivo_visita' => 'lazer', 'respondido_em' => '2026-07-03 22:40:00'],
-            ['id_pesquisa' => 14, 'id_estabelecimento' => 5, 'cidade_origem' => 'Divinópolis - MG', 'tempo_permanencia' => 'dormir', 'local_hospedagem' => 'airbnb_aluguel', 'valor_gasto_estimado' => 620.00, 'satisfacao_estrelas' => 5, 'nps' => 10, 'motivo_visita' => 'lazer', 'respondido_em' => '2026-07-04 15:30:00'],
-            ['id_pesquisa' => 15, 'id_estabelecimento' => 5, 'cidade_origem' => 'Juiz de Fora - MG', 'tempo_permanencia' => 'dormir', 'local_hospedagem' => 'hotel_pousada', 'valor_gasto_estimado' => 780.00, 'satisfacao_estrelas' => 4, 'nps' => 8, 'motivo_visita' => 'lazer', 'respondido_em' => '2026-07-04 19:10:00'],
-            ['id_pesquisa' => 16, 'id_estabelecimento' => 5, 'cidade_origem' => 'Belo Horizonte - MG', 'tempo_permanencia' => 'bate_volta', 'local_hospedagem' => null, 'valor_gasto_estimado' => 130.00, 'satisfacao_estrelas' => 2, 'nps' => 4, 'motivo_visita' => 'lazer', 'respondido_em' => '2026-07-05 13:00:00']
+            // --- POUSADA VALE DO COMANDANTE (ID: 1) ---
+            [
+                'id_pesquisa' => 1,
+                'id_estabelecimento' => 1,
+                'cidade_origem' => 'Belo Horizonte - MG',
+                'tempo_permanencia' => 'dormir',
+                'local_hospedagem' => 'hotel_pousada',
+                'valor_gasto_estimado' => 650.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 10,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-06-13 11:20:00'
+            ],
+            [
+                'id_pesquisa' => 2,
+                'id_estabelecimento' => 1,
+                'cidade_origem' => 'São Paulo - SP',
+                'tempo_permanencia' => 'dormir',
+                'local_hospedagem' => 'hotel_pousada',
+                'valor_gasto_estimado' => 1200.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 9,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-06-14 14:15:00'
+            ],
+            [
+                'id_pesquisa' => 3,
+                'id_estabelecimento' => 1,
+                'cidade_origem' => 'Contagem - MG',
+                'tempo_permanencia' => 'dormir',
+                'local_hospedagem' => 'hotel_pousada',
+                'valor_gasto_estimado' => 480.00,
+                'satisfacao_estrelas' => 4,
+                'nps' => 8,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-06-20 18:30:00'
+            ],
+            [
+                'id_pesquisa' => 4,
+                'id_estabelecimento' => 1,
+                'cidade_origem' => 'Rio de Janeiro - RJ',
+                'tempo_permanencia' => 'dormir',
+                'local_hospedagem' => 'hotel_pousada',
+                'valor_gasto_estimado' => 1500.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 10,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-06-21 10:00:00'
+            ],
+
+            // --- CERVEJARIA KRUG BIER (ID: 2) ---
+            [
+                'id_pesquisa' => 5,
+                'id_estabelecimento' => 2,
+                'cidade_origem' => 'Belo Horizonte - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 180.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 10,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-06-20 21:00:00'
+            ],
+            [
+                'id_pesquisa' => 6,
+                'id_estabelecimento' => 2,
+                'cidade_origem' => 'Nova Lima - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 120.00,
+                'satisfacao_estrelas' => 4,
+                'nps' => 8,
+                'motivo_visita' => 'outro',
+                'respondido_em' => '2026-06-20 22:30:00'
+            ],
+            [
+                'id_pesquisa' => 7,
+                'id_estabelecimento' => 2,
+                'cidade_origem' => 'Sete Lagoas - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 250.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 9,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-06-27 19:15:00'
+            ],
+            [
+                'id_pesquisa' => 8,
+                'id_estabelecimento' => 2,
+                'cidade_origem' => 'Belo Horizonte - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 310.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 10,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-06-27 21:40:00'
+            ],
+
+            // --- ESUITES SPA LAGOA DOS INGLESES (ID: 3) ---
+            [
+                'id_pesquisa' => 9,
+                'id_estabelecimento' => 3,
+                'cidade_origem' => 'São Paulo - SP',
+                'tempo_permanencia' => 'dormir',
+                'local_hospedagem' => 'hotel_pousada',
+                'valor_gasto_estimado' => 2200.00,
+                'satisfacao_estrelas' => 4,
+                'nps' => 8,
+                'motivo_visita' => 'negocios',
+                'respondido_em' => '2026-06-15 08:30:00'
+            ],
+            [
+                'id_pesquisa' => 10,
+                'id_estabelecimento' => 3,
+                'cidade_origem' => 'Belo Horizonte - MG',
+                'tempo_permanencia' => 'dormir',
+                'local_hospedagem' => 'hotel_pousada',
+                'valor_gasto_estimado' => 800.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 10,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-06-22 10:00:00'
+            ],
+            [
+                'id_pesquisa' => 11,
+                'id_estabelecimento' => 3,
+                'cidade_origem' => 'Campinas - SP',
+                'tempo_permanencia' => 'dormir',
+                'local_hospedagem' => 'hotel_pousada',
+                'valor_gasto_estimado' => 1850.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 9,
+                'motivo_visita' => 'negocios',
+                'respondido_em' => '2026-06-29 11:15:00'
+            ],
+            [
+                'id_pesquisa' => 12,
+                'id_estabelecimento' => 3,
+                'cidade_origem' => 'Rio de Janeiro - RJ',
+                'tempo_permanencia' => 'dormir',
+                'local_hospedagem' => 'hotel_pousada',
+                'valor_gasto_estimado' => 3000.00,
+                'satisfacao_estrelas' => 3,
+                'nps' => 6,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-07-04 15:30:00'
+            ],
+
+            // --- POUSADA DO RODRIGO (ID: 4) ---
+            [
+                'id_pesquisa' => 13,
+                'id_estabelecimento' => 4,
+                'cidade_origem' => 'Belo Horizonte - MG',
+                'tempo_permanencia' => 'dormir',
+                'local_hospedagem' => 'hotel_pousada',
+                'valor_gasto_estimado' => 390.00,
+                'satisfacao_estrelas' => 4,
+                'nps' => 9,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-06-14 16:00:00'
+            ],
+            [
+                'id_pesquisa' => 14,
+                'id_estabelecimento' => 4,
+                'cidade_origem' => 'Betim - MG',
+                'tempo_permanencia' => 'dormir',
+                'local_hospedagem' => 'hotel_pousada',
+                'valor_gasto_estimado' => 450.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 10,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-06-28 11:45:00'
+            ],
+
+            // --- CERVEJARIA VERACE (ID: 5) ---
+            [
+                'id_pesquisa' => 15,
+                'id_estabelecimento' => 5,
+                'cidade_origem' => 'Belo Horizonte - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 150.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 10,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-06-27 18:00:00'
+            ],
+            [
+                'id_pesquisa' => 16,
+                'id_estabelecimento' => 5,
+                'cidade_origem' => 'Contagem - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 220.00,
+                'satisfacao_estrelas' => 4,
+                'nps' => 9,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-06-27 20:30:00'
+            ],
+
+            // --- BICAME DE PEDRA (ID: 6) ---
+            [
+                'id_pesquisa' => 17,
+                'id_estabelecimento' => 6,
+                'cidade_origem' => 'Belo Horizonte - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 45.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 10,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-06-14 10:30:00'
+            ],
+            [
+                'id_pesquisa' => 18,
+                'id_estabelecimento' => 6,
+                'cidade_origem' => 'Ouro Preto - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 85.00,
+                'satisfacao_estrelas' => 4,
+                'nps' => 8,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-06-21 15:45:00'
+            ],
+            [
+                'id_pesquisa' => 19,
+                'id_estabelecimento' => 6,
+                'cidade_origem' => 'São Paulo - SP',
+                'tempo_permanencia' => 'dormir',
+                'local_hospedagem' => 'airbnb_aluguel',
+                'valor_gasto_estimado' => 350.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 10,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-06-28 14:00:00'
+            ],
+
+            // --- PARQUE NATURAL REGO DOS CARRAPATOS (ID: 7) ---
+            [
+                'id_pesquisa' => 20,
+                'id_estabelecimento' => 7,
+                'cidade_origem' => 'Nova Lima - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 20.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 10,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-06-21 09:30:00'
+            ],
+            [
+                'id_pesquisa' => 21,
+                'id_estabelecimento' => 7,
+                'cidade_origem' => 'Belo Horizonte - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 60.00,
+                'satisfacao_estrelas' => 4,
+                'nps' => 9,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-06-28 11:00:00'
+            ],
+
+            // --- FESTIVAL DE GASTRONOMIA DE MACACOS 2026 (ID: 8) ---
+            [
+                'id_pesquisa' => 22,
+                'id_estabelecimento' => 8,
+                'cidade_origem' => 'Belo Horizonte - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 180.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 10,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-07-10 20:30:00'
+            ],
+            [
+                'id_pesquisa' => 23,
+                'id_estabelecimento' => 8,
+                'cidade_origem' => 'Belo Horizonte - MG',
+                'tempo_permanencia' => 'dormir',
+                'local_hospedagem' => 'hotel_pousada',
+                'valor_gasto_estimado' => 650.00,
+                'satisfacao_estrelas' => 4,
+                'nps' => 8,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-07-10 22:45:00'
+            ],
+            [
+                'id_pesquisa' => 24,
+                'id_estabelecimento' => 8,
+                'cidade_origem' => 'Contagem - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 210.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 9,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-07-11 15:30:00'
+            ],
+            [
+                'id_pesquisa' => 25,
+                'id_estabelecimento' => 8,
+                'cidade_origem' => 'Divinópolis - MG',
+                'tempo_permanencia' => 'dormir',
+                'local_hospedagem' => 'airbnb_aluguel',
+                'valor_gasto_estimado' => 550.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 10,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-07-11 19:15:00'
+            ],
+            [
+                'id_pesquisa' => 26,
+                'id_estabelecimento' => 8,
+                'cidade_origem' => 'Juiz de Fora - MG',
+                'tempo_permanencia' => 'dormir',
+                'local_hospedagem' => 'hotel_pousada',
+                'valor_gasto_estimado' => 890.00,
+                'satisfacao_estrelas' => 4,
+                'nps' => 8,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-07-11 22:10:00'
+            ],
+            [
+                'id_pesquisa' => 27,
+                'id_estabelecimento' => 8,
+                'cidade_origem' => 'Belo Horizonte - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 140.00,
+                'satisfacao_estrelas' => 3,
+                'nps' => 5,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-07-12 14:00:00'
+            ],
+            [
+                'id_pesquisa' => 28,
+                'id_estabelecimento' => 8,
+                'cidade_origem' => 'Nova Lima - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 95.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 10,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-07-12 17:30:00'
+            ],
+
+            // --- FESTIVAL UAIKTOBERFEST (ID: 9) ---
+            [
+                'id_pesquisa' => 29,
+                'id_estabelecimento' => 9,
+                'cidade_origem' => 'Belo Horizonte - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 220.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 10,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-10-15 19:40:00'
+            ],
+            [
+                'id_pesquisa' => 30,
+                'id_estabelecimento' => 9,
+                'cidade_origem' => 'São Paulo - SP',
+                'tempo_permanencia' => 'dormir',
+                'local_hospedagem' => 'hotel_pousada',
+                'valor_gasto_estimado' => 1450.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 10,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-10-16 13:10:00'
+            ],
+            [
+                'id_pesquisa' => 31,
+                'id_estabelecimento' => 9,
+                'cidade_origem' => 'Nova Lima - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 130.00,
+                'satisfacao_estrelas' => 4,
+                'nps' => 8,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-10-16 21:00:00'
+            ],
+            [
+                'id_pesquisa' => 32,
+                'id_estabelecimento' => 9,
+                'cidade_origem' => 'Contagem - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 190.00,
+                'satisfacao_estrelas' => 4,
+                'nps' => 9,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-10-17 16:30:00'
+            ],
+            [
+                'id_pesquisa' => 33,
+                'id_estabelecimento' => 9,
+                'cidade_origem' => 'Betim - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 240.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 10,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-10-17 22:15:00'
+            ],
+            [
+                'id_pesquisa' => 34,
+                'id_estabelecimento' => 9,
+                'cidade_origem' => 'Rio de Janeiro - RJ',
+                'tempo_permanencia' => 'dormir',
+                'local_hospedagem' => 'hotel_pousada',
+                'valor_gasto_estimado' => 1100.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 9,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-10-18 11:00:00'
+            ],
+            [
+                'id_pesquisa' => 35,
+                'id_estabelecimento' => 9,
+                'cidade_origem' => 'Belo Horizonte - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 175.00,
+                'satisfacao_estrelas' => 4,
+                'nps' => 8,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-10-18 17:00:00'
+            ],
+
+            // --- FESTA DO CAVALO DE NOVA LIMA (ID: 10) ---
+            [
+                'id_pesquisa' => 36,
+                'id_estabelecimento' => 10,
+                'cidade_origem' => 'Belo Horizonte - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 280.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 10,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-07-15 19:30:00'
+            ],
+            [
+                'id_pesquisa' => 37,
+                'id_estabelecimento' => 10,
+                'cidade_origem' => 'Conselheiro Lafaiete - MG',
+                'tempo_permanencia' => 'dormir',
+                'local_hospedagem' => 'hotel_pousada',
+                'valor_gasto_estimado' => 850.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 9,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-07-16 14:10:00'
+            ],
+            [
+                'id_pesquisa' => 38,
+                'id_estabelecimento' => 10,
+                'cidade_origem' => 'Nova Lima - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 150.00,
+                'satisfacao_estrelas' => 4,
+                'nps' => 8,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-07-16 21:15:00'
+            ],
+            [
+                'id_pesquisa' => 39,
+                'id_estabelecimento' => 10,
+                'cidade_origem' => 'Contagem - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 240.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 10,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-07-17 22:40:00'
+            ],
+            [
+                'id_pesquisa' => 40,
+                'id_estabelecimento' => 10,
+                'cidade_origem' => 'Betim - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 320.00,
+                'satisfacao_estrelas' => 4,
+                'nps' => 9,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-07-18 16:30:00'
+            ],
+            [
+                'id_pesquisa' => 41,
+                'id_estabelecimento' => 10,
+                'cidade_origem' => 'Rio de Janeiro - RJ',
+                'tempo_permanencia' => 'dormir',
+                'local_hospedagem' => 'hotel_pousada',
+                'valor_gasto_estimado' => 1250.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 10,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-07-18 20:00:00'
+            ],
+            [
+                'id_pesquisa' => 42,
+                'id_estabelecimento' => 10,
+                'cidade_origem' => 'Belo Horizonte - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 195.00,
+                'satisfacao_estrelas' => 5,
+                'nps' => 10,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-07-19 15:40:00'
+            ],
+            [
+                'id_pesquisa' => 43,
+                'id_estabelecimento' => 10,
+                'cidade_origem' => 'Sabará - MG',
+                'tempo_permanencia' => 'bate_volta',
+                'local_hospedagem' => null,
+                'valor_gasto_estimado' => 160.00,
+                'satisfacao_estrelas' => 3,
+                'nps' => 7,
+                'motivo_visita' => 'lazer',
+                'respondido_em' => '2026-07-19 18:00:00'
+            ]
         ];
 
         foreach ($pesquisas as $p) {
             $db->table('pesquisa')->insert($p);
         }
 
-        return "Banco de dados limpo e semeado por completo com sucesso!";
+        return "Banco de dados limpo e semeado por completo com dados REAIS de Nova Lima para a demonstração!";
     }
 }
