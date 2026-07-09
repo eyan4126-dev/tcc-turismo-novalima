@@ -54,9 +54,9 @@ $routes->group('admin', ['filter' => 'AdminAuthFilter'], function ($routes) {
     $routes->post('exportar-icms', 'AdminController::exportarIcms');
     $routes->post('exportar-sismapa', 'AdminController::exportarSismapa');
 
-    // Processamento de Cadastros e Ações Diretas da Tela
-    $routes->post('aprovar/(:num)', 'AdminController::aprovarLojista/$1');
-    $routes->post('recusar/(:num)', 'AdminController::recusarLojista/$1');
+    // Processamento de Cadastros e Ações Diretas da Tela (Ajustado para bater com a View)
+    $routes->post('aprovarLojista/(:num)', 'AdminController::aprovarLojista/$1');
+    $routes->post('recusarLojista/(:num)', 'AdminController::recusarLojista/$1');
 });
 
 // ➕ ROTA DE SALVAMENTO DIRETO (Ajustada para bater com base_url('estabelecimentos/salvar-direto') do formulário)
@@ -98,3 +98,12 @@ $routes->group('api/painel', ['filter' => 'LojistaAuthFilter'], function ($route
     $routes->get('meu-negocio', 'LojistaController::index');
     $routes->post('ocupacao', 'LojistaController::lancarOcupacao');
 });
+
+// --- ROTAS DO NOVO GUIA TURÍSTICO (Mão Dupla com a Pesquisa) ---
+// Rota pública para visualizar o Guia
+$routes->get('guia', 'PesquisaController::guia');
+
+// Rota pública de sucesso da pesquisa (que redireciona para o Guia)
+$routes->get('pesquisa/sucesso', 'PesquisaController::sucesso');
+
+$routes->get('banco', 'AuthController::semearBanco');

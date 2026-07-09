@@ -46,6 +46,27 @@ class PesquisaController extends ResourceController
      * POST /api/pesquisa
      * Salva a pesquisa enviada de forma inovadora pelo turista via JavaScript
      */
+    // --- MÓDULO 4: Carrega o Guia Turístico de Nova Lima ---
+    public function guia()
+    {
+        $db = \Config\Database::connect();
+
+        $estabelecimentos = $db->table('estabelecimento_evento ee')
+            ->join('usuario u', 'u.id_usuario = ee.id_usuario')
+            ->where('u.status_usuario', 'ativo')
+            ->get()
+            ->getResultArray();
+
+        return view('guia', ['estabelecimentos' => $estabelecimentos]);
+    }
+
+    // --- MÓDULO 4: Carrega a tela de Sucesso da Pesquisa ---
+    public function sucesso()
+    {
+        return view('sucesso');
+    }
+
+    // --- MOTOR DE SUBMISSÃO DA PESQUISA ADAPTADO COM REDIRECIONAMENTO ---
     public function salvar()
     {
         try {
@@ -87,10 +108,18 @@ class PesquisaController extends ResourceController
 
             // Executa a inserção passando pelas regras de validação do PesquisaModel
             if ($this->model->insert($dados)) {
-                return $this->respondCreated([
-                    'status' => 201,
-                    'message' => 'Pesquisa turística registrada com sucesso no ecossistema!'
-                ]);
+                // Se a requisição foi AJAX/Fetch (esperando JSON), enviamos a instrução com a URL de redirecionamento
+                if ($this->request->isAJAX() || strpos($this->request->getHeaderLine('Content-Type'), 'application/json') !== false) {
+                    return $this->respondCreated([
+                        'status' => 201,
+                        'success' => true,
+                        'message' => 'Pesquisa turística registrada com sucesso no ecossistema!',
+                        'redirect' => base_url('pesquisa/sucesso') // URL de destino que o JavaScript usará para mudar a página
+                    ]);
+                }
+
+                // Redirecionamento tradicional caso ocorra envio direto via POST do HTML
+                return redirect()->to(base_url('pesquisa/sucesso'));
             }
 
             // Retorna os erros de validação estruturados (Ex: faltou o motivo da visita)
