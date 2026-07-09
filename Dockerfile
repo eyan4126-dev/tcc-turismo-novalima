@@ -13,9 +13,8 @@ RUN apt-get update && apt-get install -y \
     libicu-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# CORREÇÃO DO MPM: Logo após instalar as dependências, nós removemos agressivamente 
-# qualquer outro MPM que o apt-get possa ter ativado e ativamos exclusivamente o mpm_prefork.
-RUN rm -f /etc/apache2/mods-enabled/mpm_*.conf /etc/apache2/mods-enabled/mpm_*.load \
+# CORREÇÃO DO MPM: Desabilita explicitamente todos os outros MPMs antes de habilitar o prefork
+RUN a2dismod mpm_event mpm_worker 2>/dev/null || true \
     && a2enmod mpm_prefork
 
 # 2. Instala as extensões PHP (intl é obrigatório para CI4)
