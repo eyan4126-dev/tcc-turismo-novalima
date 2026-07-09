@@ -171,7 +171,7 @@
 
                         <div class="col-md-5 brand-section text-center">
                             <div class="brand-logo-container">
-                                <img src="<?= base_url('public/new-logo2.png') ?>" alt="iNovaTour Logo">
+                                <img src="<?= site_url('../public/new-logo2.png') ?>" alt="iNovaTour Logo">
                             </div>
                             <div class="prefeitura-logo-text mb-1">
                                 iNova<br><span style="font-weight: 400;">Tour</span>
@@ -233,7 +233,7 @@
                                     <h5 class="fw-bold mb-1 text-nl-purple">Área do Prestador</h5>
                                     <p class="text-muted small mb-4">Acesse o painel de inteligência turística.</p>
 
-                                    <form id="formLogin" method="POST" action="<?= base_url('api/login') ?>">
+                                    <form id="formLogin" method="POST" action="<?= site_url('api/login') ?>">
                                         <div class="mb-3">
                                             <label class="form-label">E-mail corporativo</label>
                                             <input type="email" class="form-control" id="login_email" name="email"
@@ -255,7 +255,7 @@
                                         de turismo.</p>
 
                                     <form id="formCadastro" method="POST"
-                                        action="<?= base_url('api/registrar-lojista') ?>">
+                                        action="<?= site_url('api/registrar-lojista') ?>">
                                         <div class="row g-2">
                                             <div class="col-md-12 mb-2">
                                                 <label class="form-label">Nome do responsável</label>
