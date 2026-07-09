@@ -114,12 +114,12 @@ class PesquisaController extends ResourceController
                         'status' => 201,
                         'success' => true,
                         'message' => 'Pesquisa turística registrada com sucesso no ecossistema!',
-                        'redirect' => base_url('pesquisa/sucesso') // URL de destino que o JavaScript usará para mudar a página
+                        'redirect' => site_url('pesquisa/sucesso') // URL de destino que o JavaScript usará para mudar a página
                     ]);
                 }
 
                 // Redirecionamento tradicional caso ocorra envio direto via POST do HTML
-                return redirect()->to(base_url('pesquisa/sucesso'));
+                return redirect()->to(site_url('pesquisa/sucesso'));
             }
 
             // Retorna os erros de validação estruturados (Ex: faltou o motivo da visita)

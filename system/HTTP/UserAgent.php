@@ -182,7 +182,7 @@ class UserAgent implements Stringable
                 $this->referrer = false;
             } else {
                 $refererHost = @parse_url($referer, PHP_URL_HOST);
-                $ownHost     = parse_url(\base_url(), PHP_URL_HOST);
+                $ownHost     = parse_url(\site_url(), PHP_URL_HOST);
 
                 $this->referrer = ($refererHost && $refererHost !== $ownHost);
             }

@@ -13,7 +13,7 @@ class LojistaAuthFilter implements FilterInterface
         // Ajustado para 'role' e alterado o retorno para redirecionar para a tela de login
         if (!session()->get('isLogged') || session()->get('role') !== 'lojista') {
             session()->setFlashdata('error', 'Acesso negado. Por favor, faça login no painel.');
-            return redirect()->to(base_url('login'));
+            return redirect()->to(site_url('login'));
         }
     }
 

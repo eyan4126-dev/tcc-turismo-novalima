@@ -59,7 +59,7 @@ $routes->group('admin', ['filter' => 'AdminAuthFilter'], function ($routes) {
     $routes->post('recusarLojista/(:num)', 'AdminController::recusarLojista/$1');
 });
 
-// ➕ ROTA DE SALVAMENTO DIRETO (Ajustada para bater com base_url('estabelecimentos/salvar-direto') do formulário)
+// ➕ ROTA DE SALVAMENTO DIRETO (Ajustada para bater com site_url('estabelecimentos/salvar-direto') do formulário)
 $routes->post('estabelecimentos/salvar-direto', 'AdminController::salvarDireto', ['filter' => 'AdminAuthFilter']);
 
 // Mantido por compatibilidade caso seu JS use a rota antiga diretamente na raiz

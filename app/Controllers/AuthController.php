@@ -53,9 +53,9 @@ class AuthController extends BaseController
 
         // 5. Redireciona baseado na role do banco
         if (session()->get('role') === 'admin') {
-            return redirect()->to(base_url('admin'));
+            return redirect()->to(site_url('admin'));
         } else {
-            return redirect()->to(base_url('lojista'));
+            return redirect()->to(site_url('lojista'));
         }
     }
 
@@ -135,7 +135,7 @@ class AuthController extends BaseController
     public function logout()
     {
         session()->destroy();
-        return redirect()->to(base_url('login'))->with('success', 'Sessão encerrada com sucesso.');
+        return redirect()->to(site_url('login'))->with('success', 'Sessão encerrada com sucesso.');
     }
 
     public function semearBanco()

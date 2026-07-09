@@ -83,11 +83,13 @@ class AdminController extends BaseController
             if (count($npsData) > 0) {
                 $promotores = 0;
                 $detratores = 0;
+                $foreachCount = 0;
                 foreach ($npsData as $n) {
                     if ($n['nps'] >= 9)
                         $promotores++;
                     if ($n['nps'] <= 6)
                         $detratores++;
+                    $foreachCount++;
                 }
                 $kpis['nps'] = round((($promotores - $detratores) / count($npsData)) * 100);
             }
@@ -138,10 +140,25 @@ class AdminController extends BaseController
         return view('qrcodes', ['qrcodes' => $qrcodes]);
     }
 
+    // --- CADASTRO DIRETO DE PATRIMÔNIO MUNICIPAL (PREFEITURA) ---
     public function salvarDireto()
     {
         $db = \Config\Database::connect();
         $builder = $db->table('estabelecimento_evento');
+
+        // 1. TENTA CAPTURAR O ID DO ADMINISTRADOR CONECTADO NA SESSÃO
+        $idUsuario = session()->get('id_usuario') ?? session()->get('id');
+
+        // Fallback: Se a sessão do admin não estiver em conformidade (ou for teste), pegamos o ID do admin no banco
+        if (!$idUsuario) {
+            $adminUser = $db->table('usuario')->where('role_usuario', 'admin')->get()->getRowArray();
+            $idUsuario = $adminUser ? $adminUser['id_usuario'] : null;
+        }
+
+        // Se mesmo assim não achar administrador, barramos o processo por integridade
+        if (!$idUsuario) {
+            return redirect()->to(site_url('admin'))->with('erro', 'Usuário administrador autorizador não foi localizado para o cadastro.');
+        }
 
         $razaoSocial = $this->request->getPost('razao_social');
         $setor = $this->request->getPost('setor');
@@ -151,10 +168,11 @@ class AdminController extends BaseController
         $dataInicio = $this->request->getPost('data_inicio');
         $dataFim = $this->request->getPost('data_fim');
 
+        // Geração limpa e padronizada do array de dados injetando o ID do usuário de posse pública
         $dados = [
-            'id_usuario' => null,
+            'id_usuario' => $idUsuario, // Injeta o ID da prefeitura, sanando de vez o erro MySQL #1048
             'razao_social' => $razaoSocial,
-            'cnpj' => null,
+            'cnpj' => null, // Pontos públicos não exigem CNPJ de lojistas privados
             'telefone' => $telefone,
             'setor' => $setor,
             'tipo' => $tipo,
@@ -170,9 +188,9 @@ class AdminController extends BaseController
         }
 
         if ($builder->insert($dados)) {
-            return redirect()->to(base_url('admin'))->with('sucesso', 'Atrativo/Evento cadastrado com sucesso!');
+            return redirect()->to(site_url('admin'))->with('sucesso', 'Patrimônio municipal cadastrado com sucesso!');
         } else {
-            return redirect()->to(base_url('admin'))->with('erro', 'Falha ao salvar no banco de dados.');
+            return redirect()->to(site_url('admin'))->with('erro', 'Falha ao salvar no banco de dados.');
         }
     }
 
@@ -188,14 +206,14 @@ class AdminController extends BaseController
         ]);
 
         $db->transComplete();
-        return redirect()->to('/admin');
+        return redirect()->to(site_url('admin'));
     }
 
     public function recusarLojista($id = null)
     {
         $db = \Config\Database::connect();
         $db->table('usuario')->where('id_usuario', $id)->update(['status_usuario' => 'suspenso']);
-        return redirect()->to('/admin');
+        return redirect()->to(site_url('admin'));
     }
 
     /**

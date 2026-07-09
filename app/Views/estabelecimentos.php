@@ -7,7 +7,7 @@
     <title>Estabelecimentos e Pontos - Turismo Hub</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="<?= base_url('new-logo2.png') ?>">
+    <link rel="icon" type="image/x-icon" href="<?= site_url('new-logo2.png') ?>">
     <style>
         :root {
             --nl-purple: #5D46D2;
@@ -117,23 +117,23 @@
 
             <ul class="nav flex-column nav-sidebar">
                 <li class="nav-item">
-                    <a href="<?= base_url('admin') ?>" class="nav-link <?= url_is('admin') ? 'active' : '' ?>">
+                    <a href="<?= site_url('admin') ?>" class="nav-link <?= url_is('admin') ? 'active' : '' ?>">
                         <i class="fa-solid fa-chart-pie"></i> Painel Gerencial
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="<?= base_url('estabelecimentos') ?>"
+                    <a href="<?= site_url('estabelecimentos') ?>"
                         class="nav-link <?= url_is('estabelecimentos') ? 'active' : '' ?>">
                         <i class="fa-solid fa-store"></i> Estabelecimentos
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="<?= base_url('qrcodes') ?>" class="nav-link <?= url_is('qrcodes') ? 'active' : '' ?>">
+                    <a href="<?= site_url('qrcodes') ?>" class="nav-link <?= url_is('qrcodes') ? 'active' : '' ?>">
                         <i class="fa-solid fa-qrcode"></i> QR Codes Gerados
                     </a>
                 </li>
                 <li class="nav-item mt-5">
-                    <a href="<?= base_url('logout') ?>" class="nav-link text-danger">
+                    <a href="<?= site_url('logout') ?>" class="nav-link text-danger">
                         <i class="fa-solid fa-right-from-bracket"></i> Sair do Sistema
                     </a>
                 </li>
@@ -151,13 +151,25 @@
 
             <div class="form-container">
                 <div class="report-container">
-                    <h5 class="fw-bold mb-2" style="color: var(--nl-purple);"><i
-                            class="fa-solid fa-circle-plus me-2"></i>Cadastrar Ponto Natural, Cultural ou Evento Próprio
-                        (Prefeitura)</h5>
-                    <p class="text-muted small mb-4">Insira os dados básicos do atrativo municipal para geração imediata
-                        do QR Code de coleta de dados.</p>
+                    <h5 class="fw-bold mb-2" style="color: var(--nl-purple);">
+                        <i class="fa-solid fa-circle-plus me-2"></i>Cadastrar Ponto Natural, Cultural ou Evento Próprio
+                        (Prefeitura)
+                    </h5>
+                    <p class="text-muted small mb-4">
+                        Insira os dados básicos do atrativo municipal para geração imediata do QR Code de coleta de
+                        dados.
+                    </p>
 
-                    <form action="<?= base_url('estabelecimentos/salvar-direto') ?>" method="POST">
+                    <!-- CORREÇÃO 1: Mudado para site_url() por segurança de rota no deploy -->
+                    <form action="<?= site_url('estabelecimentos/salvar-direto') ?>" method="POST">
+
+                        <!-- CORREÇÃO 2: Token CSRF obrigatório para requisições POST seguras -->
+                        <?= csrf_field() ?>
+
+                        <!-- CORREÇÃO 3: Envia o ID do administrador logado obtido diretamente da sessão ativa -->
+                        <input type="hidden" name="id_usuario"
+                            value="<?= session()->get('id_usuario') ?? session()->get('id') ?>">
+
                         <div class="row g-3 align-items-end">
                             <div class="col-md-4">
                                 <label class="form-label small fw-bold text-secondary">Nome do Ponto/Evento (Razão

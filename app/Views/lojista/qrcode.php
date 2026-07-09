@@ -7,7 +7,7 @@
     <title>Meu QR Code - iNovaTour</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="<?= base_url('new-logo2.png') ?>">
+    <link rel="icon" type="image/x-icon" href="<?= site_url('new-logo2.png') ?>">
     <style>
         :root {
             --nl-purple: #5D46D2;
@@ -108,7 +108,7 @@
         <nav id="sidebar">
             <div class="sidebar-header mb-4">
                 <div class="brand-logo-container">
-                    <img src="<?= base_url('new-logo2.png') ?>" alt="iNovaTour Logo">
+                    <img src="<?= site_url('new-logo2.png') ?>" alt="iNovaTour Logo">
                 </div>
                 <span class="fw-extrabold text-nl-purple h4 tracking-tight" style="font-weight:800;">
                     iNova<span style="font-weight:400; color:var(--nl-text-dark);">Tour</span>
@@ -118,19 +118,19 @@
 
             <ul class="nav flex-column nav-sidebar">
                 <li class="nav-item">
-                    <a href="<?= base_url('lojista/dashboard') ?>"
+                    <a href="<?= site_url('lojista/dashboard') ?>"
                         class="nav-link <?= url_is('lojista/dashboard') ? 'active' : '' ?>">
                         <i class="fa-solid fa-chart-pie"></i> Desempenho
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="<?= base_url('lojista/qrcode') ?>"
+                    <a href="<?= site_url('lojista/qrcode') ?>"
                         class="nav-link <?= url_is('lojista/qrcode') || url_is('lojista') ? 'active' : '' ?>">
                         <i class="fa-solid fa-qrcode"></i> Meu QR Code
                     </a>
                 </li>
                 <li class="nav-item mt-5">
-                    <a href="<?= base_url('logout') ?>" class="nav-link text-danger">
+                    <a href="<?= site_url('logout') ?>" class="nav-link text-danger">
                         <i class="fa-solid fa-right-from-bracket"></i> Sair
                     </a>
                 </li>
@@ -151,7 +151,7 @@
 
                         <?php
                         // Monta a URL de destino da pesquisa que o turista acessará ao ler o QR Code
-                        $urlPesquisa = base_url("pesquisa?token=" . $estabelecimento['token_qr_code']);
+                        $urlPesquisa = site_url("pesquisa?token=" . $estabelecimento['token_qr_code']);
                         // Passa a URL encodada para a API pública gerar o gráfico do QR Code dinamicamente
                         $apiQrServer = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" . urlencode($urlPesquisa);
                         ?>

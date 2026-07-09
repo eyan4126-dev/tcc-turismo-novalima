@@ -8,7 +8,7 @@
         <?= esc($estabelecimento['razao_social']) ?> - Turismo Nova Lima
     </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="<?= base_url('new-logo2.png') ?>">
+    <link rel="icon" type="image/x-icon" href="<?= site_url('new-logo2.png') ?>">
     <style>
         body {
             background-color: #f8f9fa;

@@ -72,7 +72,7 @@ class RedirectException extends RuntimeException implements ExceptionInterface, 
     {
         if (! $this->response instanceof ResponseInterface) {
             $this->response = service('response')->redirect(
-                base_url($this->getMessage()),
+                site_url($this->getMessage()),
                 'auto',
                 $this->getCode(),
             );

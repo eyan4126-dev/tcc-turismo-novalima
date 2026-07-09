@@ -7,7 +7,7 @@
     <title>Obrigado! - iNovaTour</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="<?= base_url('new-logo2.png') ?>">
+    <link rel="icon" type="image/x-icon" href="<?= site_url('new-logo2.png') ?>">
     <style>
         :root {
             --nl-purple: #5D46D2;
@@ -91,7 +91,7 @@
             <hr class="my-4" style="color: #E2E8F0;">
             <p class="fw-bold small mb-3 text-nl-purple" style="color: var(--nl-purple);">Pronto para explorar o
                 município?</p>
-            <a href="<?= base_url('guia') ?>" class="btn btn-nl-primary w-100 shadow">
+            <a href="<?= site_url('guia') ?>" class="btn btn-nl-primary w-100 shadow">
                 <i class="fa-solid fa-map-location-dot me-2"></i>Acessar Guia de Nova Lima
             </a>
         </div>

@@ -7,7 +7,7 @@
     <title>Guia Turístico Oficial - Nova Lima</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="<?= base_url('new-logo2.png') ?>">
+    <link rel="icon" type="image/x-icon" href="<?= site_url('new-logo2.png') ?>">
     <style>
         :root {
             --nl-purple: #5D46D2;
@@ -207,7 +207,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom py-3">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="#">
-                <img src="<?= base_url('new-logo2.png') ?>" alt="iNovaTour" height="40" class="me-2"
+                <img src="<?= site_url('new-logo2.png') ?>" alt="iNovaTour" height="40" class="me-2"
                     onerror="this.style.display='none'">
                 <span class="fw-bold text-nl-purple" style="letter-spacing: -0.5px; color: var(--nl-purple);">iNova<span
                         style="font-weight: 400; color: var(--nl-text-dark);">Tour</span></span>
@@ -216,6 +216,13 @@
                 style="color: #718096; font-size: 0.75rem; letter-spacing: 1px;">
                 Guia Oficial de Nova Lima
             </span>
+            <!-- NOVO ACESSO: Botão proeminente para encaminhar o lojista ao Painel / Cadastro -->
+            <div class="ms-auto">
+                <a href="<?= site_url('login') ?>"
+                    class="btn btn-nl-outline rounded-pill px-3 py-2 fw-bold text-xs uppercase tracking-wider">
+                    <i class="fa-solid fa-store me-1"></i> Área do Lojista
+                </a>
+            </div>
         </div>
     </nav>
 
@@ -299,13 +306,16 @@
                                 </p>
                                 <div class="pt-3 border-top d-flex gap-2 justify-content-between align-items-center">
                                     <!-- Botão de avaliar enviando o token específico do local via GET -->
-                                    <a href="<?= base_url('pesquisa?token=' . $est['token_qr_code']) ?>"
+                                    <a href="<?= site_url('pesquisa?token=' . $est['token_qr_code']) ?>"
                                         class="btn btn-nl-outline-purple btn-sm flex-grow-1 text-center">
                                         <i class="fa-solid fa-star me-1"></i> Avaliar
                                     </a>
-                                    <button class="btn btn-nl-primary btn-sm px-3"
-                                        onclick="alert('Visite nosso estabelecimento oficial em Nova Lima!')">Como
-                                        chegar</button>
+                                    <!-- INTEGRAÇÃO MAPAS: "Como chegar" integrado diretamente ao Google Maps -->
+                                    <a href="https://www.google.com/maps/search/?api=1&query=<?= urlencode(esc($est['razao_social']) . ', Nova Lima - MG') ?>"
+                                        target="_blank" rel="noopener noreferrer"
+                                        class="btn btn-nl-primary btn-sm px-3 d-inline-flex align-items-center gap-1">
+                                        <i class="fa-solid fa-map-location-dot"></i> Rota
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -389,7 +399,7 @@
                 return;
             }
             // Redireciona enviando o token dinâmico na URL
-            window.location.href = "<?= base_url('pesquisa?token=') ?>" + tokenSelected;
+            window.location.href = "<?= site_url('pesquisa?token=') ?>" + tokenSelected;
         }
     </script>
 </body>

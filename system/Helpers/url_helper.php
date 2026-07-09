@@ -41,7 +41,7 @@ if (! function_exists('site_url')) {
     }
 }
 
-if (! function_exists('base_url')) {
+if (! function_exists('site_url')) {
     /**
      * Returns the base URL as defined by the App config.
      * Base URLs are trimmed site URLs without the index page.
@@ -51,7 +51,7 @@ if (! function_exists('base_url')) {
      *                                   string '' is set, a protocol-relative
      *                                   link is returned.
      */
-    function base_url($relativePath = '', ?string $scheme = null): string
+    function site_url($relativePath = '', ?string $scheme = null): string
     {
         $currentURI = service('request')->getUri();
 

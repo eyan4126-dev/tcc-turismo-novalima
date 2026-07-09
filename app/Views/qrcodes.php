@@ -7,7 +7,7 @@
     <title>QR Codes Unificados - Turismo Hub</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="<?= base_url('new-logo2.png') ?>">
+    <link rel="icon" type="image/x-icon" href="<?= site_url('new-logo2.png') ?>">
     <style>
         :root {
             --nl-purple: #5D46D2;
@@ -111,7 +111,7 @@
         <nav id="sidebar">
             <div class="sidebar-header mb-4">
                 <div class="brand-logo-container">
-                    <img src="<?= base_url('new-logo2.png') ?>" alt="iNovaTour Logo">
+                    <img src="<?= site_url('new-logo2.png') ?>" alt="iNovaTour Logo">
                 </div>
                 <span class="fw-extrabold text-nl-purple h4 tracking-tight" style="font-weight:800;">
                     iNova<span style="font-weight:400; color:var(--nl-text-dark);">Tour</span>
@@ -121,24 +121,24 @@
 
             <ul class="nav flex-column nav-sidebar">
                 <li class="nav-item">
-                    <a href="<?= base_url('admin') ?>" class="nav-link <?= url_is('admin') ? 'active' : '' ?>">
+                    <a href="<?= site_url('admin') ?>" class="nav-link <?= url_is('admin') ? 'active' : '' ?>">
                         <i class="fa-solid fa-chart-pie"></i> Painel Gerencial
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="<?= base_url('estabelecimentos') ?>"
+                    <a href="<?= site_url('estabelecimentos') ?>"
                         class="nav-link <?= url_is('estabelecimentos') ? 'active' : '' ?>">
                         <i class="fa-solid fa-store"></i> Estabelecimentos
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="<?= base_url('admin/qrcodes') ?>"
+                    <a href="<?= site_url('admin/qrcodes') ?>"
                         class="nav-link <?= url_is('admin/qrcodes') || url_is('qrcodes') ? 'active' : '' ?>">
                         <i class="fa-solid fa-qrcode"></i> QR Codes Gerados
                     </a>
                 </li>
                 <li class="nav-item mt-5">
-                    <a href="<?= base_url('logout') ?>" class="nav-link text-danger">
+                    <a href="<?= site_url('logout') ?>" class="nav-link text-danger">
                         <i class="fa-solid fa-right-from-bracket"></i> Sair do Sistema
                     </a>
                 </li>
@@ -179,7 +179,7 @@
                                         </td>
                                         <td>
                                             <div class="d-flex align-items-center gap-2">
-                                                <?php $fullUrl = base_url('pesquisa?token=' . $qr['token_qr_code']); ?>
+                                                <?php $fullUrl = site_url('pesquisa?token=' . $qr['token_qr_code']); ?>
                                                 <span class="text-muted small text-break"><?= $fullUrl ?></span>
 
                                                 <button type="button" class="btn btn-link p-0 text-secondary btn-copy-url"
@@ -191,7 +191,7 @@
                                         </td>
                                         <td class="text-end">
                                             <?php
-                                            $urlDestinoTurista = base_url('pesquisa?token=' . $qr['token_qr_code']);
+                                            $urlDestinoTurista = site_url('pesquisa?token=' . $qr['token_qr_code']);
                                             $apiLinkQr = "https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=" . urlencode($urlDestinoTurista);
                                             ?>
                                             <button

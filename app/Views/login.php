@@ -7,7 +7,7 @@
     <title>Nova Lima - Turismo Hub</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="<?= base_url('new-logo2.png') ?>">
+    <link rel="icon" type="image/x-icon" href="<?= site_url('new-logo2.png') ?>">
     <style>
         :root {
             --nl-purple: #5D46D2;
@@ -184,6 +184,12 @@
                             </div>
                             <span class="mt-3 small fw-bold tracking-wider"
                                 style="font-size: 0.75rem; letter-spacing: 1px;">NOVA LIMA</span>
+                            <!-- NOVO ACESSO: Conexão circular do Login para o Guia de Turismo Público -->
+                            <a href="<?= site_url('guia') ?>"
+                                class="btn btn-outline-light rounded-pill btn-sm mt-4 px-3 py-2 fw-semibold"
+                                style="border-color: rgba(255,255,255,0.3); font-size: 0.75rem; transition: all 0.2s;">
+                                <i class="fa-solid fa-map-location-dot me-1"></i> Explorar Guia Turístico
+                            </a>
                         </div>
 
                         <div class="col-md-7 p-4 p-lg-5 d-flex flex-column justify-content-center">
@@ -202,7 +208,7 @@
                                         class="nav-link <?= (session()->getFlashdata('active_tab') === 'cadastro') ? 'active' : '' ?>"
                                         id="tab-cadastro" data-bs-toggle="pill" data-bs-target="#content-cadastro"
                                         type="button" role="tab">
-                                        Cadastrar estabelecimento
+                                        Cadastrar
                                     </button>
                                     </td>
                             </ul>

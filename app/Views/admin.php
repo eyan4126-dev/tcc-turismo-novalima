@@ -8,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="icon" type="image/x-icon" href="<?= base_url('new-logo2.png') ?>">
+    <link rel="icon" type="image/x-icon" href="<?= site_url('new-logo2.png') ?>">
     <style>
         :root {
             --nl-purple: #5D46D2;
@@ -148,7 +148,7 @@
         <nav id="sidebar">
             <div class="sidebar-header mb-4">
                 <div class="brand-logo-container">
-                    <img src="<?= base_url('new-logo2.png') ?>" alt="iNovaTour Logo">
+                    <img src="<?= site_url('new-logo2.png') ?>" alt="iNovaTour Logo">
                 </div>
                 <span class="fw-extrabold text-nl-purple h4 tracking-tight" style="font-weight:800;">
                     iNova<span style="font-weight:400; color:var(--nl-text-dark);">Tour</span>
@@ -158,24 +158,24 @@
 
             <ul class="nav flex-column nav-sidebar">
                 <li class="nav-item">
-                    <a href="<?= base_url('admin') ?>"
+                    <a href="<?= site_url('admin') ?>"
                         class="nav-link <?= url_is('admin') || url_is('admin/dashboard') ? 'active' : '' ?>">
                         <i class="fa-solid fa-chart-pie"></i> Painel de Controle
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="<?= base_url('estabelecimentos') ?>"
+                    <a href="<?= site_url('estabelecimentos') ?>"
                         class="nav-link <?= url_is('estabelecimentos') ? 'active' : '' ?>">
                         <i class="fa-solid fa-store"></i> Estabelecimentos
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="<?= base_url('qrcodes') ?>" class="nav-link <?= url_is('qrcodes') ? 'active' : '' ?>">
+                    <a href="<?= site_url('qrcodes') ?>" class="nav-link <?= url_is('qrcodes') ? 'active' : '' ?>">
                         <i class="fa-solid fa-qrcode"></i> QR Codes Gerados
                     </a>
                 </li>
                 <li class="nav-item mt-5">
-                    <a href="<?= base_url('logout') ?>" class="nav-link text-danger">
+                    <a href="<?= site_url('logout') ?>" class="nav-link text-danger">
                         <i class="fa-solid fa-right-from-bracket"></i> Sair do Sistema
                     </a>
                 </li>
@@ -183,7 +183,7 @@
         </nav>
 
         <div id="content">
-            <form method="GET" action="<?= base_url('admin') ?>" class="row g-3 mb-5 align-items-center">
+            <form method="GET" action="<?= site_url('admin') ?>" class="row g-3 mb-5 align-items-center">
                 <div class="col-md-4">
                     <h2 class="fw-bold mb-1" style="color: var(--nl-purple);">Painel Gerencial</h2>
                     <p class="text-muted small mb-0">Dados consolidados de estabelecimentos ativos.</p>
@@ -227,14 +227,14 @@
                         </div>
                         <div class="col-md-3">
                             <button type="submit"
-                                onclick="definirMetodoExportacao('<?= base_url('admin/exportar-icms') ?>')"
+                                onclick="definirMetodoExportacao('<?= site_url('admin/exportar-icms') ?>')"
                                 class="btn btn-success w-100 fw-bold">
                                 <i class="fa-solid fa-table me-2"></i>Dossiê de Demanda
                             </button>
                         </div>
                         <div class="col-md-3">
                             <button type="submit"
-                                onclick="definirMetodoExportacao('<?= base_url('admin/exportar-sismapa') ?>')"
+                                onclick="definirMetodoExportacao('<?= site_url('admin/exportar-sismapa') ?>')"
                                 class="btn btn-dark w-100 fw-bold">
                                 <i class="fa-solid fa-map-location-dot me-2"></i>Inventário de Fluxo
                             </button>
@@ -366,13 +366,13 @@
                                         </td>
                                         <td><span class="badge bg-secondary"><?= esc($sol['setor']) ?></span></td>
                                         <td class="text-end">
-                                            <form action="<?= base_url('admin/aprovarLojista/' . $sol['id_usuario']) ?>"
+                                            <form action="<?= site_url('admin/aprovarLojista/' . $sol['id_usuario']) ?>"
                                                 method="POST" class="d-inline">
                                                 <?= csrf_field() ?>
                                                 <button class="btn btn-sm btn-success fw-bold me-1"><i
                                                         class="fa-solid fa-check me-1"></i> Ativar e Gerar QR</button>
                                             </form>
-                                            <form action="<?= base_url('admin/recusarLojista/' . $sol['id_usuario']) ?>"
+                                            <form action="<?= site_url('admin/recusarLojista/' . $sol['id_usuario']) ?>"
                                                 method="POST" class="d-inline">
                                                 <?= csrf_field() ?>
                                                 <button class="btn btn-sm btn-outline-danger fw-bold"><i
