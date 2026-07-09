@@ -1,9 +1,9 @@
-# Use a imagem oficial do PHP 8.3 com Apache.
-FROM php:8.3-apache
+# Use a imagem do PHP 8.3 FPM (FastCGI Process Manager)
+FROM php:8.3-fpm
 
-# 1. Instala dependências do sistema
-# Durante essa etapa, o Debian pode acabar atualizando pacotes do Apache e reativar o mpm_event.
+# 1. Instala o Nginx e dependências do sistema
 RUN apt-get update && apt-get install -y \
+    nginx \
     libonig-dev \
     libzip-dev \
     unzip \
@@ -17,33 +17,20 @@ RUN apt-get update && apt-get install -y \
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo pdo_mysql mysqli mbstring zip exif pcntl gd intl
 
-# CORREÇÃO DO MPM: Remove agressivamente todos os arquivos e symlinks de MPM conflitantes
-# antes de habilitar o mpm_prefork, garantindo que nenhum MPM residual seja carregado.
-RUN rm -f /etc/apache2/mods-enabled/mpm_*.conf /etc/apache2/mods-enabled/mpm_*.load && \
-    rm -f /etc/apache2/mods-available/mpm_event.* /etc/apache2/mods-available/mpm_worker.* && \
-    a2dismod mpm_event mpm_worker 2>/dev/null || true && \
-    a2enmod mpm_prefork
-
-# 3. Habilita o mod_rewrite do Apache para URLs amigáveis
-RUN a2enmod rewrite
-
-# 4. Altera o DocumentRoot do Apache para a pasta public (padrão do CodeIgniter 4)
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
-
-# 5. Copia os arquivos do projeto para o diretório raiz do Apache no container
+# 3. Copia os arquivos do projeto para o diretório raiz web
 COPY . /var/www/html/
 
-# 6. Define o dono dos arquivos para o usuário do Apache e ajusta permissões
+# 4. Configura o Nginx e o script de inicialização do Railway
+COPY railway-nginx.conf /etc/nginx/sites-available/default
+COPY railway-start.sh /start.sh
+RUN chmod +x /start.sh
+
+# 5. Define o dono dos arquivos para o usuário correto e ajusta permissões da pasta writable do CodeIgniter
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/writable
 
-# 7. Instala o Composer
+# 6. Instala o Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# 8. Configura a porta dinamicamente e inicia o Apache
-# Substituímos a porta 80 do Apache pela variável de ambiente $PORT injetada pelo Railway no momento da inicialização (runtime).
-CMD sed -i "s/Listen 80/Listen ${PORT:-80}/g" /etc/apache2/ports.conf \
-    && sed -i "s/:80/:${PORT:-80}/g" /etc/apache2/sites-available/000-default.conf \
-    && apache2-foreground
+# O script de start inicia o PHP-FPM em background e o Nginx em foreground (escutando o $PORT)
+CMD ["/start.sh"]
