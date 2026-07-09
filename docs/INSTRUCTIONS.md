@@ -11,7 +11,7 @@ Certifique-se de ter os seguintes componentes instalados em sua máquina:
 
 ## 2. Instalação de Dependências
 
-Abra o terminal na raiz do projeto (`c:\laragon\www\yan-project`) e execute o comando abaixo para instalar as bibliotecas necessárias:
+Abra o terminal na raiz do projeto (`C:\projects\yan-app`) e execute o comando abaixo para instalar as bibliotecas necessárias:
 
 ```bash
 composer install
