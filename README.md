@@ -1,4 +1,4 @@
-# ⛰️ iNovaTour
+# ⛰️ iNovaTour https://turismonl.lts.app.br/guia
 
 > **iNovaTour:** Sistema web de inteligência turística e consolidação de dados municipais para a gestão estratégica de Nova Lima.
 
