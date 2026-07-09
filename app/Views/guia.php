@@ -206,7 +206,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom py-3">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="#">
-                <img src="<?= base_url('public/new-logo2.png') ?>" alt="iNovaTour" height="40" class="me-2"
+                <img src="<?= base_url('new-logo2.png') ?>" alt="iNovaTour" height="40" class="me-2"
                     onerror="this.style.display='none'">
                 <span class="fw-bold text-nl-purple" style="letter-spacing: -0.5px; color: var(--nl-purple);">iNova<span
                         style="font-weight: 400; color: var(--nl-text-dark);">Tour</span></span>

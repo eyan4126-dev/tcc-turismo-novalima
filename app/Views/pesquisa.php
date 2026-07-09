@@ -307,7 +307,7 @@
             <div class="col-md-7 col-lg-6">
 
                 <div class="brand-logo-container">
-                    <img src="public/new-logo2.png" alt="iNovaTour Logo">
+                    <img src="new-logo2.png" alt="iNovaTour Logo">
                 </div>
 
                 <div class="mb-4">

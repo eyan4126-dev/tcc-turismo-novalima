@@ -171,7 +171,7 @@
 
                         <div class="col-md-5 brand-section text-center">
                             <div class="brand-logo-container">
-                                <img src="<?= site_url('../public/new-logo2.png') ?>" alt="iNovaTour Logo">
+                                <img src="<?= site_url('new-logo2.png') ?>" alt="iNovaTour Logo">
                             </div>
                             <div class="prefeitura-logo-text mb-1">
                                 iNova<br><span style="font-weight: 400;">Tour</span>
