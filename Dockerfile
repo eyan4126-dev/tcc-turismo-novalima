@@ -1,7 +1,8 @@
-# Use a imagem oficial do PHP com Apache.
-FROM php:8.2-apache
+# Use a imagem oficial do PHP 8.3 com Apache.
+FROM php:8.3-apache
 
-# 1. Instala dependências do sistema necessárias para as extensões PHP
+# 1. Instala dependências do sistema
+# Durante essa etapa, o Debian pode acabar atualizando pacotes do Apache e reativar o mpm_event.
 RUN apt-get update && apt-get install -y \
     libonig-dev \
     libzip-dev \
@@ -11,6 +12,11 @@ RUN apt-get update && apt-get install -y \
     libfreetype-dev \
     libicu-dev \
     && rm -rf /var/lib/apt/lists/*
+
+# CORREÇÃO DO MPM: Logo após instalar as dependências, nós removemos agressivamente 
+# qualquer outro MPM que o apt-get possa ter ativado e ativamos exclusivamente o mpm_prefork.
+RUN rm -f /etc/apache2/mods-enabled/mpm_*.conf /etc/apache2/mods-enabled/mpm_*.load \
+    && a2enmod mpm_prefork
 
 # 2. Instala as extensões PHP (intl é obrigatório para CI4)
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -24,18 +30,17 @@ ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-
-# 6. Copia os arquivos do projeto para o diretório raiz do Apache no container
+# 5. Copia os arquivos do projeto para o diretório raiz do Apache no container
 COPY . /var/www/html/
 
-# 7. Define o dono dos arquivos para o usuário do Apache e ajusta permissões da pasta writable
+# 6. Define o dono dos arquivos para o usuário do Apache e ajusta permissões
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/writable
 
-# 8. Instala o Composer para gerenciar dependências
+# 7. Instala o Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# 9. Configura a porta dinamicamente e inicia o Apache
+# 8. Configura a porta dinamicamente e inicia o Apache
 # Substituímos a porta 80 do Apache pela variável de ambiente $PORT injetada pelo Railway no momento da inicialização (runtime).
 CMD sed -i "s/Listen 80/Listen ${PORT:-80}/g" /etc/apache2/ports.conf \
     && sed -i "s/:80/:${PORT:-80}/g" /etc/apache2/sites-available/000-default.conf \
