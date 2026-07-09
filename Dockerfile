@@ -13,13 +13,14 @@ RUN apt-get update && apt-get install -y \
     libicu-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# CORREÇÃO DO MPM: Desabilita explicitamente todos os outros MPMs antes de habilitar o prefork
-RUN a2dismod mpm_event mpm_worker 2>/dev/null || true \
-    && a2enmod mpm_prefork
-
 # 2. Instala as extensões PHP (intl é obrigatório para CI4)
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo pdo_mysql mysqli mbstring zip exif pcntl gd intl
+
+# CORREÇÃO DO MPM: Desabilita explicitamente todos os outros MPMs após a instalação das extensões PHP,
+# pois o docker-php-ext-install pode reativar o mpm_event durante o processo.
+RUN a2dismod mpm_event mpm_worker 2>/dev/null || true \
+    && a2enmod mpm_prefork
 
 # 3. Habilita o mod_rewrite do Apache para URLs amigáveis
 RUN a2enmod rewrite
