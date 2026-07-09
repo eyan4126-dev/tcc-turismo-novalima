@@ -210,8 +210,8 @@
             <div class="report-container">
                 <h5 class="fw-bold mb-2" style="color: var(--nl-purple);"><i
                         class="fa-solid fa-file-export me-2"></i>Módulo Fiscal: Exportação de Relatórios Estaduais</h5>
-                <p class="text-muted small mb-4">Insira o intervalo cronológico para gerar as matrizes em conformidade
-                    com o ICMS Turismo e Sismapa.</p>
+                <p class="text-muted small mb-4">IInsira o intervalo cronológico para exportar as matrizes de dados
+                    oficiais exigidas para captação de recursos e inventário turístico municipal.</p>
 
                 <form method="POST" action="" id="formExportadoresFiscais">
                     <?= csrf_field() ?>
@@ -228,14 +228,14 @@
                             <button type="submit"
                                 onclick="definirMetodoExportacao('<?= base_url('admin/exportar-icms') ?>')"
                                 class="btn btn-success w-100 fw-bold">
-                                <i class="fa-solid fa-table me-2"></i>Gerar ICMS Turismo
+                                <i class="fa-solid fa-table me-2"></i>Dossiê de Demanda
                             </button>
                         </div>
                         <div class="col-md-3">
                             <button type="submit"
                                 onclick="definirMetodoExportacao('<?= base_url('admin/exportar-sismapa') ?>')"
                                 class="btn btn-dark w-100 fw-bold">
-                                <i class="fa-solid fa-map-location-dot me-2"></i>Matriz SISMAPA
+                                <i class="fa-solid fa-map-location-dot me-2"></i>Inventário de Fluxo
                             </button>
                         </div>
                     </div>

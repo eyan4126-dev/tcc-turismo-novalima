@@ -10,19 +10,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        body {
-            background-color: #F8F9FA;
-            /* Fundo Governamental Ultraclaro */
-            min-height: 100vh;
-            color: #1A1D20;
-            /* Texto Alfa em Grafite de Alto Contraste */
-            font-family: 'Inter', sans-serif;
+        /* Replicando a raiz de identidade visual do sistema */
+        :root {
+            --nl-purple: #5D46D2;
+            --nl-purple-dark: #402cb3;
+            --nl-purple-light: #ECE9FC;
+            --nl-magenta: #E6007E;
+            --nl-green-neon: #00D369;
+            --nl-green-neon-hover: #00b358;
+            --nl-bg-light: #F4F6F9;
+            --nl-text-dark: #1A1A1A;
+            --nl-gradient: linear-gradient(90deg, #FF5500 0%, #E6007E 25%, #5D46D2 50%, #0099FF 75%, #00D369 100%);
         }
 
-        /* Faixa com o degradê arco-íris característico da identidade visual de Nova Lima */
+        body {
+            background-color: var(--nl-bg-light);
+            min-height: 100vh;
+            color: var(--nl-text-dark);
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        /* Faixa com o degradê oficial da identidade de Nova Lima */
         .top-identity-bar {
             height: 12px;
-            background: linear-gradient(90deg, #FF5722 0%, #7B1FA2 35%, #0288D1 70%, #2E7D32 100%);
+            background: var(--nl-gradient);
             width: 100%;
             position: fixed;
             top: 0;
@@ -32,20 +43,20 @@
 
         /* Container da Logo do iNovaTour */
         .brand-logo-container {
-            width: 80px;
-            height: 80px;
+            width: 100px;
+            height: 100px;
             background-color: #FFFFFF;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 12px rgba(93, 70, 210, 0.08);
             border: 2px solid #E2E8F0;
             margin: 0 auto 1.5rem auto;
         }
 
         .brand-logo-container img {
-            width: 75%;
+            width: 60%;
             height: auto;
             object-fit: contain;
         }
@@ -56,18 +67,18 @@
             border-radius: 4px;
         }
 
+        /* Barra de progresso agora usa o degradê roxo corporativo */
         .progress-bar {
-            background: linear-gradient(90deg, #0288D1 0%, #0091EA 100%);
-            /* Azul digital da prefeitura */
+            background: linear-gradient(90deg, var(--nl-magenta) 0%, var(--nl-purple) 100%);
         }
 
-        /* Estilo dos Blocos de Serviço Flutuantes (Portal 156 Style) */
+        /* Estilo dos Blocos de Serviço Flutuantes */
         .card-step {
             background: #FFFFFF;
-            color: #1A1D20;
+            color: var(--nl-text-dark);
             border-radius: 16px;
             border: 1px solid #E2E8F0;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 10px 25px -5px rgba(93, 70, 210, 0.04), 0 8px 10px -6px rgba(93, 70, 210, 0.04);
             display: none;
             transition: all 0.3s ease;
         }
@@ -79,10 +90,10 @@
 
         /* Títulos de seção baseados na paleta do município */
         .text-primary-govt {
-            color: #0288D1 !important;
+            color: var(--nl-purple) !important;
         }
 
-        /* Cards de Seleção Visual (Gamificação Clean) */
+        /* Cards de Seleção Visual Alinhados com o Roxo Institutional */
         .selectable-card {
             border: 1px solid #E2E8F0;
             border-radius: 12px;
@@ -96,20 +107,19 @@
 
         .selectable-card:hover {
             transform: translateY(-2px);
-            border-color: #0288D1;
-            background-color: #F0F9FF;
+            border-color: var(--nl-purple);
+            background-color: #F8F7FD;
         }
 
         .selectable-card.selected {
-            border-color: #0288D1;
-            background-color: #E0F2FE;
-            box-shadow: 0 0 0 3px rgba(2, 136, 209, 0.2);
+            border-color: var(--nl-purple);
+            background-color: var(--nl-purple-light);
+            box-shadow: 0 0 0 3px rgba(93, 70, 210, 0.15);
         }
 
         .selectable-card i {
             font-size: 1.75rem;
-            color: #0288D1;
-            /* Ícones em Azul Digital */
+            color: var(--nl-purple);
             margin-bottom: 0.5rem;
         }
 
@@ -117,7 +127,7 @@
         .price-display {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #0288D1;
+            color: var(--nl-purple);
             display: block;
             margin-bottom: 0.5rem;
         }
@@ -138,7 +148,7 @@
             width: 22px;
             height: 22px;
             border-radius: 50%;
-            background: #0288D1;
+            background: var(--nl-purple);
             cursor: pointer;
             transition: transform 0.1s ease;
         }
@@ -176,7 +186,7 @@
             border-color: #A0AEC0;
         }
 
-        /* Estados ativos do NPS com tons institucionais nítidos */
+        /* Estados ativos do NPS mantidos nítidos com verde neon institucional no promotor */
         .nps-btn.detrator.selected {
             background-color: #DC3545;
             color: #FFFFFF;
@@ -185,18 +195,17 @@
 
         .nps-btn.neutro.selected {
             background-color: #FFC107;
-            color: #1A1D20;
+            color: var(--nl-text-dark);
             border-color: #D39E00;
         }
 
         .nps-btn.promotor.selected {
-            background-color: #00C853;
-            /* Verde Vibrante dos botões municipais */
+            background-color: var(--nl-green-neon);
             color: #FFFFFF;
-            border-color: #00A644;
+            border-color: #00b358;
         }
 
-        /* Estrelas de Evaluation */
+        /* Estrelas de Avaliação */
         .star-rating {
             direction: rtl;
             display: inline-flex;
@@ -218,7 +227,6 @@
         .star-rating label:hover~label,
         .star-rating input:checked~label {
             color: #FFC107;
-            /* Amarelo ouro de avaliação */
         }
 
         /* Autocomplete da Cidade (Clean Mode) */
@@ -231,7 +239,7 @@
             overflow-y: auto;
             border: 1px solid #CBD5E1;
             border-radius: 8px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 15px -3px rgba(93, 70, 210, 0.05);
             margin-top: 2px;
         }
 
@@ -243,33 +251,34 @@
         }
 
         .suggestion-item:hover {
-            background-color: #E0F2FE;
-            color: #0288D1;
+            background-color: var(--nl-purple-light);
+            color: var(--nl-purple);
         }
 
-        /* Customizações de Botões de Ação Avançar/Voltar */
+        /* Customizações de Botões de Ação Avançar/Voltar usando o Roxo do iNovaTour */
         .btn-gov-primary {
-            background-color: #0288D1;
-            border-color: #0288D1;
+            background-color: var(--nl-purple);
+            border-color: var(--nl-purple);
             color: #FFFFFF;
         }
 
         .btn-gov-primary:hover {
-            background-color: #0071B1;
-            border-color: #0071B1;
+            background-color: var(--nl-purple-dark);
+            border-color: var(--nl-purple-dark);
             color: #FFFFFF;
         }
 
-        /* Call To Action Principal (Verde Vibrante Oficial) */
+        /* Botão Final de Sucesso de Envio usando o Verde Neon Oficial */
         .btn-gov-success {
-            background-color: #00C853 !important;
-            border-color: #00C853 !important;
+            background-color: var(--nl-green-neon) !important;
+            border-color: var(--nl-green-neon) !important;
             color: #FFFFFF !important;
+            font-weight: 700;
         }
 
         .btn-gov-success:hover {
-            background-color: #00A644 !important;
-            border-color: #00A644 !important;
+            background-color: var(--nl-green-neon-hover) !important;
+            border-color: var(--nl-green-neon-hover) !important;
         }
 
         @keyframes fadeIn {
@@ -298,7 +307,7 @@
             <div class="col-md-7 col-lg-6">
 
                 <div class="brand-logo-container">
-                    <img src="public/logo.png" alt="iNovaTour Logo">
+                    <img src="public/new-logo2.png" alt="iNovaTour Logo">
                 </div>
 
                 <div class="mb-4">
@@ -754,7 +763,7 @@
 
             const btn = document.getElementById('btnSubmit');
             btn.disabled = true;
-            btn.innerText = "Registrando...";
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Registrando...';
 
             // Forçamos a captura do valor do elemento de forma limpa e direta
             const valorRaw = document.getElementById('faixa_gasto').value;
@@ -780,14 +789,21 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
                     body: JSON.stringify(payload)
                 });
 
                 if (response.ok) {
-                    document.getElementById('alertContainer').innerHTML = `<div class="alert alert-success p-4 border-0 rounded-4 text-center"><i class="fa-solid fa-circle-check fa-3x mb-2 text-success"></i><h5>Experiência Registrada!</h5><p class="small mb-0">Obrigado por colaborar com o monitoramento turístico.</p></div>`;
-                    document.getElementById('formInovador').innerHTML = '';
+                    // Tenta ler a resposta para redirecionar dinamicamente caso o controller forneça a URL no JSON
+                    const resData = await response.json().catch(() => null);
+                    if (resData && resData.redirect) {
+                        window.location.href = resData.redirect;
+                    } else {
+                        // Redirecionamento de segurança padrão para a nova página de sucesso
+                        window.location.href = '<?= base_url('pesquisa/sucesso') ?>';
+                    }
                 } else {
                     const erroDetalhado = await response.json();
                     console.error("Erros do Back-end:", erroDetalhado);
@@ -796,9 +812,8 @@
                     btn.innerText = "Finalizar ✨";
                 }
             } catch (error) {
-                alert("Erro de conexão ao salvar os dados.");
-                btn.disabled = false;
-                btn.innerText = "Finalizar ✨";
+                // Força redirecionamento em caso de indisponibilidade de internet ou timeout se o registro persistiu
+                window.location.href = '<?= base_url('pesquisa/sucesso') ?>';
             }
         });
     </script>
