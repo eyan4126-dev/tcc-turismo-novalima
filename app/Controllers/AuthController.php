@@ -978,57 +978,117 @@ class AuthController extends BaseController
     }
 
     // ====================================================================
-// ADICIONE ESTE MÉTODO AO FINAL DO SEU AuthController.php
-// (Pode colar logo abaixo do método semearBanco() que você já possui)
+// SUBSTITUA O MÉTODO executarMigracaoVantagens NO SEU AuthController.php
+// POR ESTA VERSÃO QUE UTILIZA BLOCOS TRY/CATCH COMPATÍVEIS COM CI4
 // ====================================================================
 
     public function executarMigracaoVantagens()
     {
-        // Restringe o acesso apenas para segurança (opcional, mas bom para TCC)
-        // Se quiser facilitar o teste, pode deixar aberto para rodar no navegador
         $db = \Config\Database::connect();
+        $relatorio = [];
 
-        $db->transStart();
+        // --- PASSO 1: Atualização da tabela 'estabelecimento_evento' ---
+        try {
+            $query1 = "ALTER TABLE `estabelecimento_evento` 
+                   ADD COLUMN `aceita_desconto` TINYINT(1) NOT NULL DEFAULT 0 AFTER `tipo`";
+            $db->query($query1);
+            $relatorio[] = "<span style='color:green;'>[OK]</span> Coluna 'aceita_desconto' adicionada com sucesso.";
+        } catch (\Exception $e) {
+            // Se o erro for de coluna já existente (Código 1060), tratamos como aviso amigável
+            if (strpos($e->getMessage(), '1060') !== false) {
+                $relatorio[] = "<span style='color:orange;'>[Aviso]</span> Coluna 'aceita_desconto' já existia no banco.";
+            } else {
+                $relatorio[] = "<span style='color:red;'>[FALHA]</span> Erro ao adicionar 'aceita_desconto': " . $e->getMessage();
+            }
+        }
 
         try {
-            // 1. Atualiza a tabela de estabelecimentos
-            $db->query("ALTER TABLE `estabelecimento_evento` 
-                    ADD COLUMN IF NOT EXISTS `aceita_desconto` TINYINT(1) NOT NULL DEFAULT 0 AFTER `tipo`,
-                    ADD COLUMN IF NOT EXISTS `pin_validacao` VARCHAR(4) NULL DEFAULT NULL AFTER `aceita_desconto`;");
+            $query2 = "ALTER TABLE `estabelecimento_evento` 
+                   ADD COLUMN `pin_validacao` VARCHAR(4) NULL DEFAULT NULL AFTER `aceita_desconto`";
+            $db->query($query2);
+            $relatorio[] = "<span style='color:green;'>[OK]</span> Coluna 'pin_validacao' adicionada com sucesso.";
+        } catch (\Exception $e) {
+            if (strpos($e->getMessage(), '1060') !== false) {
+                $relatorio[] = "<span style='color:orange;'>[Aviso]</span> Coluna 'pin_validacao' já existia no banco.";
+            } else {
+                $relatorio[] = "<span style='color:red;'>[FALHA]</span> Erro ao adicionar 'pin_validacao': " . $e->getMessage();
+            }
+        }
 
-            // 2. Atualiza a tabela de pesquisas
-            $db->query("ALTER TABLE `pesquisa` 
-                    ADD COLUMN IF NOT EXISTS `cpf` VARCHAR(11) NULL DEFAULT NULL AFTER `motivo_visita`,
-                    ADD COLUMN IF NOT EXISTS `device_hash` VARCHAR(64) NULL DEFAULT NULL AFTER `cpf`,
-                    ADD COLUMN IF NOT EXISTS `is_morador` TINYINT(1) NOT NULL DEFAULT 0 AFTER `device_hash`;");
+        // --- PASSO 2: Atualização da tabela 'pesquisa' ---
+        try {
+            $query3 = "ALTER TABLE `pesquisa` 
+                   ADD COLUMN `cpf` VARCHAR(11) NULL DEFAULT NULL AFTER `motivo_visita`";
+            $db->query($query3);
+            $relatorio[] = "<span style='color:green;'>[OK]</span> Coluna 'cpf' adicionada com sucesso.";
+        } catch (\Exception $e) {
+            if (strpos($e->getMessage(), '1060') !== false) {
+                $relatorio[] = "<span style='color:orange;'>[Aviso]</span> Coluna 'cpf' já existia no banco.";
+            } else {
+                $relatorio[] = "<span style='color:red;'>[FALHA]</span> Erro ao adicionar 'cpf': " . $e->getMessage();
+            }
+        }
 
-            // 3. Cria a tabela de moradores locais de Nova Lima
-            $db->query("CREATE TABLE IF NOT EXISTS `morador_novalima` (
+        try {
+            $query4 = "ALTER TABLE `pesquisa` 
+                   ADD COLUMN `device_hash` VARCHAR(64) NULL DEFAULT NULL AFTER `cpf`";
+            $db->query($query4);
+            $relatorio[] = "<span style='color:green;'>[OK]</span> Coluna 'device_hash' adicionada com sucesso.";
+        } catch (\Exception $e) {
+            if (strpos($e->getMessage(), '1060') !== false) {
+                $relatorio[] = "<span style='color:orange;'>[Aviso]</span> Coluna 'device_hash' já existia no banco.";
+            } else {
+                $relatorio[] = "<span style='color:red;'>[FALHA]</span> Erro ao adicionar 'device_hash': " . $e->getMessage();
+            }
+        }
+
+        try {
+            $query5 = "ALTER TABLE `pesquisa` 
+                   ADD COLUMN `is_morador` TINYINT(1) NOT NULL DEFAULT 0 AFTER `device_hash`";
+            $db->query($query5);
+            $relatorio[] = "<span style='color:green;'>[OK]</span> Coluna 'is_morador' adicionada com sucesso.";
+        } catch (\Exception $e) {
+            if (strpos($e->getMessage(), '1060') !== false) {
+                $relatorio[] = "<span style='color:orange;'>[Aviso]</span> Coluna 'is_morador' já existia no banco.";
+            } else {
+                $relatorio[] = "<span style='color:red;'>[FALHA]</span> Erro ao adicionar 'is_morador': " . $e->getMessage();
+            }
+        }
+
+        // --- PASSO 3: Tabela de moradores ---
+        try {
+            $query6 = "CREATE TABLE IF NOT EXISTS `morador_novalima` (
                       `id_morador` INT(11) NOT NULL AUTO_INCREMENT,
                       `cpf` VARCHAR(11) NOT NULL,
                       `nome` VARCHAR(150) NOT NULL,
                       `criado_em` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
                       PRIMARY KEY (`id_morador`),
                       UNIQUE KEY `cpf_unico` (`cpf`)
-                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;");
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
+            $db->query($query6);
+            $relatorio[] = "<span style='color:green;'>[OK]</span> Tabela 'morador_novalima' verificada/criada.";
+        } catch (\Exception $e) {
+            $relatorio[] = "<span style='color:red;'>[FALHA]</span> Erro ao criar tabela 'morador_novalima': " . $e->getMessage();
+        }
 
-            // 4. Insere os moradores de simulação de forma segura para não duplicar se rodar mais de uma vez
-            $db->query("INSERT IGNORE INTO `morador_novalima` (`cpf`, `nome`) VALUES
+        // --- PASSO 4: Inserção de dados de simulação ---
+        try {
+            $query7 = "INSERT IGNORE INTO `morador_novalima` (`cpf`, `nome`) VALUES
                     ('11111111111', 'Ana Souza (Moradora Teste 1)'),
                     ('22222222222', 'Bruno Lima (Morador Teste 2)'),
-                    ('33333333333', 'Carlos Eduardo (Morador Teste 3)');");
-
-            $db->transComplete();
-
-            if ($db->transStatus() === false) {
-                return "Erro ao executar transação de migração no banco da Railway.";
-            }
-
-            return "<h3>Sucesso! 🎉</h3><p>O banco de dados na Railway foi atualizado e as tabelas e colunas do ecossistema antifraude/recompensas já estão ativas!</p><p>Você já pode remover este método e a rota temporária se desejar.</p>";
-
+                    ('33333333333', 'Carlos Eduardo (Morador Teste 3)');";
+            $db->query($query7);
+            $relatorio[] = "<span style='color:green;'>[OK]</span> CPFs de simulação importados com sucesso.";
         } catch (\Exception $e) {
-            $db->transRollback();
-            return "<h3>Erro na migração:</h3><p style='color:red;'>" . $e->getMessage() . "</p>";
+            $relatorio[] = "<span style='color:red;'>[FALHA]</span> Erro ao inserir CPFs: " . $e->getMessage();
         }
+
+        // Retorna o diagnóstico detalhado formatado na tela
+        $html = "<h2>Relatório de Atualização de Banco - iNovaTour</h2>";
+        $html .= "<ul><li>" . implode("</li><li>", $relatorio) . "</li></ul>";
+        $html .= "<br><p><strong>Status:</strong> Se todos os passos retornaram [OK] ou [Aviso], o seu sistema já está totalmente pronto para rodar!</p>";
+        $html .= "<p><a href='" . site_url('guia') . "'>Ir para o Guia Turístico</a></p>";
+
+        return $html;
     }
 }
