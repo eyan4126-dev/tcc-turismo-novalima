@@ -18,7 +18,6 @@ class PesquisaController extends ResourceController
     public function index($tokenQr = null)
     {
         // Se a rota acessada foi 'turismo/visitar/{token}', o parâmetro $tokenQr virá preenchido.
-        // Isso significa que o turista ESCANEOU O QR CODE FÍSICO!
         if ($tokenQr !== null) {
             // Nós redirecionamos o navegador dele injetando de forma mandatória o 'origem=qrcode' na URL
             return redirect()->to(site_url("pesquisa?token={$tokenQr}&origem=qrcode"));
@@ -156,6 +155,9 @@ class PesquisaController extends ResourceController
                 $dados['local_hospedagem'] = null;
             }
 
+            // CORREÇÃO: Se não receber origem explícita do front-end, o fallback definitivo é sempre 'qrcode' (Físico)
+            $origemValida = (isset($dados['origem']) && $dados['origem'] === 'guia') ? 'guia' : 'qrcode';
+
             // Injeta dados de conformidade e segurança na tabela de pesquisas
             $payloadPesquisa = [
                 'id_estabelecimento' => $dados['id_estabelecimento'],
@@ -177,7 +179,7 @@ class PesquisaController extends ResourceController
                     'status' => 201,
                     'success' => true,
                     'is_resident' => $isMorador,
-                    'origem' => $dados['origem'] ?? 'guia',
+                    'origem' => $origemValida, // Devolve sempre 'qrcode' ou 'guia' com segurança
                     'message' => 'Pesquisa avaliativa gravada com sucesso.'
                 ], 201);
             }

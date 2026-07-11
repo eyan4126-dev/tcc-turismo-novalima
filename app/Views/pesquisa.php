@@ -327,7 +327,9 @@
     <?php
     $nomeLugar = isset($estabelecimento['razao_social']) ? $estabelecimento['razao_social'] : 'Estabelecimento';
     $tokenEstOriginal = isset($estabelecimento['token_qr_code']) ? $estabelecimento['token_qr_code'] : '';
-    $aceitaDesconto = isset($estabelecimento['aceita_desconto']) && $estabelecimento['aceita_desconto'] == 1;
+
+    // CORREÇÃO CONCEITUAL: Tratamento explícito com coerção de tipo (Cast Inteiro) para o switch de desconto
+    $aceitaDesconto = isset($estabelecimento['aceita_desconto']) && ((int) $estabelecimento['aceita_desconto'] === 1);
     ?>
 
     <div class="top-identity-bar"></div>
@@ -906,7 +908,8 @@
             const valorFloat = parseFloat(valorRaw);
 
             const urlParams = new URLSearchParams(window.location.search);
-            const canalOrigem = urlParams.get('origem') || 'guia';
+            // CORREÇÃO DE SEGURANÇA: Se o parâmetro "origem" for omitido, tratamos como 'qrcode' (Físico) por padrão!
+            const canalOrigem = urlParams.get('origem') || 'qrcode';
 
             const payload = {
                 id_estabelecimento: document.getElementById('id_estabelecimento').value,
@@ -954,20 +957,32 @@
                     }
 
                     // CASO SEJA TURISTA E O LOCAL PARTICIPE DA REDE DE RECOMPENSAS COM LEITURA VIA QR CODE FÍSICO
-                    if (aceitaDescontoDoLocal && resData.origem === 'qrcode') {
-                        // Grava no LocalStorage o voucher pendente
-                        localStorage.setItem('inovatour_voucher', JSON.stringify({
-                            token: originalToken,
-                            local: '<?= esc($nomeLugar) ?>',
-                            status: 'pendente'
-                        }));
+                    if (resData.origem === 'qrcode') {
+                        if (aceitaDescontoDoLocal) {
+                            // Local dá desconto direto. Salva e mostra tela do PIN local.
+                            localStorage.setItem('inovatour_voucher', JSON.stringify({
+                                token: originalToken,
+                                local: '<?= esc($nomeLugar) ?>',
+                                status: 'pendente'
+                            }));
 
-                        // Avança dinamicamente para o Passo do Voucher Ativo
-                        document.getElementById('formInovador').style.display = 'none';
-                        document.getElementById('progressWrapper').style.display = 'none';
-                        document.getElementById('stepVoucher').classList.add('active');
+                            // Avança dinamicamente para o Passo do Voucher Ativo (Sem redirecionar de página!)
+                            document.getElementById('formInovador').style.display = 'none';
+                            document.getElementById('progressWrapper').style.display = 'none';
+                            document.getElementById('stepVoucher').classList.add('active');
+                        } else {
+                            // MÓDULO ANTIFRAUDE FLEXÍVEL: Local NÃO dá desconto direto (como ponto natural/público).
+                            // Salva um voucher de desconto de uso geral na rede parceira
+                            localStorage.setItem('inovatour_voucher', JSON.stringify({
+                                token: 'rede_parceira',
+                                local: 'Rede de Vantagens (Qualquer Loja/Hotel)',
+                                status: 'pendente'
+                            }));
+                            // Redireciona para a tela de sucesso para ser parabenizado
+                            window.location.href = '<?= site_url('pesquisa/sucesso') ?>';
+                        }
                     } else {
-                        // Sem voucher para origens espontâneas de casa
+                        // Sem voucher para origens espontâneas de casa ou sem QR code
                         window.location.href = '<?= site_url('pesquisa/sucesso') ?>';
                     }
 
@@ -1019,7 +1034,7 @@
             }
         }
 
-        function disparoCronometroRegressivo(segundosTotais) {
+        function dispararCronometroRegressivo(segundosTotais) {
             const clockText = document.getElementById('regressiveClock');
             const pBar = document.getElementById('timerProgressBar');
             let tempoRestante = segundosTotais;

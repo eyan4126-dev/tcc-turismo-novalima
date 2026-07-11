@@ -39,7 +39,6 @@
             z-index: 1050;
         }
 
-        /* Banner de Engajamento para Pesquisa */
         .cta-research-banner {
             background: linear-gradient(135deg, var(--nl-purple) 0%, #301b9e 100%);
             color: #ffffff;
@@ -53,7 +52,6 @@
 
         .cta-research-banner::after {
             content: "\f0a1";
-            /* Icon de Megafone FontAwesome */
             font-family: "Font Awesome 6 Free";
             font-weight: 900;
             position: absolute;
@@ -128,7 +126,6 @@
             border-color: var(--nl-purple-light);
         }
 
-        /* Badge dinâmica do Selo de Destaque para Lojistas Credenciados ativos na rede */
         .badge-highlight-premium {
             position: absolute;
             top: 12px;
@@ -145,7 +142,6 @@
             text-transform: uppercase;
         }
 
-        /* CARD DE CAPA CATEGÓRICA */
         .atrativo-img-placeholder {
             height: 160px;
             display: flex;
@@ -218,7 +214,7 @@
             color: #ffffff;
         }
 
-        /* Estilização para o Botão Flutuante de Recuperação de Voucher */
+        /* Botão flutuante estilizado de cupom ativo */
         .floating-voucher-btn {
             position: fixed;
             bottom: 24px;
@@ -243,6 +239,41 @@
             color: #ffffff;
             box-shadow: 0 12px 30px rgba(0, 211, 105, 0.45);
         }
+
+        /* Animação contra prints */
+        @keyframes waveGradiente {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .voucher-active-card-modal {
+            background: linear-gradient(-45deg, #FF5500, #E6007E, #5D46D2, #00D369);
+            background-size: 400% 400%;
+            animation: waveGradiente 4s ease infinite;
+            border-radius: 16px;
+            color: #ffffff;
+        }
+
+        .pin-box-input-modal {
+            border: 2px solid #E2E8F0;
+            border-radius: 12px;
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: 12px;
+            text-align: center;
+            color: var(--nl-purple);
+            max-width: 200px;
+            margin: 0 auto;
+        }
     </style>
 </head>
 
@@ -250,7 +281,6 @@
 
     <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom py-3">
         <div class="container d-flex align-items-center position-relative">
-            <!-- Lado Esquerdo: Logo do iNovaTour -->
             <a class="navbar-brand d-flex align-items-center" href="#">
                 <img src="<?= site_url('new-logo2.png') ?>" alt="iNovaTour" height="40" class="me-2"
                     onerror="this.style.display='none'">
@@ -258,14 +288,12 @@
                         style="font-weight: 400; color: var(--nl-text-dark);">Tour</span></span>
             </a>
 
-            <!-- Centro: "Guia Oficial" (Centralizado Absoluto) -->
             <span
                 class="navbar-text small fw-bold text-uppercase tracking-wider d-none d-md-inline-block position-absolute start-50 translate-middle-x"
                 style="color: #718096; font-size: 0.75rem; letter-spacing: 1px; white-space: nowrap;">
                 Guia Oficial de Nova Lima
             </span>
 
-            <!-- Lado Direito: Área do Lojista -->
             <div class="ms-auto">
                 <a href="<?= site_url('login') ?>"
                     class="btn btn-nl-outline rounded-pill px-3 py-2 fw-bold text-xs uppercase tracking-wider">
@@ -275,21 +303,22 @@
         </div>
     </nav>
 
-    <!-- NOVO COMPONENTE: Botão Flutuante de Recuperação Automática de Cupom de Desconto via LocalStorage -->
-    <a href="#" id="floatingVoucherRecovery" class="floating-voucher-btn d-none animate__animated animate__bounceIn">
+    <!-- BOTÃO FLUTUANTE DE RESGATE DO VOUCHER DO LOCALSTORAGE -->
+    <button id="floatingVoucherRecovery" class="floating-voucher-btn d-none animate__animated animate__bounceIn"
+        onclick="abrirModalVoucher()">
         <i class="fa-solid fa-ticket fa-lg animate__animated animate__swing animate__infinite animate__slower"></i>
         <div class="text-start">
             <small class="d-block text-uppercase"
                 style="font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px; opacity: 0.9;">Você tem 1 Desconto
                 Ativo!</small>
-            <span class="d-block" style="font-size: 0.85rem; line-height: 1.1;" id="floatingVoucherLabel">Resgatar
-                Cupom</span>
+            <span class="d-block" style="font-size: 0.85rem; line-height: 1.1;" id="floatingVoucherLabel">Resgatar Cupom
+                (10% OFF)</span>
         </div>
-    </a>
+    </button>
 
     <div class="container my-4">
 
-        <!-- BANNER DE ENGAJAMENTO (Atualizado para acionar o Modal de Seleção de Local) -->
+        <!-- BANNER DE ENGAJAMENTO -->
         <div class="cta-research-banner">
             <div class="row align-items-center">
                 <div class="col-lg-9">
@@ -339,14 +368,12 @@
                     <div class="col-md-6 col-lg-4 card-item" data-setor="<?= $est['setor'] ?>">
                         <div class="atrativo-card d-flex flex-column h-100">
 
-                            <!-- Selo de Destaque Algorítmico para quem participa ativamente do programa de recompensas -->
                             <?php if ($est['aceita_desconto'] == 1): ?>
                                 <div class="badge-highlight-premium">
                                     <i class="fa-solid fa-certificate me-1"></i> 10% de Desconto
                                 </div>
                             <?php endif; ?>
 
-                            <!-- Div de capa categórica com a classe correta de estilo baseada no tipo de comércio -->
                             <div class="atrativo-img-placeholder placeholder-<?= $est['setor'] ?>">
                                 <?php if ($est['setor'] === 'hospedagem'): ?>
                                     <i class="fa-solid fa-hotel"></i>
@@ -375,12 +402,10 @@
                                     <?php endif; ?>
                                 </p>
                                 <div class="pt-3 border-top d-flex gap-2 justify-content-between align-items-center">
-                                    <!-- Botão de avaliar enviando o token específico do local via GET e o canal espontâneo -->
                                     <a href="<?= site_url('pesquisa?token=' . $est['token_qr_code'] . '&origem=guia') ?>"
                                         class="btn btn-nl-outline-purple btn-sm flex-grow-1 text-center">
                                         <i class="fa-solid fa-star me-1"></i> Avaliar
                                     </a>
-                                    <!-- INTEGRAÇÃO MAPAS: "Como chegar" integrado diretamente ao Google Maps -->
                                     <a href="https://www.google.com/maps/search/?api=1&query=<?= urlencode(esc($est['razao_social']) . ', Nova Lima - MG') ?>"
                                         target="_blank" rel="noopener noreferrer"
                                         class="btn btn-nl-primary btn-sm px-3 d-inline-flex align-items-center gap-1">
@@ -442,18 +467,112 @@
         </div>
     </div>
 
+    <!-- MODAL DE RESGATE DE VOUCHER (DINÂMICO CONTRA PRINTS) -->
+    <div class="modal fade" id="modalAtivacaoVoucher" tabindex="-1" aria-labelledby="modalAtivacaoVoucherLabel"
+        aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow" style="border-radius: 20px;">
+                <div class="modal-header border-0 bg-light py-3">
+                    <h5 class="modal-title fw-bold text-nl-purple" id="modalAtivacaoVoucherLabel">
+                        <i class="fa-solid fa-gift me-2 text-nl-magenta"></i>Resgatar meu Desconto
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        id="btnCloseVoucherModal"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+
+                    <div id="modalVoucherDisplay" class="voucher-active-card-modal p-4 shadow-sm text-white mb-4">
+                        <i class="fa-solid fa-ticket fa-3x mb-2 animate__animated animate__swing animate__infinite"></i>
+                        <h4 class="fw-bold m-0" id="modalVoucherTitle">Desconto de 10% Ativo!</h4>
+                        <p class="small opacity-90 m-0 mt-1" id="modalVoucherSubtitle">Carregado no seu navegador</p>
+                    </div>
+
+                    <!-- Sessão do PIN de Ativação (Público ou Local) -->
+                    <div id="modalPinActivationZone">
+                        <p class="small text-muted mb-3" id="modalVoucherExplainer">Selecione onde você está consumindo
+                            para digitar o PIN de validação do caixa:</p>
+
+                        <!-- Dropdown de seleção de estabelecimento da rede ativa (Oculto se for voucher local pré-definido) -->
+                        <div class="mb-4" id="modalPartnerSelectWrapper">
+                            <label class="form-label small fw-bold text-muted text-uppercase d-block text-start">Onde
+                                você está agora?</label>
+                            <select class="form-select border-2" id="modalSelectTokenLocal">
+                                <option value="" disabled selected>-- Escolha o lojista para desconto --</option>
+                                <?php if (!empty($estabelecimentos)): ?>
+                                    <?php foreach ($estabelecimentos as $est): ?>
+                                        <?php if ($est['aceita_desconto'] == 1): ?>
+                                            <option value="<?= $est['token_qr_code'] ?>">
+                                                <?= $est['razao_social'] ?>
+                                            </option>
+                                        <?php endif; ?>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
+                        </div>
+
+                        <input type="text" id="modalCaixaPinInput" class="form-control pin-box-input-modal mb-4"
+                            maxlength="4" placeholder="0000" inputmode="numeric">
+
+                        <button type="button" class="btn btn-nl-success btn-lg w-100 rounded-pill py-3 fw-bold"
+                            onclick="validarPinModal()">
+                            <i class="fa-solid fa-bolt me-2"></i> Ativar Desconto de 10%
+                        </button>
+                    </div>
+
+                    <!-- Cronômetro Regressivo Animado (Oculto por padrão) -->
+                    <div id="modalCountdownZone" class="d-none">
+                        <div class="alert alert-success border-0 shadow-sm p-3 mb-4 rounded-4">
+                            <h6 class="alert-heading fw-bold mb-1"><i
+                                    class="fa-solid fa-circle-check me-2 animate__animated animate__pulse animate__infinite"></i>Desconto
+                                Autorizado no Caixa!</h6>
+                            <p class="small text-muted mb-0">Mostre esta tela piscando ao atendente para aplicar o
+                                desconto na sua conta agora.</p>
+                        </div>
+
+                        <div class="my-4">
+                            <div class="display-1 fw-bold text-nl-purple font-monospace mb-2" id="modalRegressiveClock"
+                                style="font-size: 4.5rem; letter-spacing: -2px;">02:00</div>
+                            <div class="progress" style="height: 12px; background-color: #E2E8F0; border-radius: 50px;">
+                                <div id="modalTimerProgressBar"
+                                    class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                                    style="width: 100%; background: linear-gradient(90deg, #00D369 0%, #5D46D2 100%);">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-light rounded-3 text-muted small border">
+                            <i class="fa-solid fa-circle-info me-2 text-nl-purple"></i>Esta tela é dinâmica e expira em
+                            2 minutos. Capturas de tela e prints são inválidos.
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        let voucherAtivoLocal = null;
+        let ativacaoModalInstanciado = null;
+
         document.addEventListener("DOMContentLoaded", function () {
-            // RECUPERAÇÃO AUTOMÁTICA DE VOUCHER DO LOCALSTORAGE (Mão-Dupla Invisível)
+            // Instancia o modal do bootstrap para manipulação via JS
+            ativacaoModalInstanciado = new bootstrap.Modal(document.getElementById('modalAtivacaoVoucher'));
+
+            // RECUPERAÇÃO AUTOMÁTICA DE VOUCHER DO LOCALSTORAGE (Geral ou Local)
             const voucherObj = localStorage.getItem('inovatour_voucher');
             if (voucherObj) {
                 try {
-                    const voucher = JSON.parse(voucherObj);
-                    if (voucher && voucher.status === 'pendente') {
-                        document.getElementById('floatingVoucherLabel').innerText = `Ver cupom do ${voucher.local}`;
-                        // Redireciona diretamente para o fluxo de ativação de PIN do local
-                        document.getElementById('floatingVoucherRecovery').href = `<?= site_url('pesquisa?token=') ?>` + voucher.token;
+                    voucherAtivoLocal = JSON.parse(voucherObj);
+                    if (voucherAtivoLocal && voucherAtivoLocal.status === 'pendente') {
+
+                        if (voucherAtivoLocal.token === 'rede_parceira') {
+                            document.getElementById('floatingVoucherLabel').innerText = "Voucher Geral de 10% OFF Ativo!";
+                        } else {
+                            document.getElementById('floatingVoucherLabel').innerText = `Cupom do ${voucherAtivoLocal.local} de 10% OFF!`;
+                        }
+
                         document.getElementById('floatingVoucherRecovery').classList.remove('d-none');
                     }
                 } catch (e) {
@@ -462,13 +581,113 @@
             }
         });
 
+        // Configura o modal de resgate dinamicamente dependendo de onde o turista avaliou
+        function abrirModalVoucher() {
+            if (!voucherAtivoLocal) return;
+
+            if (voucherAtivoLocal.token === 'rede_parceira') {
+                // Caso o voucher seja geral (ganhou avaliando trilha/ponto natural)
+                document.getElementById('modalVoucherSubtitle').innerText = "Resgatável em qualquer parceiro da cidade";
+                document.getElementById('modalVoucherExplainer').innerText = "Selecione o estabelecimento onde você está fisicamente agora para digitar o PIN do balcão deles:";
+                document.getElementById('modalPartnerSelectWrapper').classList.remove('d-none');
+            } else {
+                // Caso o voucher seja de um comércio local específico
+                document.getElementById('modalVoucherSubtitle').innerText = `Válido exclusivamente no(a) ${voucherAtivoLocal.local}`;
+                document.getElementById('modalVoucherExplainer').innerText = `Apresente este celular ao atendente do(a) ${voucherAtivoLocal.local} e digite o PIN de balcão deles abaixo:`;
+                document.getElementById('modalPartnerSelectWrapper').classList.add('d-none');
+            }
+
+            ativacaoModalInstanciado.show();
+        }
+
+        async function validarPinModal() {
+            const pinDigitado = document.getElementById('modalCaixaPinInput').value.trim();
+
+            if (pinDigitado.length < 4) {
+                alert("Por favor, digite o código de 4 dígitos do balcão.");
+                return;
+            }
+
+            // Define qual token de estabelecimento enviar para validar
+            let tokenParaValidar = "";
+            if (voucherAtivoLocal.token === 'rede_parceira') {
+                tokenParaValidar = document.getElementById('modalSelectTokenLocal').value;
+                if (!tokenParaValidar) {
+                    alert("Por favor, selecione onde você está consumindo para resgatar.");
+                    return;
+                }
+            } else {
+                tokenParaValidar = voucherAtivoLocal.token;
+            }
+
+            try {
+                const response = await fetch(`<?= site_url('api/pesquisa/validar-pin') ?>`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        token: tokenParaValidar,
+                        pin: pinDigitado
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Trava o fechamento do modal para o lojista validar o timer sem risco de clique errado
+                    document.getElementById('btnCloseVoucherModal').classList.add('d-none');
+                    document.getElementById('modalPinActivationZone').classList.add('d-none');
+                    document.getElementById('modalCountdownZone').classList.remove('d-none');
+
+                    dispararCronometroRegressivoModal(120);
+
+                    // Limpa o LocalStorage porque o desconto já foi formalmente consumido
+                    localStorage.removeItem('inovatour_voucher');
+                    document.getElementById('floatingVoucherRecovery').classList.add('d-none');
+                } else {
+                    alert("Código PIN inválido para este estabelecimento.");
+                }
+            } catch (e) {
+                alert("Erro ao validar PIN.");
+            }
+        }
+
+        function dispararCronometroRegressivoModal(segundosTotais) {
+            const clockText = document.getElementById('modalRegressiveClock');
+            const pBar = document.getElementById('modalTimerProgressBar');
+            let tempoRestante = segundosTotais;
+
+            const intervalo = setInterval(() => {
+                tempoRestante--;
+
+                let minutos = Math.floor(tempoRestante / 60);
+                let segundos = tempoRestante % 60;
+
+                clockText.innerText = `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+
+                let porcentagem = (tempoRestante / segundosTotais) * 100;
+                pBar.style.width = `${porcentagem}%`;
+
+                if (tempoRestante <= 0) {
+                    clearInterval(intervalo);
+                    document.getElementById('modalCountdownZone').innerHTML = `
+                        <div class="alert alert-danger border-0 shadow-sm p-4 rounded-4">
+                            <i class="fa-solid fa-clock-rotate-left fa-3x mb-2 text-danger"></i>
+                            <h5 class="fw-bold">Cupom Expirado!</h5>
+                            <p class="small text-muted mb-0">Este voucher foi devidamente consumido ou expirou o prazo limite de permanência de validação no caixa.</p>
+                            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill mt-4 px-4 fw-bold" data-bs-dismiss="modal" onclick="window.location.reload();">Fechar Guia</button>
+                        </div>
+                    `;
+                    // Devolve o botão de fechar modal após expirar
+                    document.getElementById('btnCloseVoucherModal').classList.remove('d-none');
+                }
+            }, 1000);
+        }
+
         function filtrarSetor(setor) {
-            // Atualiza classe ativa dos botões
             const botoes = document.querySelectorAll('.filter-btn');
             botoes.forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
 
-            // Filtra os cards
             const cards = document.querySelectorAll('.card-item');
             cards.forEach(card => {
                 if (setor === 'todos' || card.getAttribute('data-setor') === setor) {
@@ -479,7 +698,6 @@
             });
         }
 
-        // Script para redirecionar o usuário do Modal para o formulário correto usando o token e a origem espontânea
         function redirecionarParaPesquisa() {
             const tokenSelected = document.getElementById('selectTokenLocal').value;
             if (!tokenSelected) {
