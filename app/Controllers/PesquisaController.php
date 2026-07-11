@@ -64,7 +64,11 @@ class PesquisaController extends ResourceController
             $dados = $this->request->getJSON(true);
 
             if (empty($dados)) {
-                return $this->fail('Nenhum dado enviado.', 400);
+                return $this->respond([
+                    'status' => 400,
+                    'success' => false,
+                    'messages' => ['error' => 'Nenhum dado enviado.']
+                ], 400);
             }
 
             $db = \Config\Database::connect();
@@ -81,10 +85,18 @@ class PesquisaController extends ResourceController
                     $idEstabelecimento = $local['id_estabelecimento'];
                     $dados['id_estabelecimento'] = $idEstabelecimento;
                 } else {
-                    return $this->failValidationErrors('Estabelecimento inválido.');
+                    return $this->respond([
+                        'status' => 400,
+                        'success' => false,
+                        'messages' => ['error' => 'Estabelecimento inválido.']
+                    ], 400);
                 }
             } else {
-                return $this->failValidationErrors('ID do estabelecimento é obrigatório.');
+                return $this->respond([
+                    'status' => 400,
+                    'success' => false,
+                    'messages' => ['error' => 'ID do estabelecimento é obrigatório.']
+                ], 400);
             }
 
             // 2. GARANTIA DE UNICIDADE DO ENVIO (CPF + DEVICE FINGERPRINT NOS ÚLTIMOS 30 DIAS)
@@ -92,10 +104,14 @@ class PesquisaController extends ResourceController
             $deviceHash = $dados['device_hash'] ?? '';
 
             if (empty($cpfLimpo)) {
-                return $this->failValidationErrors('CPF é obrigatório.');
+                return $this->respond([
+                    'status' => 400,
+                    'success' => false,
+                    'messages' => ['error' => 'CPF é obrigatório para validação de segurança.']
+                ], 400);
             }
 
-            // Consulta duplicidade para este local nos últimos 30 dias
+            // Consulta duplicidade para este local nos últimos 30 dias de forma unificada
             $duplicidade = $db->table('pesquisa')
                 ->where('id_estabelecimento', $idEstabelecimento)
                 ->groupStart()
@@ -122,7 +138,7 @@ class PesquisaController extends ResourceController
                 ->where('cpf', $cpfLimpo)
                 ->countAllResults() > 0;
 
-            // Tratamento das colunas fiscais conforme validação
+            // Tratamento das colunas fiscais conforme validação do Model
             if (isset($dados['faixa_gasto'])) {
                 $dados['valor_gasto_estimado'] = (float) $dados['faixa_gasto'];
                 unset($dados['faixa_gasto']);
@@ -133,28 +149,43 @@ class PesquisaController extends ResourceController
             }
 
             // Injeta dados de conformidade e segurança na tabela de pesquisas
-            $dados['cpf'] = $cpfLimpo;
-            $dados['device_hash'] = $deviceHash;
-            $dados['is_morador'] = $isMorador ? 1 : 0;
+            $payloadPesquisa = [
+                'id_estabelecimento' => $dados['id_estabelecimento'],
+                'cidade_origem' => $dados['cidade_origem'],
+                'tempo_permanencia' => $dados['tempo_permanencia'],
+                'local_hospedagem' => $dados['local_hospedagem'],
+                'valor_gasto_estimado' => $dados['valor_gasto_estimado'] ?? 0.00,
+                'satisfacao_estrelas' => (int) $dados['satisfacao_estrelas'],
+                'nps' => (int) $dados['nps'],
+                'motivo_visita' => $dados['motivo_visita'],
+                'cpf' => $cpfLimpo,
+                'device_hash' => $deviceHash,
+                'is_morador' => $isMorador ? 1 : 0
+            ];
 
-            // Remove a flag de origem temporária antes de salvar no modelo
-            $origemForm = $dados['origem'] ?? 'guia';
-            unset($dados['origem']);
-
-            if ($this->model->insert($dados)) {
-                return $this->respondCreated([
+            // Executamos a inserção de forma robusta e direta
+            if ($db->table('pesquisa')->insert($payloadPesquisa)) {
+                return $this->respond([
                     'status' => 201,
                     'success' => true,
-                    'is_resident' => $isMorador, // Informa se foi bloqueado por moradia
-                    'origem' => $origemForm,
+                    'is_resident' => $isMorador,
+                    'origem' => $dados['origem'] ?? 'guia',
                     'message' => 'Pesquisa avaliativa gravada com sucesso.'
-                ]);
+                ], 201);
             }
 
-            return $this->failValidationErrors($this->model->errors());
+            return $this->respond([
+                'status' => 400,
+                'success' => false,
+                'messages' => $this->model->errors()
+            ], 400);
 
         } catch (\Exception $e) {
-            return $this->respond(['status' => 500, 'error' => $e->getMessage()], 500);
+            return $this->respond([
+                'status' => 500,
+                'success' => false,
+                'messages' => ['error' => $e->getMessage()]
+            ], 500);
         }
     }
 
@@ -170,7 +201,10 @@ class PesquisaController extends ResourceController
             $pinDigitado = $dados['pin'] ?? '';
 
             if (empty($token) || empty($pinDigitado)) {
-                return $this->fail('Parâmetros ausentes.', 400);
+                return $this->respond([
+                    'success' => false,
+                    'message' => 'Parâmetros ausentes.'
+                ], 400);
             }
 
             $db = \Config\Database::connect();
@@ -193,7 +227,10 @@ class PesquisaController extends ResourceController
             ], 401);
 
         } catch (\Exception $e) {
-            return $this->respond(['status' => 500, 'error' => $e->getMessage()], 500);
+            return $this->respond([
+                'success' => false,
+                'message' => 'Erro interno ao validar PIN.'
+            ], 500);
         }
     }
 }

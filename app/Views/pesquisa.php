@@ -354,7 +354,7 @@
                 <div class="alertContainer animate__animated animate__fadeIn" id="alertContainer"></div>
 
                 <form id="formInovador">
-                    <!-- ID criptografado ou token do local -->
+                    <!-- ID do estabelecimento ou token -->
                     <input type="hidden" id="id_estabelecimento" name="id_estabelecimento">
                     <!-- Assinatura única do navegador para coibir spams em segundo plano -->
                     <input type="hidden" id="device_hash" name="device_hash">
@@ -580,9 +580,9 @@
                 </form>
 
                 <!-- PASSO 5 (DINÂMICO): TELA DE VOUCHER / CRONÔMETRO PÓS-PIN CONTRA PRINTS -->
-                <div class="card-step p-4 text-center" id="stepVoucher">
+                <div class="card-step p-4 text-center animate__animated animate__fadeIn" id="stepVoucher">
                     <div class="voucher-active-card p-4 shadow-lg text-white mb-4">
-                        <i class="fa-solid fa-ticket fa-3x mb-3 animate__animated animate__bounce"></i>
+                        <i class="fa-solid fa-ticket fa-3x mb-3"></i>
                         <h4 class="fw-bold mb-1">Seu Voucher de Desconto!</h4>
                         <p class="small opacity-90 mb-3">Válido exclusivamente para resgate neste estabelecimento
                             parceiro.</p>
@@ -654,9 +654,6 @@
             const urlParams = new URLSearchParams(window.location.search);
             const tokenEst = urlParams.get('token') || urlParams.get('id');
 
-            // Captura o canal de origem para o JavaScript saber se é QR Code físico ou espontâneo do site
-            const canalOrigem = urlParams.get('origem') || 'guia';
-
             // GERA O DEVICE FINGERPRINT SILENCIOSO (Canvas + Hardware Hashing)
             gerarDeviceFingerprint();
 
@@ -667,8 +664,8 @@
                 document.getElementById('formInovador').style.display = 'none';
                 document.getElementById('progressWrapper').style.display = 'none';
                 document.getElementById('alertContainer').innerHTML = `
-                    <div class="alert alert-danger p-4 border-0 rounded-4 text-center shadow-sm animate__animated animate__shakeY">
-                        <i class="fa-solid fa-qrcode fa-3x mb-2 text-danger animate__animated animate__pulse animate__infinite"></i>
+                    <div class="alert alert-danger p-4 border-0 rounded-4 text-center shadow-sm">
+                        <i class="fa-solid fa-qrcode fa-3x mb-2 text-danger"></i>
                         <h5 class="fw-bold">Leitura Obrigatória</h5>
                         <p class="small mb-0 text-muted">Por favor, faça a leitura do QR Code oficial impresso e colado no estabelecimento para responder.</p>
                     </div>
@@ -687,7 +684,6 @@
             }
         });
 
-        // Função moderna e limpa de Fingerprint baseado em propriedades do cliente (Fricção Zero)
         function gerarDeviceFingerprint() {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
@@ -703,7 +699,6 @@
                 navigator.hardwareConcurrency || 4
             ].join('||');
 
-            // Grava o device_hash final em SHA256 fictício ou hash base64 para envio
             document.getElementById('device_hash').value = btoa(canvasHash + '||' + hardwareAssinatura).substring(0, 64);
         }
 
@@ -913,7 +908,6 @@
             const valorRaw = document.getElementById('faixa_gasto').value;
             const valorFloat = parseFloat(valorRaw);
 
-            // Captura o canal de origem real da URL (para o backend saber o fluxo de recompensa)
             const urlParams = new URLSearchParams(window.location.search);
             const canalOrigem = urlParams.get('origem') || 'guia';
 
@@ -928,7 +922,7 @@
                 motivo_visita: document.getElementById('motivo_visita').value,
                 cpf: cpfVal,
                 device_hash: document.getElementById('device_hash').value,
-                origem: canalOrigem // Injeta se veio do qr code de balcão ou espontâneo de casa
+                origem: canalOrigem
             };
 
             try {
@@ -946,7 +940,7 @@
 
                 if (response.ok && resData.success) {
 
-                    // CASO SEJA MORADOR IDENTIFICADO: O sistema bloqueia de forma elegante a geração do voucher
+                    // CASO SEJA MORADOR IDENTIFICADO: Bloqueia de forma elegante a geração do voucher
                     if (resData.is_resident) {
                         document.getElementById('formInovador').style.display = 'none';
                         document.getElementById('progressWrapper').style.display = 'none';
@@ -955,16 +949,16 @@
                                 <i class="fa-solid fa-user-shield fa-3x mb-2 text-warning"></i>
                                 <h5 class="fw-bold">Agradecemos sua Participação!</h5>
                                 <p class="small text-muted mb-3">Identificamos seu cadastro de morador em Nova Lima. Sua pesquisa foi salva com sucesso e ajudará muito a prefeitura a monitorar as políticas locais!</p>
-                                <p class="small text-muted mb-0 font-italic">* Conforme regulamento, os cupons de rede de vantagens são limitados para turistas em tráfego de fora do município.</p>
+                                <p class="small text-muted mb-0 font-italic">* Conforme regulamento, os cupons da rede de vantagens são limitados para turistas em trânsito de fora do município.</p>
                                 <a href="<?= site_url('guia') ?>" class="btn btn-outline-primary btn-sm rounded-pill mt-4 px-4 fw-bold">Ir para o Guia Turístico</a>
                             </div>
                         `;
                         return;
                     }
 
-                    // CASO SEJA TURISTA E O LOCAL PARTICIPE DA REDE DE RECOMPENSAS
+                    // CASO SEJA TURISTA E O LOCAL PARTICIPE DA REDE DE RECOMPENSAS COM LEITURA VIA QR CODE FÍSICO
                     if (aceitaDescontoDoLocal && resData.origem === 'qrcode') {
-                        // Grava no LocalStorage o voucher pendente para ele acessar quando quiser no Guia
+                        // Grava no LocalStorage o voucher pendente
                         localStorage.setItem('inovatour_voucher', JSON.stringify({
                             token: originalToken,
                             local: '<?= esc($nomeLugar) ?>',
@@ -976,12 +970,11 @@
                         document.getElementById('progressWrapper').style.display = 'none';
                         document.getElementById('stepVoucher').classList.add('active');
                     } else {
-                        // Se respondeu espontaneamente de casa (origem=guia) ou o local não dá desconto
+                        // Sem voucher para origens espontâneas de casa
                         window.location.href = '<?= site_url('pesquisa/sucesso') ?>';
                     }
 
                 } else {
-                    // Trata duplicidade de CPF ou device_hash nos últimos 30 dias
                     alert(resData.messages ? resData.messages.error : "Falha ao registrar dados.");
                     btn.disabled = false;
                     btn.innerText = "Finalizar ✨";
@@ -1001,7 +994,6 @@
             }
 
             try {
-                // Chama a API rápida para validar se o PIN pertence ao estabelecimento correspondente
                 const response = await fetch(`<?= site_url('api/pesquisa/validar-pin') ?>`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1014,16 +1006,13 @@
                 const data = await response.json();
 
                 if (response.ok && data.success) {
-                    // Oculta a área de digitação e revela o Cronômetro Ativo piscando em tempo real
                     document.getElementById('pinActivationZone').classList.add('d-none');
                     document.getElementById('countdownTimerZone').classList.remove('d-none');
 
-                    // Inicia o Timer regressivo real de 2 minutos
                     dispararCronometroRegressivo(120);
 
                     // Limpa o LocalStorage porque o desconto já foi formalmente resgatado
                     localStorage.removeItem('inovatour_voucher');
-
                 } else {
                     alert("Código PIN inválido para este estabelecimento.");
                 }
@@ -1045,7 +1034,6 @@
 
                 clockText.innerText = `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
 
-                // Reduz proporcionalmente a barra wave
                 let porcentagem = (tempoRestante / segundosTotais) * 100;
                 pBar.style.width = `${porcentagem}%`;
 

@@ -100,13 +100,15 @@
             margin-bottom: 30px;
         }
 
-        /* Classes utilitárias premium adicionadas para o status de desconto e PIN */
+        /* Correção para garantir que o badge se ajuste no layout mobile de tabelas responsivas */
         .badge-discount-status {
             font-size: 0.72rem;
             font-weight: 700;
             padding: 6px 12px;
             border-radius: 50px;
             text-transform: uppercase;
+            white-space: nowrap;
+            display: inline-block;
         }
 
         .pin-code-display {
@@ -118,6 +120,8 @@
             border-radius: 6px;
             color: var(--nl-purple);
             letter-spacing: 1px;
+            white-space: nowrap;
+            display: inline-block;
         }
     </style>
 </head>
@@ -127,7 +131,7 @@
         <nav id="sidebar">
             <div class="sidebar-header mb-4">
                 <div class="brand-logo-container">
-                    <img src="new-logo2.png" alt="iNovaTour Logo">
+                    <img src="<?= site_url('new-logo2.png') ?>" alt="iNovaTour Logo">
                 </div>
                 <span class="fw-extrabold text-nl-purple h4 tracking-tight" style="font-weight:800;">
                     iNova<span style="font-weight:400; color:var(--nl-text-dark);">Tour</span>
@@ -164,33 +168,27 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h2 class="fw-bold mb-1" style="color: var(--nl-purple);">Base Unificada de Estabelecimentos</h2>
-                    <p class="text-muted small">Gerenciamento de lojistas privados ativos e cadastro direto de
-                        patrimônios públicos.</p>
+                    <p class="text-muted small">Gerenciamento de lojistas privados ativos e cadastro direto de patrimônios públicos.</p>
                 </div>
             </div>
 
             <div class="form-container">
                 <div class="report-container">
                     <h5 class="fw-bold mb-2" style="color: var(--nl-purple);">
-                        <i class="fa-solid fa-circle-plus me-2"></i>Cadastrar Ponto Natural, Cultural ou Evento Próprio
-                        (Prefeitura)
+                        <i class="fa-solid fa-circle-plus me-2"></i>Cadastrar Ponto Natural, Cultural ou Evento Próprio (Prefeitura)
                     </h5>
                     <p class="text-muted small mb-4">
-                        Insira os dados básicos do atrativo municipal para geração imediata do QR Code de coleta de
-                        dados.
+                        Insira os dados básicos do atrativo municipal para geração imediata do QR Code de coleta de dados.
                     </p>
 
                     <form action="<?= site_url('estabelecimentos/salvar-direto') ?>" method="POST">
                         <?= csrf_field() ?>
-                        <input type="hidden" name="id_usuario"
-                            value="<?= session()->get('id_usuario') ?? session()->get('id') ?>">
+                        <input type="hidden" name="id_usuario" value="<?= session()->get('id_usuario') ?? session()->get('id') ?>">
 
                         <div class="row g-3 align-items-end">
                             <div class="col-md-4">
-                                <label class="form-label small fw-bold text-secondary">Nome do Ponto/Evento (Razão
-                                    Social):</label>
-                                <input type="text" name="razao_social" class="form-control" required
-                                    placeholder="Ex: Cachoeira de Santo Antônio">
+                                <label class="form-label small fw-bold text-secondary">Nome do Ponto/Evento (Razão Social):</label>
+                                <input type="text" name="razao_social" class="form-control" required placeholder="Ex: Cachoeira de Santo Antônio">
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label small fw-bold text-secondary">Setor Oficial:</label>
@@ -203,8 +201,7 @@
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label small fw-bold text-secondary">Tipo:</label>
-                                <select name="tipo" class="form-select" id="tipoCadastro"
-                                    onchange="toggleDatas(this.value)" required>
+                                <select name="tipo" class="form-select" id="tipoCadastro" onchange="toggleDatas(this.value)" required>
                                     <option value="fixo">Fixo Permanente</option>
                                     <option value="evento">Evento Sazonal</option>
                                 </select>
@@ -239,8 +236,8 @@
                                 <th>Nome do Local / Razão Social</th>
                                 <th>Setor</th>
                                 <th>Tipo de Operação</th>
-                                <th>Rede de Vantagens</th> <!-- NOVO CAMPO -->
-                                <th>PIN de Balcão</th> <!-- NOVO CAMPO -->
+                                <th>Rede de Vantagens</th>
+                                <th>PIN de Balcão</th>
                                 <th>Vínculo / Origem</th>
                             </tr>
                         </thead>
@@ -249,35 +246,29 @@
                                 foreach ($estabelecimentos as $est): ?>
                                     <tr>
                                         <td>
-                                            <div class="fw-bold"><?= esc($est['razao_social']) ?></div>
-                                            <span
-                                                class="text-muted small"><?= esc($est['cnpj'] ?? 'Isento (Prefeitura)') ?></span>
+                                            <div class="fw-bold text-nowrap"><?= esc($est['razao_social']) ?></div>
+                                            <span class="text-muted small"><?= esc($est['cnpj'] ?? 'Isento (Prefeitura)') ?></span>
                                         </td>
                                         <td>
-                                            <span
-                                                class="badge bg-light text-dark text-uppercase"><?= esc($est['setor']) ?></span>
+                                            <span class="badge bg-light text-dark text-uppercase"><?= esc($est['setor']) ?></span>
                                         </td>
                                         <td>
                                             <?php if ($est['tipo'] === 'evento'): ?>
-                                                <span class="badge bg-warning text-dark"><i
-                                                        class="fa-solid fa-calendar-day me-1"></i> Sazonal
-                                                    (<?= date('d/m', strtotime($est['data_inicio'])) ?> a
-                                                    <?= date('d/m', strtotime($est['data_fim'])) ?>)</span>
+                                                <span class="badge bg-warning text-dark text-nowrap"><i class="fa-solid fa-calendar-day me-1"></i> Sazonal
+                                                    (<?= date('d/m', strtotime($est['data_inicio'])) ?> a <?= date('d/m', strtotime($est['data_fim'])) ?>)</span>
                                             <?php else: ?>
-                                                <span class="badge bg-success"><i class="fa-solid fa-building me-1"></i> Fixo</span>
+                                                <span class="badge bg-success text-nowrap"><i class="fa-solid fa-building me-1"></i> Fixo</span>
                                             <?php endif; ?>
                                         </td>
-
-                                        <!-- NOVO CAMPO: Status da Rede de Vantagens do Lojista -->
+                                        
+                                        <!-- NOVO CAMPO: Status da Rede de Vantagens do Lojista (Com correção de white-space) -->
                                         <td>
                                             <?php if (isset($est['aceita_desconto']) && $est['aceita_desconto'] == 1): ?>
-                                                <span
-                                                    class="badge-discount-status bg-success-subtle text-success border border-success fw-bold"
-                                                    style="background-color: #E8F9EE;">
+                                                <span class="badge-discount-status bg-success-subtle text-success border border-success fw-bold" style="background-color: #E8F9EE;">
                                                     <i class="fa-solid fa-circle-check me-1"></i> Ativo (10% OFF)
                                                 </span>
                                             <?php else: ?>
-                                                <span class="text-muted small">Fora da Rede</span>
+                                                <span class="text-muted small text-nowrap">Fora da Rede</span>
                                             <?php endif; ?>
                                         </td>
 
@@ -290,15 +281,13 @@
                                             <?php endif; ?>
                                         </td>
 
-                                        <td><?= esc($est['role_usuario'] === 'admin' ? 'Prefeitura (Direto)' : 'Lojista Credenciado') ?>
-                                        </td>
+                                        <td class="text-nowrap"><?= esc($est['role_usuario'] === 'admin' ? 'Prefeitura (Direto)' : 'Lojista Credenciado') ?></td>
                                     </tr>
                                 <?php endforeach;
                             else: ?>
                                 <tr>
                                     <td>
-                                        <div class="fw-bold">Matriz de Nossa Senhora do Pilar</div><span
-                                            class="text-muted small">Isento (Prefeitura)</span>
+                                        <div class="fw-bold">Matriz de Nossa Senhora do Pilar</div><span class="text-muted small">Isento (Prefeitura)</span>
                                     </td>
                                     <td><span class="badge bg-light text-dark">CULTURAL</span></td>
                                     <td><span class="badge bg-success">Fixo</span></td>
