@@ -1091,4 +1091,134 @@ class AuthController extends BaseController
 
         return $html;
     }
+
+    // ====================================================================
+// VERSÃO FINAL CORRIGIDA - SEM ATRIBUIÇÃO DE DBDEBUG E SEM CONFLITOS
+// (Pode colar de olhos fechados no seu AuthController.php)
+// ====================================================================
+
+    public function semearNovosParceirosReais()
+    {
+        $db = \Config\Database::connect();
+        $relatorio = [];
+
+        // 1. Criar usuários fictícios para os responsáveis
+        $novosUsuarios = [
+            [
+                'id_usuario' => 20,
+                'nome_responsavel' => 'Geraldo Magela (Rancho)',
+                'email' => 'contato@ranchodobolo.com.br',
+                'senha' => password_hash('senha123', PASSWORD_BCRYPT),
+                'role_usuario' => 'lojista',
+                'status_usuario' => 'ativo'
+            ],
+            [
+                'id_usuario' => 21,
+                'nome_responsavel' => 'Filipe Lamas (Cervejaria)',
+                'email' => 'financeiro@cervejariajambreiro.com.br',
+                'senha' => password_hash('senha123', PASSWORD_BCRYPT),
+                'role_usuario' => 'lojista',
+                'status_usuario' => 'ativo'
+            ],
+            [
+                'id_usuario' => 22,
+                'nome_responsavel' => 'Mariana Guimarães (Pousada)',
+                'email' => 'reservas@pousadaserradorolamoca.com.br',
+                'senha' => password_hash('senha123', PASSWORD_BCRYPT),
+                'role_usuario' => 'lojista',
+                'status_usuario' => 'ativo'
+            ]
+        ];
+
+        foreach ($novosUsuarios as $user) {
+            try {
+                $db->table('usuario')->insert($user);
+                $relatorio[] = "<span style='color:green;'>[OK]</span> Usuário do responsável '{$user['nome_responsavel']}' criado.";
+            } catch (\Exception $ex) {
+                $relatorio[] = "<span style='color:orange;'>[Aviso]</span> Usuário '{$user['nome_responsavel']}' já existia ou conflitou: " . $ex->getMessage();
+            }
+        }
+
+        // 2. Criar os novos estabelecimentos REAIS de Nova Lima que aceitam desconto
+        $novosEstabelecimentos = [
+            [
+                'id_estabelecimento' => 20,
+                'id_usuario' => 20,
+                'razao_social' => 'Rancho do Bolo (São Sebastião das Águas Claras)',
+                'cnpj' => '11.111.222/0001-33',
+                'telefone' => '(31) 99841-3321',
+                'setor' => 'alimentacao_comercio',
+                'token_qr_code' => 'rancho_bolo_macacos_654',
+                'tipo' => 'fixo',
+                'aceita_desconto' => 1,
+                'pin_validacao' => '1234'
+            ],
+            [
+                'id_estabelecimento' => 21,
+                'id_usuario' => 21,
+                'razao_social' => 'Cervejaria Jambreiro (Centro Histórico)',
+                'cnpj' => '22.222.333/0001-44',
+                'telefone' => '(31) 3541-8899',
+                'setor' => 'alimentacao_comercio',
+                'token_qr_code' => 'cerveja_jambreiro_novalima_987',
+                'tipo' => 'fixo',
+                'aceita_desconto' => 1,
+                'pin_validacao' => '4321'
+            ],
+            [
+                'id_estabelecimento' => 22,
+                'id_usuario' => 22,
+                'razao_social' => 'Pousada Serra do Rola-Moça (Jardim de Alah)',
+                'cnpj' => '33.333.444/0001-55',
+                'telefone' => '(31) 3542-1212',
+                'setor' => 'hospedagem',
+                'token_qr_code' => 'pousada_rolamoca_novalima_112',
+                'tipo' => 'fixo',
+                'aceita_desconto' => 1,
+                'pin_validacao' => '7890'
+            ]
+        ];
+
+        foreach ($novosEstabelecimentos as $est) {
+            try {
+                $db->table('estabelecimento_evento')->insert($est);
+                $relatorio[] = "<span style='color:green;'>[OK]</span> Estabelecimento real '{$est['razao_social']}' cadastrado e ativo na Rede de Vantagens (10% OFF)!";
+            } catch (\Exception $ex) {
+                $relatorio[] = "<span style='color:red;'>[FALHA]</span> Não foi possível inserir '{$est['razao_social']}': " . $ex->getMessage();
+            }
+        }
+
+        $html = "<h2>Semeador de Parceiros Reais com Desconto Ativo - iNovaTour</h2>";
+        $html .= "<ul><li>" . implode("</li><li>", $relatorio) . "</li></ul>";
+        $html .= "<br><p><strong>Uso nos Testes Práticos:</strong></p>";
+        $html .= "<table border='1' cellpadding='10' style='border-collapse:collapse;'>
+                <thead>
+                    <tr style='background-color:#F5F3FF;'>
+                        <th>Estabelecimento</th>
+                        <th>Token do QR Code</th>
+                        <th>PIN de Validação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Rancho do Bolo</td>
+                        <td><strong>rancho_bolo_macacos_654</strong></td>
+                        <td><strong>1234</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Cervejaria Jambreiro</td>
+                        <td><strong>cerveja_jambreiro_novalima_987</strong></td>
+                        <td><strong>4321</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Pousada Serra do Rola-Moça</td>
+                        <td><strong>pousada_rolamoca_novalima_112</strong></td>
+                        <td><strong>7890</strong></td>
+                    </tr>
+                </tbody>
+              </table>";
+        $html .= "<p><a href='" . site_url('guia') . "'>Ir para o Guia Turístico e testar o fluxo</a></p>";
+
+        return $html;
+    }
 }
