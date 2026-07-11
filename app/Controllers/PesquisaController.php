@@ -12,10 +12,19 @@ class PesquisaController extends ResourceController
     protected $format = 'json';
 
     /**
-     * Renderiza o formulário de pesquisa carregando as preferências do local
+     * GET /pesquisa ou GET /turismo/visitar/(:any)
+     * Renderiza a página do formulário e trata o roteamento do QR Code físico
      */
-    public function index()
+    public function index($tokenQr = null)
     {
+        // Se a rota acessada foi 'turismo/visitar/{token}', o parâmetro $tokenQr virá preenchido.
+        // Isso significa que o turista ESCANEOU O QR CODE FÍSICO!
+        if ($tokenQr !== null) {
+            // Nós redirecionamos o navegador dele injetando de forma mandatória o 'origem=qrcode' na URL
+            return redirect()->to(site_url("pesquisa?token={$tokenQr}&origem=qrcode"));
+        }
+
+        // Se o acesso foi direto à URL '/pesquisa', capturamos os parâmetros normais da query string
         $token = $this->request->getGet('token') ?? $this->request->getGet('id');
         $estabelecimento = null;
 
@@ -133,7 +142,6 @@ class PesquisaController extends ResourceController
             }
 
             // 3. TRIAGEM DO MORADOR MUNICIPAL (Sem Placebo / Barramento Direto)
-            // Cruzamos contra a nossa tabela municipal homologada
             $isMorador = $db->table('morador_novalima')
                 ->where('cpf', $cpfLimpo)
                 ->countAllResults() > 0;
