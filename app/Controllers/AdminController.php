@@ -176,7 +176,9 @@ class AdminController extends BaseController
             'telefone' => $telefone,
             'setor' => $setor,
             'tipo' => $tipo,
-            'token_qr_code' => md5(uniqid($razaoSocial, true))
+            'token_qr_code' => md5(uniqid($razaoSocial, true)),
+            'aceita_desconto' => 0, // Patrimônio municipal público não participa diretamente da rede comercial
+            'pin_validacao' => null  // Logo, não precisa de PIN de validação
         ];
 
         if ($tipo === 'evento') {
@@ -201,8 +203,13 @@ class AdminController extends BaseController
 
         $db->table('usuario')->where('id_usuario', $id)->update(['status_usuario' => 'ativo']);
 
+        // GERAÇÃO DO PIN EXCLUSIVO DE 4 DÍGITOS NA APROVAÇÃO
+        // Sorteia um número de 0 a 9999 e preenche com zeros à esquerda (ex: "0342", "7249")
+        $pinGerado = sprintf("%04d", mt_rand(0, 9999));
+
         $db->table('estabelecimento_evento')->where('id_usuario', $id)->update([
-            'token_qr_code' => bin2hex(random_bytes(10))
+            'token_qr_code' => bin2hex(random_bytes(10)),
+            'pin_validacao' => $pinGerado // O PIN fica gravado com segurança e pronto para uso do lojista
         ]);
 
         $db->transComplete();

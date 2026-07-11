@@ -180,7 +180,9 @@
                                         <td>
                                             <div class="d-flex align-items-center gap-2">
                                                 <?php $fullUrl = site_url('pesquisa?token=' . $qr['token_qr_code']); ?>
-                                                <span class="text-muted small text-break"><?= $fullUrl ?></span>
+                                                <a href="<?= $fullUrl ?>" target="_blank" class="text-decoration-none">
+                                                    <span class="text-muted small text-break"><?= $fullUrl ?></span>
+                                                </a>
 
                                                 <button type="button" class="btn btn-link p-0 text-secondary btn-copy-url"
                                                     data-url="<?= $fullUrl ?>" title="Copiar URL"

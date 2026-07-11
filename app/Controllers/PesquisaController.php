@@ -3,84 +3,74 @@
 namespace App\Controllers;
 
 use App\Models\PesquisaModel;
-use App\Models\EstabelecimentoModel; // Importa o model para buscar o local
+use App\Models\EstabelecimentoModel;
 use CodeIgniter\RESTful\ResourceController;
 
 class PesquisaController extends ResourceController
 {
-    // Define automaticamente o uso do PesquisaModel dentro do Controller
     protected $modelName = 'App\Models\PesquisaModel';
     protected $format = 'json';
 
     /**
-     * GET /pesquisa
-     * Renderiza a página do formulário buscando o nome do estabelecimento
+     * Renderiza o formulário de pesquisa carregando as preferências do local
      */
     public function index()
     {
-        // Captura o 'token' ou o 'id' vindo na URL (?token=...)
         $token = $this->request->getGet('token') ?? $this->request->getGet('id');
-
         $estabelecimento = null;
 
         if ($token) {
             $estabelecimentoModel = new EstabelecimentoModel();
-
-            // CORREÇÃO: Usando os nomes reais das suas colunas baseados no banco de dados
             $estabelecimento = $estabelecimentoModel->where('token_qr_code', $token)
                 ->orWhere('id_estabelecimento', $token)
                 ->first();
         }
 
-        // Renderiza a view 'pesquisa' injetando os dados encontrados
         return view('pesquisa', [
             'estabelecimento' => $estabelecimento
         ]);
     }
 
     /**
-     * POST /api/pesquisa
-     * Salva a pesquisa enviada de forma inovadora pelo turista via JavaScript
+     * Mapeia o guia com destaque privilegiado baseado em SEO para lojistas da rede
      */
-    /**
-     * POST /api/pesquisa
-     * Salva a pesquisa enviada de forma inovadora pelo turista via JavaScript
-     */
-    // --- MÓDULO 4: Carrega o Guia Turístico de Nova Lima ---
     public function guia()
     {
         $db = \Config\Database::connect();
 
+        // Ordenamos os estabelecimentos ativos priorizando quem participa da rede de vantagens (Selo de Destaque)
         $estabelecimentos = $db->table('estabelecimento_evento ee')
             ->join('usuario u', 'u.id_usuario = ee.id_usuario')
             ->where('u.status_usuario', 'ativo')
+            ->orderBy('ee.aceita_desconto', 'DESC')
+            ->orderBy('ee.razao_social', 'ASC')
             ->get()
             ->getResultArray();
 
         return view('guia', ['estabelecimentos' => $estabelecimentos]);
     }
 
-    // --- MÓDULO 4: Carrega a tela de Sucesso da Pesquisa ---
     public function sucesso()
     {
         return view('sucesso');
     }
 
-    // --- MOTOR DE SUBMISSÃO DA PESQUISA ADAPTADO COM REDIRECIONAMENTO ---
+    /**
+     * MOTOR DE SUBMISSÃO DA PESQUISA COM FILTRO DE MORADOR E TRAVAS DE SPAM
+     */
     public function salvar()
     {
         try {
-            // Captura o payload bruto enviado pelo front-end
             $dados = $this->request->getJSON(true);
 
             if (empty($dados)) {
-                return $this->fail('Nenhum dado foi enviado no corpo da requisição.', 400);
+                return $this->fail('Nenhum dado enviado.', 400);
             }
 
-            // Converter o token recebido no ID numérico do banco de dados antes de salvar
+            $db = \Config\Database::connect();
+
+            // 1. CONVERSÃO DE TOKEN PARA ID NUMÉRICO DO BANCO
             if (isset($dados['id_estabelecimento'])) {
-                // Usando o Query Builder direto no banco para evitar erros de colunas fantasmas do Model
-                $db = \Config\Database::connect();
                 $local = $db->table('estabelecimento_evento')
                     ->where('token_qr_code', $dados['id_estabelecimento'])
                     ->orWhere('id_estabelecimento', $dados['id_estabelecimento'])
@@ -88,51 +78,122 @@ class PesquisaController extends ResourceController
                     ->getRowArray();
 
                 if ($local) {
-                    // Substitui o token texto pelo ID numérico real da chave estrangeira
-                    $dados['id_estabelecimento'] = $local['id_estabelecimento'];
+                    $idEstabelecimento = $local['id_estabelecimento'];
+                    $dados['id_estabelecimento'] = $idEstabelecimento;
                 } else {
-                    return $this->failValidationErrors('O estabelecimento enviado não foi encontrado ou o token é inválido.');
+                    return $this->failValidationErrors('Estabelecimento inválido.');
                 }
+            } else {
+                return $this->failValidationErrors('ID do estabelecimento é obrigatório.');
             }
 
-            // TRADUÇÃO DO CAMPO: Mapeia e garante que o valor seja um número inteiro puro
+            // 2. GARANTIA DE UNICIDADE DO ENVIO (CPF + DEVICE FINGERPRINT NOS ÚLTIMOS 30 DIAS)
+            $cpfLimpo = preg_replace('/\D/', '', $dados['cpf'] ?? '');
+            $deviceHash = $dados['device_hash'] ?? '';
+
+            if (empty($cpfLimpo)) {
+                return $this->failValidationErrors('CPF é obrigatório.');
+            }
+
+            // Consulta duplicidade para este local nos últimos 30 dias
+            $duplicidade = $db->table('pesquisa')
+                ->where('id_estabelecimento', $idEstabelecimento)
+                ->groupStart()
+                ->where('cpf', $cpfLimpo)
+                ->orWhere('device_hash', $deviceHash)
+                ->groupEnd()
+                ->where('respondido_em >=', date('Y-m-d H:i:s', strtotime('-30 days')))
+                ->get()
+                ->getRowArray();
+
+            if ($duplicidade) {
+                return $this->respond([
+                    'status' => 400,
+                    'success' => false,
+                    'messages' => [
+                        'error' => 'Acesso limitado: Você já enviou uma avaliação para este estabelecimento nos últimos 30 dias.'
+                    ]
+                ], 400);
+            }
+
+            // 3. TRIAGEM DO MORADOR MUNICIPAL (Sem Placebo / Barramento Direto)
+            // Cruzamos contra a nossa tabela municipal homologada
+            $isMorador = $db->table('morador_novalima')
+                ->where('cpf', $cpfLimpo)
+                ->countAllResults() > 0;
+
+            // Tratamento das colunas fiscais conforme validação
             if (isset($dados['faixa_gasto'])) {
-                $dados['valor_gasto_estimado'] = (int) $dados['faixa_gasto'];
+                $dados['valor_gasto_estimado'] = (float) $dados['faixa_gasto'];
                 unset($dados['faixa_gasto']);
             }
 
-            // Tratamento lógico de microconsistência: se for Bate e Volta, o local de hospedagem DEVE ser nulo
             if (isset($dados['tempo_permanencia']) && $dados['tempo_permanencia'] === 'bate_volta') {
                 $dados['local_hospedagem'] = null;
             }
 
-            // Executa a inserção passando pelas regras de validação do PesquisaModel
-            if ($this->model->insert($dados)) {
-                // Se a requisição foi AJAX/Fetch (esperando JSON), enviamos a instrução com a URL de redirecionamento
-                if ($this->request->isAJAX() || strpos($this->request->getHeaderLine('Content-Type'), 'application/json') !== false) {
-                    return $this->respondCreated([
-                        'status' => 201,
-                        'success' => true,
-                        'message' => 'Pesquisa turística registrada com sucesso no ecossistema!',
-                        'redirect' => site_url('pesquisa/sucesso') // URL de destino que o JavaScript usará para mudar a página
-                    ]);
-                }
+            // Injeta dados de conformidade e segurança na tabela de pesquisas
+            $dados['cpf'] = $cpfLimpo;
+            $dados['device_hash'] = $deviceHash;
+            $dados['is_morador'] = $isMorador ? 1 : 0;
 
-                // Redirecionamento tradicional caso ocorra envio direto via POST do HTML
-                return redirect()->to(site_url('pesquisa/sucesso'));
+            // Remove a flag de origem temporária antes de salvar no modelo
+            $origemForm = $dados['origem'] ?? 'guia';
+            unset($dados['origem']);
+
+            if ($this->model->insert($dados)) {
+                return $this->respondCreated([
+                    'status' => 201,
+                    'success' => true,
+                    'is_resident' => $isMorador, // Informa se foi bloqueado por moradia
+                    'origem' => $origemForm,
+                    'message' => 'Pesquisa avaliativa gravada com sucesso.'
+                ]);
             }
 
-            // Retorna os erros de validação estruturados (Ex: faltou o motivo da visita)
             return $this->failValidationErrors($this->model->errors());
+
         } catch (\Exception $e) {
-            // Retorna o erro exato caso ainda falte algo no banco de dados (Ex: colunas de data)
+            return $this->respond(['status' => 500, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * API: VALIDAÇÃO DO PIN DE BALCÃO PARA ATIVAÇÃO DO CRONÔMETRO
+     */
+    public function validarPin()
+    {
+        try {
+            $dados = $this->request->getJSON(true);
+
+            $token = $dados['token'] ?? '';
+            $pinDigitado = $dados['pin'] ?? '';
+
+            if (empty($token) || empty($pinDigitado)) {
+                return $this->fail('Parâmetros ausentes.', 400);
+            }
+
+            $db = \Config\Database::connect();
+            $estabelecimento = $db->table('estabelecimento_evento')
+                ->where('token_qr_code', $token)
+                ->orWhere('id_estabelecimento', $token)
+                ->get()
+                ->getRowArray();
+
+            if ($estabelecimento && $estabelecimento['pin_validacao'] === $pinDigitado) {
+                return $this->respond([
+                    'success' => true,
+                    'message' => 'PIN de Balcão homologado com sucesso!'
+                ]);
+            }
+
             return $this->respond([
-                'status' => 500,
-                'error' => 500,
-                'messages' => [
-                    'error' => $e->getMessage() . ' no arquivo ' . $e->getFile() . ' na linha ' . $e->getLine()
-                ]
-            ], 500);
+                'success' => false,
+                'message' => 'PIN de validação inválido.'
+            ], 401);
+
+        } catch (\Exception $e) {
+            return $this->respond(['status' => 500, 'error' => $e->getMessage()], 500);
         }
     }
 }

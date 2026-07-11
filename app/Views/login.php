@@ -159,6 +159,18 @@
             letter-spacing: -0.5px;
             text-transform: uppercase;
         }
+        
+        /* Ajuste fino para o switch de desconto se destacar premium */
+        .discount-promo-box {
+            border: 1px dashed var(--nl-purple);
+            background-color: #F5F3FF;
+            border-radius: 16px;
+            transition: all 0.2s ease;
+        }
+        
+        .discount-promo-box:hover {
+            background-color: #EDE9FE;
+        }
     </style>
 </head>
 
@@ -202,7 +214,7 @@
                                         type="button" role="tab">
                                         Entrar
                                     </button>
-                                    </td>
+                                </li>
                                 <li class="nav-item" role="presentation">
                                     <button
                                         class="nav-link <?= (session()->getFlashdata('active_tab') === 'cadastro') ? 'active' : '' ?>"
@@ -210,7 +222,7 @@
                                         type="button" role="tab">
                                         Cadastrar
                                     </button>
-                                    </td>
+                                </li>
                             </ul>
 
                             <div id="alertContainer">
@@ -258,8 +270,7 @@
                                 <div class="tab-pane fade <?= (session()->getFlashdata('active_tab') === 'cadastro') ? 'show active' : '' ?>"
                                     id="content-cadastro" role="tabpanel">
                                     <h5 class="fw-bold mb-1 text-nl-purple">Solicitar credenciamento</h5>
-                                    <p class="text-muted small mb-4">Cadastre seu negócio para receber o QR Code oficial
-                                        de turismo.</p>
+                                    <p class="text-muted small mb-4">Cadastre seu negócio para receber o QR Code oficial de turismo.</p>
 
                                     <form id="formCadastro" method="POST"
                                         action="<?= site_url('api/registrar-lojista') ?>">
@@ -317,6 +328,23 @@
                                                         Estabelecimento Fixo</option>
                                                     <option value="evento" <?= old('tipo') == 'evento' ? 'selected' : '' ?>>Evento Temporário</option>
                                                 </select>
+                                            </div>
+                                            
+                                            <!-- NOVO SWITCH: Participação Opcional na Rede de Vantagens iNovaTour -->
+                                            <div class="col-md-12 mb-3">
+                                                <div class="discount-promo-box p-3">
+                                                    <div class="form-check form-switch d-flex align-items-center justify-content-between p-0">
+                                                        <div class="pe-3">
+                                                            <label class="form-check-label fw-bold text-nl-purple mb-1" for="cad_desconto" style="cursor: pointer; font-size: 0.9rem;">
+                                                                <i class="fa-solid fa-ticket me-1"></i> Participar da Rede de Vantagens?
+                                                            </label>
+                                                            <p class="text-muted mb-0" style="font-size: 0.75rem; line-height: 1.3;">
+                                                                Ofereça 10% de desconto para turistas e ganhe o <strong>Selo de Destaque</strong> oficial no topo do Guia Turístico!
+                                                            </p>
+                                                        </div>
+                                                        <input class="form-check-input ms-0" type="checkbox" id="cad_desconto" name="aceita_desconto" value="1" <?= old('aceita_desconto') == '1' ? 'checked' : '' ?> style="width: 2.8em; height: 1.4em; cursor: pointer;">
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                         <button type="submit" class="btn btn-primary w-100">Enviar solicitação</button>

@@ -30,8 +30,9 @@ $routes->get('logout', 'AuthController::logout');
 $routes->get('api/auth/sessao-atual', 'AuthController::obterSessao');
 $routes->get('painel', 'AuthController::painel');
 
-// --- 3. FLUXO DO TURISTA (Submissão da Pesquisa) ---
+// --- 3. FLUXO DO TURISTA (Submissão da Pesquisa e Validação do PIN) ---
 $routes->post('api/pesquisa', 'PesquisaController::salvar');
+$routes->post('api/pesquisa/validar-pin', 'PesquisaController::validarPin'); // NOVA ROTA: Validação dinâmica do PIN de balcão
 
 // --- 4. FLUXO DO TURISTA (Escaneamento do QR Code) ---
 $routes->get('turismo/visitar/(:any)', 'PesquisaController::index');
@@ -59,7 +60,7 @@ $routes->group('admin', ['filter' => 'AdminAuthFilter'], function ($routes) {
     $routes->post('recusarLojista/(:num)', 'AdminController::recusarLojista/$1');
 });
 
-// ➕ ROTA DE SALVAMENTO DIRETO (Ajustada para bater com site_url('estabelecimentos/salvar-direto') do formulário)
+// 🏛️ ROTA DE SALVAMENTO DIRETO (Ajustada para bater com site_url('estabelecimentos/salvar-direto') do formulário)
 $routes->post('estabelecimentos/salvar-direto', 'AdminController::salvarDireto', ['filter' => 'AdminAuthFilter']);
 
 // Mantido por compatibilidade caso seu JS use a rota antiga diretamente na raiz
@@ -91,6 +92,9 @@ $routes->group('lojista', ['filter' => 'LojistaAuthFilter'], function ($routes) 
     $routes->get('', 'LojistaController::index');
     $routes->get('dashboard', 'LojistaController::index');
     $routes->get('qrcode', 'LojistaController::qrcode');
+
+    // NOVA ROTA: Permite atualizar o status do switch de desconto diretamente do painel do lojista
+    $routes->post('atualizar-desconto', 'LojistaController::atualizarDesconto');
 });
 
 // Rotas de API internas do Lojista
@@ -107,3 +111,10 @@ $routes->get('guia', 'PesquisaController::guia');
 $routes->get('pesquisa/sucesso', 'PesquisaController::sucesso');
 
 $routes->get('banco', 'AuthController::semearBanco');
+
+// ====================================================================
+// ADICIONE ESTA ROTA NO SEU ARQUIVO app/Config/Routes.php
+// (Pode colar perto da sua rota '/banco' que chama o semearBanco)
+// ====================================================================
+
+$routes->get('migrar-banco', 'AuthController::executarMigracaoVantagens');

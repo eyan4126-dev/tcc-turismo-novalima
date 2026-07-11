@@ -13,6 +13,7 @@ class PesquisaModel extends Model
     protected $useSoftDeletes = false;
     protected $protectFields = true;
 
+    // CAMPOS PERMITIDOS ATUALIZADOS PARA ADMITIR O FLUXO ANTIFRAUDE E GEOLOCALIZAÇÃO
     protected $allowedFields = [
         'id_estabelecimento',
         'cidade_origem',
@@ -22,11 +23,15 @@ class PesquisaModel extends Model
         'valor_gasto_estimado',
         'satisfacao_estrelas',
         'nps',
-        'motivo_visita'
+        'motivo_visita',
+        'cpf',          // Novo campo de validação de morador
+        'device_hash',   // Novo campo de assinatura de navegador
+        'is_resident'   // Nova flag de triagem estatística
     ];
 
     protected bool $allowEmptyInserts = false;
 
+    // REGRAS DE VALIDAÇÃO DO SEU SISTEMA ATUALIZADAS
     protected $validationRules = [
         'id_estabelecimento' => 'required|integer',
         'cidade_origem' => 'required|min_length[3]|max_length[100]',
@@ -36,7 +41,10 @@ class PesquisaModel extends Model
         'valor_gasto_estimado' => 'required',
         'satisfacao_estrelas' => 'required|integer|greater_than_equal_to[1]|less_than_equal_to[5]',
         'nps' => 'required|integer|greater_than_equal_to[0]|less_than_equal_to[10]',
-        'motivo_visita' => 'required|in_list[lazer,negocios,parentes_amigos,outro]'
+        'motivo_visita' => 'required|in_list[lazer,negocios,parentes_amigos,outro]',
+        'cpf' => 'permit_empty|exact_length[11]|numeric', // Validação leve do CPF
+        'device_hash' => 'permit_empty|max_length[64]',    // Validação da hash de segurança
+        'is_resident' => 'permit_empty|in_list[0,1]'       // Boolean de moradores
     ];
 
     protected $validationMessages = [
@@ -48,14 +56,22 @@ class PesquisaModel extends Model
     protected $skipValidation = false;
     protected $cleanValidationRules = true;
 
+    /**
+     * MÓDULO EXPORTADOR FISCAL ATUALIZADO (ICMS TURISMO / SETUR-MG)
+     * Filtra e remove moradores, garantindo a integridade dos dados qualitativos exigidos pelo Estado
+     */
     public function getDadosFiscaisPorPeriodo($dataInicio, $dataFim)
     {
-        return $this->where('respondido_em >=', $dataInicio . ' 00:00:00')
+        return $this->where('is_resident', 0) // Regra de ouro: apenas turistas legítimos entram
+            ->where('respondido_em >=', $dataInicio . ' 00:00:00')
             ->where('respondido_em <=', $dataFim . ' 23:59:59')
             ->orderBy('respondido_em', 'ASC')
             ->findAll();
     }
 
+    /**
+     * MÉTODOS DE INTELIGÊNCIA DO SEU DASHBOARD ORIGINAL PRESERVADOS COM SUCESSO
+     */
     public function getIndicadoresConsolidados()
     {
         $db = \Config\Database::connect();

@@ -137,6 +137,15 @@
             box-shadow: 0 4px 20px rgba(93, 70, 210, 0.04);
             padding: 25px;
         }
+
+        /* Banner promocional para o Dashboard */
+        .alert-promo-banner {
+            background: linear-gradient(135deg, #F5F3FF 0%, #ECE9FC 100%);
+            border-left: 4px solid var(--nl-purple);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(93, 70, 210, 0.03);
+        }
     </style>
 </head>
 
@@ -175,7 +184,7 @@
         </nav>
 
         <div id="content">
-            <form method="GET" action="<?= site_url('lojista/dashboard') ?>" class="row g-3 mb-5 align-items-center">
+            <form method="GET" action="<?= site_url('lojista/dashboard') ?>" class="row g-3 mb-4 align-items-center">
                 <div class="col-md-8">
                     <h2 class="fw-bold mb-1" style="color: var(--nl-purple);">Seu Estabelecimento</h2>
                     <p class="text-muted small mb-0">Métricas estratégicas reais e comportamento de consumo dos seus
@@ -189,6 +198,40 @@
                     </select>
                 </div>
             </form>
+
+            <!-- NOVO BANNER ESTRATÉGICO DE COMPLIANCE NO DASHBOARD -->
+            <div
+                class="alert-promo-banner d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-white d-flex align-items-center justify-content-center border"
+                        style="width: 50px; height: 50px; flex-shrink: 0;">
+                        <i class="fa-solid fa-ticket text-nl-purple fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1">Status da Rede de Vantagens:
+                            <span class="<?= $aceitaDesconto ? 'text-success' : 'text-secondary' ?>">
+                                <?= $aceitaDesconto ? 'Ativo (10% de Desconto)' : 'Inativo' ?>
+                            </span>
+                        </h6>
+                        <p class="text-muted mb-0 small" style="line-height: 1.3;">
+                            <?php if ($aceitaDesconto): ?>
+                                Seu estabelecimento está qualificado para receber o <strong>Selo de Destaque</strong> e
+                                possui o PIN <strong><?= esc($pinValidacao) ?></strong> ativo para validações.
+                            <?php else: ?>
+                                Ative a sua adesão à rede para garantir destaque algorítmico privilegiado no topo do Guia
+                                Turístico Municipal.
+                            <?php endif; ?>
+                        </p>
+                    </div>
+                </div>
+                <div>
+                    <a href="<?= site_url('lojista/qrcode') ?>"
+                        class="btn btn-sm btn-outline-primary rounded-pill px-4 fw-bold text-nowrap"
+                        style="color: var(--nl-purple); border-color: var(--nl-purple);">
+                        <i class="fa-solid fa-sliders me-1"></i> Gerenciar Adesão
+                    </a>
+                </div>
+            </div>
 
             <?php if (session()->getFlashdata('sucesso')): ?>
                 <div class="alert alert-success fw-bold mb-4 border-0 shadow-sm"><i

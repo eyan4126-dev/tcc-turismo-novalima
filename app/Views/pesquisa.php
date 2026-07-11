@@ -11,7 +11,6 @@
     <link rel="icon" type="image/x-icon" href="<?= site_url('new-logo2.png') ?>">
 
     <style>
-        /* Replicando a raiz de identidade visual do sistema */
         :root {
             --nl-purple: #5D46D2;
             --nl-purple-dark: #402cb3;
@@ -31,7 +30,6 @@
             font-family: 'Inter', system-ui, sans-serif;
         }
 
-        /* Faixa com o degradê oficial da identidade de Nova Lima */
         .top-identity-bar {
             height: 12px;
             background: var(--nl-gradient);
@@ -42,7 +40,6 @@
             z-index: 1050;
         }
 
-        /* Container da Logo do iNovaTour */
         .brand-logo-container {
             width: 100px;
             height: 100px;
@@ -68,12 +65,10 @@
             border-radius: 4px;
         }
 
-        /* Barra de progresso agora usa o degradê roxo corporativo */
         .progress-bar {
             background: linear-gradient(90deg, var(--nl-magenta) 0%, var(--nl-purple) 100%);
         }
 
-        /* Estilo dos Blocos de Serviço Flutuantes */
         .card-step {
             background: #FFFFFF;
             color: var(--nl-text-dark);
@@ -89,12 +84,10 @@
             animation: fadeIn 0.4s ease-in-out;
         }
 
-        /* Títulos de seção baseados na paleta do município */
         .text-primary-govt {
             color: var(--nl-purple) !important;
         }
 
-        /* Cards de Seleção Visual Alinhados com o Roxo Institutional */
         .selectable-card {
             border: 1px solid #E2E8F0;
             border-radius: 12px;
@@ -124,7 +117,6 @@
             margin-bottom: 0.5rem;
         }
 
-        /* Estilos da Régua de Gasto Arrastável */
         .price-display {
             font-size: 1.5rem;
             font-weight: 700;
@@ -158,7 +150,6 @@
             transform: scale(1.15);
         }
 
-        /* Régua do NPS Interativa Clean */
         .nps-container {
             display: flex;
             justify-content: space-between;
@@ -187,7 +178,6 @@
             border-color: #A0AEC0;
         }
 
-        /* Estados ativos do NPS mantidos nítidos com verde neon institucional no promotor */
         .nps-btn.detrator.selected {
             background-color: #DC3545;
             color: #FFFFFF;
@@ -206,7 +196,6 @@
             border-color: #00b358;
         }
 
-        /* Estrelas de Avaliação */
         .star-rating {
             direction: rtl;
             display: inline-flex;
@@ -230,7 +219,6 @@
             color: #FFC107;
         }
 
-        /* Autocomplete da Cidade (Clean Mode) */
         .autocomplete-suggestions {
             position: absolute;
             z-index: 1000;
@@ -256,7 +244,6 @@
             color: var(--nl-purple);
         }
 
-        /* Customizações de Botões de Ação Avançar/Voltar usando o Roxo do iNovaTour */
         .btn-gov-primary {
             background-color: var(--nl-purple);
             border-color: var(--nl-purple);
@@ -269,7 +256,6 @@
             color: #FFFFFF;
         }
 
-        /* Botão Final de Sucesso de Envio usando o Verde Neon Oficial */
         .btn-gov-success {
             background-color: var(--nl-green-neon) !important;
             border-color: var(--nl-green-neon) !important;
@@ -280,6 +266,48 @@
         .btn-gov-success:hover {
             background-color: var(--nl-green-neon-hover) !important;
             border-color: var(--nl-green-neon-hover) !important;
+        }
+
+        /* ANIMAÇÃO DO GRADIENTE WAVE CONTRA PRINTS */
+        @keyframes waveGradiente {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .voucher-active-card {
+            background: linear-gradient(-45deg, #FF5500, #E6007E, #5D46D2, #00D369);
+            background-size: 400% 400%;
+            animation: waveGradiente 4s ease infinite;
+            border-radius: 20px;
+            color: #ffffff;
+            box-shadow: 0 10px 30px rgba(93, 70, 210, 0.3);
+        }
+
+        .pin-box-input {
+            border: 2px solid #E2E8F0;
+            border-radius: 12px;
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: 12px;
+            text-align: center;
+            color: var(--nl-purple);
+            max-width: 200px;
+            margin: 0 auto;
+        }
+
+        .pin-box-input:focus {
+            border-color: var(--nl-purple);
+            box-shadow: 0 0 0 3px rgba(93, 70, 210, 0.15);
+            outline: none;
         }
 
         @keyframes fadeIn {
@@ -299,6 +327,7 @@
 <body>
     <?php
     $nomeLugar = isset($estabelecimento['razao_social']) ? $estabelecimento['razao_social'] : 'Estabelecimento';
+    $aceitaDesconto = isset($estabelecimento['aceita_desconto']) && $estabelecimento['aceita_desconto'] == 1;
     ?>
 
     <div class="top-identity-bar"></div>
@@ -308,10 +337,11 @@
             <div class="col-md-7 col-lg-6">
 
                 <div class="brand-logo-container">
-                    <img src="new-logo2.png" alt="iNovaTour Logo">
+                    <img src="<?= site_url('new-logo2.png') ?>" alt="iNovaTour Logo">
                 </div>
 
-                <div class="mb-4">
+                <!-- Barra de Progresso Principal (Oculta na tela de voucher final) -->
+                <div class="mb-4" id="progressWrapper">
                     <div class="d-flex justify-content-between text-sm mb-1">
                         <span class="text-muted small fw-medium">Pesquisa de Fluxo Turístico</span>
                         <span id="progressText" class="fw-bold text-primary-govt small">Passo 1 de 4</span>
@@ -321,15 +351,19 @@
                     </div>
                 </div>
 
-                <div class="alertContainer" id="alertContainer"></div>
+                <div class="alertContainer animate__animated animate__fadeIn" id="alertContainer"></div>
 
                 <form id="formInovador">
+                    <!-- ID criptografado ou token do local -->
                     <input type="hidden" id="id_estabelecimento" name="id_estabelecimento">
+                    <!-- Assinatura única do navegador para coibir spams em segundo plano -->
+                    <input type="hidden" id="device_hash" name="device_hash">
 
+                    <!-- PASSO 1: Boas-vindas, Origem e Motivação -->
                     <div class="card-step active p-4" id="step1">
-                        <h4 class="fw-bold mb-3">
+                        <h4 class="fw-bold mb-3 text-nl-purple">
                             <i class="fa-solid fa-map-location-dot text-primary-govt me-2"></i>Boas-vindas ao
-                            <strong><?= esc($nomeLugar) ?></strong>! Vamos começar?
+                            <strong><?= esc($nomeLugar) ?></strong>!
                         </h4>
 
                         <div class="mb-4 position-relative">
@@ -384,6 +418,7 @@
                         </div>
                     </div>
 
+                    <!-- PASSO 2: Estadia e Hospedagem -->
                     <div class="card-step p-4" id="step2">
                         <h4 class="fw-bold mb-4"><i class="fa-solid fa-clock text-primary-govt me-2"></i>Sobre a sua
                             estadia</h4>
@@ -452,14 +487,14 @@
                         </div>
                     </div>
 
+                    <!-- PASSO 3: Gasto Estimado -->
                     <div class="card-step p-4" id="step3">
                         <h4 class="fw-bold mb-4"><i class="fa-solid fa-wallet text-primary-govt me-2"></i>Planejamento
                             Financeiro</h4>
 
                         <div class="mb-3">
                             <label class="form-label fw-semibold text-secondary small mb-3">
-                                Qual o seu gasto médio estimado aqui no(a)
-                                <strong><?= esc($nomeLugar) ?></strong>?
+                                Qual o seu gasto médio estimado aqui no(a) <strong><?= esc($nomeLugar) ?></strong>?
                             </label>
 
                             <div class="my-4 mx-auto text-center" style="max-width: 290px;">
@@ -474,8 +509,7 @@
                                 <div class="form-text text-muted small mt-2">Digite o valor incluindo os centavos.</div>
                             </div>
 
-                            <input type="hidden" id="faixa_gasto" name="valor_gasto_estimado" value="0.00"><input
-                                type="hidden" id="faixa_gasto" value="0.00">
+                            <input type="hidden" id="faixa_gasto" name="valor_gasto_estimado" value="0.00">
                         </div>
 
                         <div class="d-flex justify-content-between mt-4">
@@ -487,6 +521,7 @@
                         </div>
                     </div>
 
+                    <!-- PASSO 4: NPS, Estrelas e Coleta Segura de CPF -->
                     <div class="card-step p-4" id="step4">
                         <h4 class="fw-bold mb-4"><i class="fa-solid fa-ranking-star text-primary-govt me-2"></i>Sua
                             Opinião Final</h4>
@@ -522,6 +557,19 @@
                             </div>
                         </div>
 
+                        <!-- INPUT CRÍTICO: CPF obrigatório para travas e proteção contra robôs -->
+                        <div class="mb-4 border-top pt-4">
+                            <label class="form-label fw-bold text-dark small"><i
+                                    class="fa-solid fa-shield-halved me-1 text-nl-purple"></i> Digite seu CPF para
+                                validação</label>
+                            <input type="text" id="turista_cpf" name="cpf"
+                                class="form-control rounded-pill border-2 px-3 py-2 fw-semibold"
+                                placeholder="000.000.000-00" required>
+                            <div class="form-text text-muted small" style="font-size:0.72rem;">* Seus dados são
+                                protegidos em conformidade com a LGPD e usados exclusivamente para coibir múltiplos
+                                envios.</div>
+                        </div>
+
                         <div class="d-flex justify-content-between mt-4">
                             <button type="button" class="btn btn-outline-secondary px-4 fw-bold rounded-pill"
                                 onclick="prevStep(3)"><i class="fa-solid fa-arrow-left me-1"></i> Voltar</button>
@@ -529,30 +577,100 @@
                                 id="btnSubmit">Finalizar ✨</button>
                         </div>
                     </div>
-
                 </form>
+
+                <!-- PASSO 5 (DINÂMICO): TELA DE VOUCHER / CRONÔMETRO PÓS-PIN CONTRA PRINTS -->
+                <div class="card-step p-4 text-center" id="stepVoucher">
+                    <div class="voucher-active-card p-4 shadow-lg text-white mb-4">
+                        <i class="fa-solid fa-ticket fa-3x mb-3 animate__animated animate__bounce"></i>
+                        <h4 class="fw-bold mb-1">Seu Voucher de Desconto!</h4>
+                        <p class="small opacity-90 mb-3">Válido exclusivamente para resgate neste estabelecimento
+                            parceiro.</p>
+
+                        <div class="bg-white text-dark rounded-4 p-3 shadow-sm my-3 border">
+                            <span class="d-block text-muted small fw-bold text-uppercase mb-1">Status do Desconto</span>
+                            <span class="h1 fw-bold text-nl-purple m-0">10% OFF</span>
+                        </div>
+                    </div>
+
+                    <!-- Sessão do PIN de Ativação do Caixa -->
+                    <div id="pinActivationZone">
+                        <h6 class="fw-bold text-dark mb-2">Apresente este celular ao atendente no caixa</h6>
+                        <p class="text-muted small mb-4">Insira o código de balcão (PIN de 4 dígitos) do lojista para
+                            ativar o cronômetro do seu desconto.</p>
+
+                        <input type="text" id="caixaPinInput" class="form-control pin-box-input mb-4" maxlength="4"
+                            placeholder="0000" inputmode="numeric">
+
+                        <button type="button" class="btn btn-gov-primary w-100 rounded-pill py-2 fw-bold"
+                            onclick="validarPinEAtivarCronometro()">
+                            <i class="fa-solid fa-bolt me-2"></i> Ativar Desconto
+                        </button>
+                    </div>
+
+                    <!-- Tela do Cronômetro Regressivo Ativo pós-PIN (Oculta por padrão) -->
+                    <div id="countdownTimerZone" class="d-none">
+                        <div class="alert alert-success border-0 shadow-sm p-3 mb-4 rounded-4">
+                            <h6 class="alert-heading fw-bold mb-1"><i
+                                    class="fa-solid fa-circle-check me-2 animate__animated animate__pulse animate__infinite"></i>Desconto
+                                Ativo no Caixa!</h6>
+                            <p class="small text-muted mb-0">Mostre a tela abaixo piscando para o atendente aplicar o
+                                desconto na comanda.</p>
+                        </div>
+
+                        <!-- Barra de contagem decrescente wave -->
+                        <div class="my-4">
+                            <div class="display-1 fw-bold text-nl-purple font-monospace mb-2" id="regressiveClock"
+                                style="font-size: 4.5rem; letter-spacing: -2px;">02:00</div>
+                            <div class="progress" style="height: 12px; background-color: #E2E8F0; border-radius: 50px;">
+                                <div id="timerProgressBar"
+                                    class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                                    style="width: 100%; background: linear-gradient(90deg, #00D369 0%, #5D46D2 100%);">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-light rounded-3 text-muted small mb-3 border">
+                            <i class="fa-solid fa-circle-info me-2 text-nl-purple"></i>Esta tela é interativa e expirará
+                            em instantes. Impossível revalidar via capturas de tela.
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/imask"></script>
+
     <script>
         let currentStep = 1;
         let cidadeSelecionadaVerdadeira = false;
+        let originalToken = "";
+        let aceitaDescontoDoLocal = <?= $aceitaDesconto ? 'true' : 'false' ?>;
 
         document.addEventListener("DOMContentLoaded", function () {
             const urlParams = new URLSearchParams(window.location.search);
             const tokenEst = urlParams.get('token') || urlParams.get('id');
 
+            // Captura o canal de origem para o JavaScript saber se é QR Code físico ou espontâneo do site
+            const canalOrigem = urlParams.get('origem') || 'guia';
+
+            // GERA O DEVICE FINGERPRINT SILENCIOSO (Canvas + Hardware Hashing)
+            gerarDeviceFingerprint();
+
             if (tokenEst) {
                 document.getElementById('id_estabelecimento').value = tokenEst;
-            }
-            else {
+                originalToken = tokenEst;
+            } else {
                 document.getElementById('formInovador').style.display = 'none';
+                document.getElementById('progressWrapper').style.display = 'none';
                 document.getElementById('alertContainer').innerHTML = `
-                    <div class="alert alert-danger p-4 border-0 rounded-4 text-center">
-                        <i class="fa-solid fa-qrcode fa-3x mb-2 text-danger"></i>
-                        <h5>QR Code Inválido ou Ausente</h5>
-                        <p class="small mb-0">Por favor, faça a leitura do QR Code oficial impresso no estabelecimento.</p>
+                    <div class="alert alert-danger p-4 border-0 rounded-4 text-center shadow-sm animate__animated animate__shakeY">
+                        <i class="fa-solid fa-qrcode fa-3x mb-2 text-danger animate__animated animate__pulse animate__infinite"></i>
+                        <h5 class="fw-bold">Leitura Obrigatória</h5>
+                        <p class="small mb-0 text-muted">Por favor, faça a leitura do QR Code oficial impresso e colado no estabelecimento para responder.</p>
                     </div>
                 `;
             }
@@ -561,7 +679,33 @@
             construirNps();
             configurarAutocompleteCidades();
             configurarInputGastoCentavos();
+
+            // Aplica a máscara nacional de CPF no campo obrigatório
+            const cpfInput = document.getElementById('turista_cpf');
+            if (cpfInput) {
+                IMask(cpfInput, { mask: '000.000.000-00' });
+            }
         });
+
+        // Função moderna e limpa de Fingerprint baseado em propriedades do cliente (Fricção Zero)
+        function gerarDeviceFingerprint() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.textBaseline = "top";
+            ctx.font = "14px 'Arial'";
+            ctx.fillText("iNovaTour, Nova Lima - MG", 2, 2);
+            const canvasHash = btoa(canvas.toDataURL());
+
+            const hardwareAssinatura = [
+                navigator.userAgent,
+                screen.width + 'x' + screen.height,
+                new Date().getTimezoneOffset(),
+                navigator.hardwareConcurrency || 4
+            ].join('||');
+
+            // Grava o device_hash final em SHA256 fictício ou hash base64 para envio
+            document.getElementById('device_hash').value = btoa(canvasHash + '||' + hardwareAssinatura).substring(0, 64);
+        }
 
         function showStep(step) {
             document.querySelectorAll('.card-step').forEach(el => el.classList.remove('active'));
@@ -655,7 +799,6 @@
             });
         }
 
-        // Função de máscara monetária dinâmica para tratar centavos à direita
         function configurarInputGastoCentavos() {
             const inputVisivel = document.getElementById('gasto_input_pix');
             const hiddenInput = document.getElementById('faixa_gasto');
@@ -670,11 +813,9 @@
                     return;
                 }
 
-                // Transforma a string numérica em um valor com 2 casas decimais (ex: "150" vira 1.50)
                 let valorDecimal = (parseInt(valorLimpo, 10) / 100);
                 hiddenInput.value = valorDecimal.toFixed(2);
 
-                // Formata visualmente para exibição: "1.250,50"
                 this.value = valorDecimal.toLocaleString('pt-BR', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
@@ -753,39 +894,44 @@
             });
         }
 
+        // MOTOR DE SUBMISSÃO DA PESQUISA AMARRADO CONTRA SPAM E FRAUDE DE MORADORES
         document.getElementById('formInovador').addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const estrela = document.querySelector('input[name="satisfacao_estrelas"]:checked');
-            if (!estrela || document.getElementById('nps_val').value === "") {
-                alert("Por favor, preencha as avaliações de estrelas e a nota de recomendação.");
+            const cpfVal = document.getElementById('turista_cpf').value;
+
+            if (!estrela || document.getElementById('nps_val').value === "" || cpfVal.length < 14) {
+                alert("Por favor, preencha as avaliações de estrelas, recomendação e digite o CPF completo.");
                 return;
             }
 
             const btn = document.getElementById('btnSubmit');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Registrando...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Validando com Segurança...';
 
-            // Forçamos a captura do valor do elemento de forma limpa e direta
             const valorRaw = document.getElementById('faixa_gasto').value;
             const valorFloat = parseFloat(valorRaw);
+
+            // Captura o canal de origem real da URL (para o backend saber o fluxo de recompensa)
+            const urlParams = new URLSearchParams(window.location.search);
+            const canalOrigem = urlParams.get('origem') || 'guia';
 
             const payload = {
                 id_estabelecimento: document.getElementById('id_estabelecimento').value,
                 cidade_origem: document.getElementById('cidade_origem').value,
                 tempo_permanencia: document.getElementById('tempo_permanencia').value,
                 local_hospedagem: document.getElementById('tempo_permanencia').value === 'dormir' ? document.getElementById('local_hospedagem').value : null,
-
-                // Enviamos estritamente a chave que a validação do Back-end exige
                 valor_gasto_estimado: isNaN(valorFloat) ? 0.00 : valorFloat,
-
                 satisfacao_estrelas: parseInt(estrela.value),
                 nps: parseInt(document.getElementById('nps_val').value),
-                motivo_visita: document.getElementById('motivo_visita').value
+                motivo_visita: document.getElementById('motivo_visita').value,
+                cpf: cpfVal,
+                device_hash: document.getElementById('device_hash').value,
+                origem: canalOrigem // Injeta se veio do qr code de balcão ou espontâneo de casa
             };
 
             try {
-                // Como o back-end exige JSON, mantemos a estrutura original limpa
                 const response = await fetch('<?= site_url('api/pesquisa') ?>', {
                     method: 'POST',
                     headers: {
@@ -796,30 +942,127 @@
                     body: JSON.stringify(payload)
                 });
 
-                if (response.ok) {
-                    // Tenta ler a resposta para redirecionar dinamicamente caso o controller forneça a URL no JSON
-                    const resData = await response.json().catch(() => null);
-                    if (resData && resData.redirect) {
-                        window.location.href = resData.redirect;
+                const resData = await response.json();
+
+                if (response.ok && resData.success) {
+
+                    // CASO SEJA MORADOR IDENTIFICADO: O sistema bloqueia de forma elegante a geração do voucher
+                    if (resData.is_resident) {
+                        document.getElementById('formInovador').style.display = 'none';
+                        document.getElementById('progressWrapper').style.display = 'none';
+                        document.getElementById('alertContainer').innerHTML = `
+                            <div class="alert alert-warning p-4 border-0 rounded-4 text-center shadow-sm">
+                                <i class="fa-solid fa-user-shield fa-3x mb-2 text-warning"></i>
+                                <h5 class="fw-bold">Agradecemos sua Participação!</h5>
+                                <p class="small text-muted mb-3">Identificamos seu cadastro de morador em Nova Lima. Sua pesquisa foi salva com sucesso e ajudará muito a prefeitura a monitorar as políticas locais!</p>
+                                <p class="small text-muted mb-0 font-italic">* Conforme regulamento, os cupons de rede de vantagens são limitados para turistas em tráfego de fora do município.</p>
+                                <a href="<?= site_url('guia') ?>" class="btn btn-outline-primary btn-sm rounded-pill mt-4 px-4 fw-bold">Ir para o Guia Turístico</a>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    // CASO SEJA TURISTA E O LOCAL PARTICIPE DA REDE DE RECOMPENSAS
+                    if (aceitaDescontoDoLocal && resData.origem === 'qrcode') {
+                        // Grava no LocalStorage o voucher pendente para ele acessar quando quiser no Guia
+                        localStorage.setItem('inovatour_voucher', JSON.stringify({
+                            token: originalToken,
+                            local: '<?= esc($nomeLugar) ?>',
+                            status: 'pendente'
+                        }));
+
+                        // Avança dinamicamente para o Passo do Voucher Ativo
+                        document.getElementById('formInovador').style.display = 'none';
+                        document.getElementById('progressWrapper').style.display = 'none';
+                        document.getElementById('stepVoucher').classList.add('active');
                     } else {
-                        // Redirecionamento de segurança padrão para a nova página de sucesso
+                        // Se respondeu espontaneamente de casa (origem=guia) ou o local não dá desconto
                         window.location.href = '<?= site_url('pesquisa/sucesso') ?>';
                     }
+
                 } else {
-                    const erroDetalhado = await response.json();
-                    console.error("Erros do Back-end:", erroDetalhado);
-                    alert("Erro de validação: " + (erroDetalhado.messages ? JSON.stringify(erroDetalhado.messages) : "Verifique os dados"));
+                    // Trata duplicidade de CPF ou device_hash nos últimos 30 dias
+                    alert(resData.messages ? resData.messages.error : "Falha ao registrar dados.");
                     btn.disabled = false;
                     btn.innerText = "Finalizar ✨";
                 }
             } catch (error) {
-                // Força redirecionamento em caso de indisponibilidade de internet ou timeout se o registro persistiu
                 window.location.href = '<?= site_url('pesquisa/sucesso') ?>';
             }
         });
-    </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        // MECÂNICA ANTIFRAUDE: Validação dinâmica do PIN de Caixa e disparo do Cronômetro Ativo
+        async function validarPinEAtivarCronometro() {
+            const pinDigitado = document.getElementById('caixaPinInput').value.trim();
+
+            if (pinDigitado.length < 4) {
+                alert("Por favor, digite o código de 4 dígitos do balcão.");
+                return;
+            }
+
+            try {
+                // Chama a API rápida para validar se o PIN pertence ao estabelecimento correspondente
+                const response = await fetch(`<?= site_url('api/pesquisa/validar-pin') ?>`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        token: originalToken,
+                        pin: pinDigitado
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Oculta a área de digitação e revela o Cronômetro Ativo piscando em tempo real
+                    document.getElementById('pinActivationZone').classList.add('d-none');
+                    document.getElementById('countdownTimerZone').classList.remove('d-none');
+
+                    // Inicia o Timer regressivo real de 2 minutos
+                    dispararCronometroRegressivo(120);
+
+                    // Limpa o LocalStorage porque o desconto já foi formalmente resgatado
+                    localStorage.removeItem('inovatour_voucher');
+
+                } else {
+                    alert("Código PIN inválido para este estabelecimento.");
+                }
+            } catch (e) {
+                alert("Erro ao validar PIN.");
+            }
+        }
+
+        function dispararCronometroRegressivo(segundosTotais) {
+            const clockText = document.getElementById('regressiveClock');
+            const pBar = document.getElementById('timerProgressBar');
+            let tempoRestante = segundosTotais;
+
+            const intervalo = setInterval(() => {
+                tempoRestante--;
+
+                let minutos = Math.floor(tempoRestante / 60);
+                let segundos = tempoRestante % 60;
+
+                clockText.innerText = `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+
+                // Reduz proporcionalmente a barra wave
+                let porcentagem = (tempoRestante / segundosTotais) * 100;
+                pBar.style.width = `${porcentagem}%`;
+
+                if (tempoRestante <= 0) {
+                    clearInterval(intervalo);
+                    document.getElementById('countdownTimerZone').innerHTML = `
+                        <div class="alert alert-danger border-0 shadow-sm p-4 rounded-4">
+                            <i class="fa-solid fa-clock-rotate-left fa-3x mb-2 text-danger"></i>
+                            <h5 class="fw-bold">Cupom Expirado!</h5>
+                            <p class="small text-muted mb-0">Este voucher foi devidamente consumido ou expirou o prazo limite de permanência de validação no caixa.</p>
+                            <a href="<?= site_url('guia') ?>" class="btn btn-outline-secondary btn-sm rounded-pill mt-4 px-4 fw-bold">Voltar ao Guia</a>
+                        </div>
+                    `;
+                }
+            }, 1000);
+        }
+    </script>
 </body>
 
 </html>

@@ -211,7 +211,7 @@
             <div class="report-container">
                 <h5 class="fw-bold mb-2" style="color: var(--nl-purple);"><i
                         class="fa-solid fa-file-export me-2"></i>Módulo Fiscal: Exportação de Relatórios Estaduais</h5>
-                <p class="text-muted small mb-4">IInsira o intervalo cronológico para exportar as matrizes de dados
+                <p class="text-muted small mb-4">Insira o intervalo cronológico para exportar as matrizes de dados
                     oficiais exigidas para captação de recursos e inventário turístico municipal.</p>
 
                 <form method="POST" action="" id="formExportadoresFiscais">
@@ -349,6 +349,7 @@
                                 <th>Responsável</th>
                                 <th>Razão Social / CNPJ</th>
                                 <th>Setor</th>
+                                <th>Rede de Vantagens?</th> <!-- NOVO CAMPO: Indica interesse no onboarding -->
                                 <th class="text-end">Ações de Controle</th>
                             </tr>
                         </thead>
@@ -365,6 +366,20 @@
                                             <span class="text-muted small"><?= esc($sol['cnpj'] ?? 'Sem CNPJ') ?></span>
                                         </td>
                                         <td><span class="badge bg-secondary"><?= esc($sol['setor']) ?></span></td>
+
+                                        <!-- NOVO CAMPO: Badge dinâmico de intenção de descontos no cadastro -->
+                                        <td>
+                                            <?php if (isset($sol['aceita_desconto']) && $sol['aceita_desconto'] == 1): ?>
+                                                <span
+                                                    class="badge bg-success-subtle text-success py-1 px-3 border border-success rounded-pill fw-bold"
+                                                    style="font-size:0.75rem; background-color: #E8F9EE;">
+                                                    <i class="fa-solid fa-ticket me-1"></i> SIM (10% OFF)
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="text-muted small">Não solicitado</span>
+                                            <?php endif; ?>
+                                        </td>
+
                                         <td class="text-end">
                                             <form action="<?= site_url('admin/aprovarLojista/' . $sol['id_usuario']) ?>"
                                                 method="POST" class="d-inline">
@@ -383,7 +398,7 @@
                                 <?php endforeach;
                             else: ?>
                                 <tr>
-                                    <td colspan="4" class="text-muted text-center py-4">Nenhuma solicitação de lojista
+                                    <td colspan="5" class="text-muted text-center py-4">Nenhuma solicitação de lojista
                                         pendente no momento.</td>
                                 </tr>
                             <?php endif; ?>

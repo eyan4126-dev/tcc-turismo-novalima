@@ -99,6 +99,26 @@
             padding: 25px;
             margin-bottom: 30px;
         }
+
+        /* Classes utilitárias premium adicionadas para o status de desconto e PIN */
+        .badge-discount-status {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 50px;
+            text-transform: uppercase;
+        }
+
+        .pin-code-display {
+            font-family: monospace;
+            font-weight: 700;
+            background-color: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            padding: 4px 8px;
+            border-radius: 6px;
+            color: var(--nl-purple);
+            letter-spacing: 1px;
+        }
     </style>
 </head>
 
@@ -160,13 +180,8 @@
                         dados.
                     </p>
 
-                    <!-- CORREÇÃO 1: Mudado para site_url() por segurança de rota no deploy -->
                     <form action="<?= site_url('estabelecimentos/salvar-direto') ?>" method="POST">
-
-                        <!-- CORREÇÃO 2: Token CSRF obrigatório para requisições POST seguras -->
                         <?= csrf_field() ?>
-
-                        <!-- CORREÇÃO 3: Envia o ID do administrador logado obtido diretamente da sessão ativa -->
                         <input type="hidden" name="id_usuario"
                             value="<?= session()->get('id_usuario') ?? session()->get('id') ?>">
 
@@ -224,6 +239,8 @@
                                 <th>Nome do Local / Razão Social</th>
                                 <th>Setor</th>
                                 <th>Tipo de Operação</th>
+                                <th>Rede de Vantagens</th> <!-- NOVO CAMPO -->
+                                <th>PIN de Balcão</th> <!-- NOVO CAMPO -->
                                 <th>Vínculo / Origem</th>
                             </tr>
                         </thead>
@@ -232,10 +249,12 @@
                                 foreach ($estabelecimentos as $est): ?>
                                     <tr>
                                         <td>
-                                            <div class="fw-bold"><?= esc($est['razao_social']) ?></div><span
+                                            <div class="fw-bold"><?= esc($est['razao_social']) ?></div>
+                                            <span
                                                 class="text-muted small"><?= esc($est['cnpj'] ?? 'Isento (Prefeitura)') ?></span>
                                         </td>
-                                        <td><span
+                                        <td>
+                                            <span
                                                 class="badge bg-light text-dark text-uppercase"><?= esc($est['setor']) ?></span>
                                         </td>
                                         <td>
@@ -248,6 +267,29 @@
                                                 <span class="badge bg-success"><i class="fa-solid fa-building me-1"></i> Fixo</span>
                                             <?php endif; ?>
                                         </td>
+
+                                        <!-- NOVO CAMPO: Status da Rede de Vantagens do Lojista -->
+                                        <td>
+                                            <?php if (isset($est['aceita_desconto']) && $est['aceita_desconto'] == 1): ?>
+                                                <span
+                                                    class="badge-discount-status bg-success-subtle text-success border border-success fw-bold"
+                                                    style="background-color: #E8F9EE;">
+                                                    <i class="fa-solid fa-circle-check me-1"></i> Ativo (10% OFF)
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="text-muted small">Fora da Rede</span>
+                                            <?php endif; ?>
+                                        </td>
+
+                                        <!-- NOVO CAMPO: PIN Ativo gerado para suporte ao lojista -->
+                                        <td>
+                                            <?php if (isset($est['aceita_desconto']) && $est['aceita_desconto'] == 1 && !empty($est['pin_validacao'])): ?>
+                                                <span class="pin-code-display"><?= esc($est['pin_validacao']) ?></span>
+                                            <?php else: ?>
+                                                <span class="text-muted small">—</span>
+                                            <?php endif; ?>
+                                        </td>
+
                                         <td><?= esc($est['role_usuario'] === 'admin' ? 'Prefeitura (Direto)' : 'Lojista Credenciado') ?>
                                         </td>
                                     </tr>
@@ -260,6 +302,8 @@
                                     </td>
                                     <td><span class="badge bg-light text-dark">CULTURAL</span></td>
                                     <td><span class="badge bg-success">Fixo</span></td>
+                                    <td><span class="text-muted small">—</span></td>
+                                    <td><span class="text-muted small">—</span></td>
                                     <td>Prefeitura (Direto)</td>
                                 </tr>
                             <?php endif; ?>

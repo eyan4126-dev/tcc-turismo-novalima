@@ -14,15 +14,16 @@ class LojistaController extends BaseController
         // 1. RECUPERA O LOJISTA LOGADO PELA SESSÃO REAL (Usando 'id' conforme grava seu AuthController)
         $idUsuarioLogado = session()->get('id');
 
-        // 2. BUSCA O ESTABELECIMENTO PARA COLETAR O SETOR REAL DO ENUM DO BANCO
-        // Cruzamos o ID da sessão para garantir que pegamos o local correto e passamos para a View
-        $estabelecimentoLogado = $db->table('estabelecimento_evento') // Ajuste para 'estabelecimento_evento' ou o nome exato da sua tabela
+        // 2. BUSCA O ESTABELECIMENTO PARA COLETAR O SETOR REAL DO ENUM DO BANCO E OS NOVOS CAMPOS
+        $estabelecimentoLogado = $db->table('estabelecimento_evento')
             ->where('id_usuario', $idUsuarioLogado)
             ->get()
             ->getRowArray();
 
         // Fallback caso não encontre o vínculo no banco, para não quebrar a página
         $setorReal = $estabelecimentoLogado['setor'] ?? 'outro';
+        $aceitaDesconto = $estabelecimentoLogado['aceita_desconto'] ?? 0;
+        $pinValidacao = $estabelecimentoLogado['pin_validacao'] ?? 'Pendente';
 
         // Filtro Temporal enviado pelo form da View do Lojista
         $periodo = $this->request->getGet('periodo') ?? 'atual';
@@ -102,13 +103,16 @@ class LojistaController extends BaseController
             $charts['hospedagem'] = ['labels' => json_encode(array_column($hosp, 'local_hospedagem')), 'valores' => json_encode(array_map('intval', array_column($hosp, 'total')))];
         }
 
-        // 3. ENVIA TUDO PARA A VIEW, INCLUINDO O SETOR REAL MAREADO DO ENUM
+        // 3. ENVIA TUDO PARA A VIEW, INCLUINDO NOVAS CONFIGURAÇÕES DE DESCONTO
         return view('lojista/dashboard', [
             'kpis' => $kpis,
             'charts' => $charts,
-            'setorLojista' => $setorReal
+            'setorLojista' => $setorReal,
+            'aceitaDesconto' => $aceitaDesconto,
+            'pinValidacao' => $pinValidacao
         ]);
     }
+
     public function qrcode()
     {
         $estabelecimentoModel = new EstabelecimentoModel();
@@ -135,6 +139,34 @@ class LojistaController extends BaseController
         $data['estabelecimento'] = $estabelecimento;
 
         return view('lojista/qrcode', $data);
+    }
+
+    // NOVO MÉTODO: Permite que o Lojista ative/desative sua participação na rede diretamente de seu painel
+    public function atualizarDesconto()
+    {
+        $idUsuarioLogado = session()->get('id');
+        $estabelecimentoModel = new EstabelecimentoModel();
+
+        $estabelecimento = $estabelecimentoModel->where('id_usuario', $idUsuarioLogado)->first();
+
+        if (!$estabelecimento) {
+            return redirect()->back()->with('error', 'Estabelecimento não vinculado ao seu usuário.');
+        }
+
+        $aceitaDesconto = $this->request->getPost('aceita_desconto') !== null ? 1 : 0;
+
+        // Se ele reativar o desconto mas não tiver um PIN gerado por alguma razão, o sistema garante a segurança do PIN
+        $pinAtual = $estabelecimento['pin_validacao'];
+        if ($aceitaDesconto == 1 && empty($pinAtual)) {
+            $pinAtual = sprintf("%04d", mt_rand(0, 9999));
+        }
+
+        $estabelecimentoModel->update($estabelecimento['id_estabelecimento'], [
+            'aceita_desconto' => $aceitaDesconto,
+            'pin_validacao' => $pinAtual
+        ]);
+
+        return redirect()->back()->with('success', 'Configurações de recompensa atualizadas com sucesso!');
     }
 
     public function lancarOcupacao()

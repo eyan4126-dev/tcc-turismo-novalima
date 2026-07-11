@@ -7,6 +7,7 @@
     <title>Guia Turístico Oficial - Nova Lima</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="<?= site_url('new-logo2.png') ?>">
     <style>
         :root {
@@ -118,6 +119,7 @@
             transition: all 0.3s ease;
             height: 100%;
             overflow: hidden;
+            position: relative;
         }
 
         .atrativo-card:hover {
@@ -126,7 +128,24 @@
             border-color: var(--nl-purple-light);
         }
 
-        /* CARD DE CAPA CATEGÓRICA (Estilizados e Modernizados) */
+        /* Badge dinâmica do Selo de Destaque para Lojistas Credenciados ativos na rede */
+        .badge-highlight-premium {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: linear-gradient(135deg, var(--nl-magenta) 0%, var(--nl-purple) 100%);
+            color: #ffffff;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 6px 14px;
+            border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(230, 0, 126, 0.25);
+            z-index: 10;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* CARD DE CAPA CATEGÓRICA */
         .atrativo-img-placeholder {
             height: 160px;
             display: flex;
@@ -137,7 +156,6 @@
             position: relative;
         }
 
-        /* Gradientes premium baseados na identidade de Nova Lima para cada categoria */
         .atrativo-img-placeholder.placeholder-hospedagem {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
@@ -199,6 +217,32 @@
             background-color: #00b358;
             color: #ffffff;
         }
+
+        /* Estilização para o Botão Flutuante de Recuperação de Voucher */
+        .floating-voucher-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: linear-gradient(135deg, var(--nl-green-neon) 0%, var(--nl-purple) 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 50px;
+            padding: 14px 28px;
+            font-weight: 800;
+            box-shadow: 0 10px 25px rgba(0, 211, 105, 0.35);
+            z-index: 2000;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .floating-voucher-btn:hover {
+            transform: scale(1.06) translateY(-2px);
+            color: #ffffff;
+            box-shadow: 0 12px 30px rgba(0, 211, 105, 0.45);
+        }
     </style>
 </head>
 
@@ -231,6 +275,18 @@
         </div>
     </nav>
 
+    <!-- NOVO COMPONENTE: Botão Flutuante de Recuperação Automática de Cupom de Desconto via LocalStorage -->
+    <a href="#" id="floatingVoucherRecovery" class="floating-voucher-btn d-none animate__animated animate__bounceIn">
+        <i class="fa-solid fa-ticket fa-lg animate__animated animate__swing animate__infinite animate__slower"></i>
+        <div class="text-start">
+            <small class="d-block text-uppercase"
+                style="font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px; opacity: 0.9;">Você tem 1 Desconto
+                Ativo!</small>
+            <span class="d-block" style="font-size: 0.85rem; line-height: 1.1;" id="floatingVoucherLabel">Resgatar
+                Cupom</span>
+        </div>
+    </a>
+
     <div class="container my-4">
 
         <!-- BANNER DE ENGAJAMENTO (Atualizado para acionar o Modal de Seleção de Local) -->
@@ -243,7 +299,8 @@
                     <h4 class="fw-bold mb-2 text-white">Sua opinião vale prêmios e melhorias em Nova Lima!</h4>
                     <p class="mb-0 text-white-50 small">
                         Ao responder nossa pesquisa de satisfação turística de 1 minuto, você ajuda o município a captar
-                        recursos estaduais e aprimorar nossa infraestrutura, atrativos e serviços.
+                        recursos estaduais e ganha <strong>10% de desconto</strong> para consumir na nossa rede
+                        credenciada!
                     </p>
                 </div>
                 <div class="col-lg-3 text-lg-end mt-3 mt-lg-0">
@@ -281,6 +338,14 @@
                 <?php foreach ($estabelecimentos as $est): ?>
                     <div class="col-md-6 col-lg-4 card-item" data-setor="<?= $est['setor'] ?>">
                         <div class="atrativo-card d-flex flex-column h-100">
+
+                            <!-- Selo de Destaque Algorítmico para quem participa ativamente do programa de recompensas -->
+                            <?php if ($est['aceita_desconto'] == 1): ?>
+                                <div class="badge-highlight-premium">
+                                    <i class="fa-solid fa-certificate me-1"></i> 10% de Desconto
+                                </div>
+                            <?php endif; ?>
+
                             <!-- Div de capa categórica com a classe correta de estilo baseada no tipo de comércio -->
                             <div class="atrativo-img-placeholder placeholder-<?= $est['setor'] ?>">
                                 <?php if ($est['setor'] === 'hospedagem'): ?>
@@ -310,8 +375,8 @@
                                     <?php endif; ?>
                                 </p>
                                 <div class="pt-3 border-top d-flex gap-2 justify-content-between align-items-center">
-                                    <!-- Botão de avaliar enviando o token específico do local via GET -->
-                                    <a href="<?= site_url('pesquisa?token=' . $est['token_qr_code']) ?>"
+                                    <!-- Botão de avaliar enviando o token específico do local via GET e o canal espontâneo -->
+                                    <a href="<?= site_url('pesquisa?token=' . $est['token_qr_code'] . '&origem=guia') ?>"
                                         class="btn btn-nl-outline-purple btn-sm flex-grow-1 text-center">
                                         <i class="fa-solid fa-star me-1"></i> Avaliar
                                     </a>
@@ -379,6 +444,24 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // RECUPERAÇÃO AUTOMÁTICA DE VOUCHER DO LOCALSTORAGE (Mão-Dupla Invisível)
+            const voucherObj = localStorage.getItem('inovatour_voucher');
+            if (voucherObj) {
+                try {
+                    const voucher = JSON.parse(voucherObj);
+                    if (voucher && voucher.status === 'pendente') {
+                        document.getElementById('floatingVoucherLabel').innerText = `Ver cupom do ${voucher.local}`;
+                        // Redireciona diretamente para o fluxo de ativação de PIN do local
+                        document.getElementById('floatingVoucherRecovery').href = `<?= site_url('pesquisa?token=') ?>` + voucher.token;
+                        document.getElementById('floatingVoucherRecovery').classList.remove('d-none');
+                    }
+                } catch (e) {
+                    console.error("Erro na leitura do LocalStorage do Turista", e);
+                }
+            }
+        });
+
         function filtrarSetor(setor) {
             // Atualiza classe ativa dos botões
             const botoes = document.querySelectorAll('.filter-btn');
@@ -396,15 +479,14 @@
             });
         }
 
-        // Script para redirecionar o usuário do Modal para o formulário correto usando o token selecionado
+        // Script para redirecionar o usuário do Modal para o formulário correto usando o token e a origem espontânea
         function redirecionarParaPesquisa() {
             const tokenSelected = document.getElementById('selectTokenLocal').value;
             if (!tokenSelected) {
                 alert('Por favor, escolha um estabelecimento na lista antes de prosseguir.');
                 return;
             }
-            // Redireciona enviando o token dinâmico na URL
-            window.location.href = "<?= site_url('pesquisa?token=') ?>" + tokenSelected;
+            window.location.href = "<?= site_url('pesquisa?token=') ?>" + tokenSelected + "&origem=guia";
         }
     </script>
 </body>
