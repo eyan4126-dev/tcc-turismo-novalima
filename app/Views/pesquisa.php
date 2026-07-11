@@ -268,7 +268,6 @@
             border-color: var(--nl-green-neon-hover) !important;
         }
 
-        /* ANIMAÇÃO DO GRADIENTE WAVE CONTRA PRINTS */
         @keyframes waveGradiente {
             0% {
                 background-position: 0% 50%;
@@ -327,6 +326,7 @@
 <body>
     <?php
     $nomeLugar = isset($estabelecimento['razao_social']) ? $estabelecimento['razao_social'] : 'Estabelecimento';
+    $tokenEstOriginal = isset($estabelecimento['token_qr_code']) ? $estabelecimento['token_qr_code'] : '';
     $aceitaDesconto = isset($estabelecimento['aceita_desconto']) && $estabelecimento['aceita_desconto'] == 1;
     ?>
 
@@ -340,7 +340,7 @@
                     <img src="<?= site_url('new-logo2.png') ?>" alt="iNovaTour Logo">
                 </div>
 
-                <!-- Barra de Progresso Principal (Oculta na tela de voucher final) -->
+                <!-- Barra de Progresso Principal -->
                 <div class="mb-4" id="progressWrapper">
                     <div class="d-flex justify-content-between text-sm mb-1">
                         <span class="text-muted small fw-medium">Pesquisa de Fluxo Turístico</span>
@@ -354,8 +354,9 @@
                 <div class="alertContainer animate__animated animate__fadeIn" id="alertContainer"></div>
 
                 <form id="formInovador">
-                    <!-- ID do estabelecimento ou token -->
-                    <input type="hidden" id="id_estabelecimento" name="id_estabelecimento">
+                    <!-- ID criptografado ou token do local -->
+                    <input type="hidden" id="id_estabelecimento" name="id_estabelecimento"
+                        value="<?= esc($tokenEstOriginal) ?>">
                     <!-- Assinatura única do navegador para coibir spams em segundo plano -->
                     <input type="hidden" id="device_hash" name="device_hash">
 
@@ -557,7 +558,6 @@
                             </div>
                         </div>
 
-                        <!-- INPUT CRÍTICO: CPF obrigatório para travas e proteção contra robôs -->
                         <div class="mb-4 border-top pt-4">
                             <label class="form-label fw-bold text-dark small"><i
                                     class="fa-solid fa-shield-halved me-1 text-nl-purple"></i> Digite seu CPF para
@@ -618,7 +618,6 @@
                                 desconto na comanda.</p>
                         </div>
 
-                        <!-- Barra de contagem decrescente wave -->
                         <div class="my-4">
                             <div class="display-1 fw-bold text-nl-purple font-monospace mb-2" id="regressiveClock"
                                 style="font-size: 4.5rem; letter-spacing: -2px;">02:00</div>
@@ -647,14 +646,13 @@
     <script>
         let currentStep = 1;
         let cidadeSelecionadaVerdadeira = false;
-        let originalToken = "";
+        let originalToken = "<?= esc($tokenEstOriginal) ?>";
         let aceitaDescontoDoLocal = <?= $aceitaDesconto ? 'true' : 'false' ?>;
 
         document.addEventListener("DOMContentLoaded", function () {
             const urlParams = new URLSearchParams(window.location.search);
             const tokenEst = urlParams.get('token') || urlParams.get('id');
 
-            // GERA O DEVICE FINGERPRINT SILENCIOSO (Canvas + Hardware Hashing)
             gerarDeviceFingerprint();
 
             if (tokenEst) {
@@ -677,7 +675,6 @@
             configurarAutocompleteCidades();
             configurarInputGastoCentavos();
 
-            // Aplica a máscara nacional de CPF no campo obrigatório
             const cpfInput = document.getElementById('turista_cpf');
             if (cpfInput) {
                 IMask(cpfInput, { mask: '000.000.000-00' });
@@ -975,11 +972,12 @@
                     }
 
                 } else {
-                    alert(resData.messages ? resData.messages.error : "Falha ao registrar dados.");
+                    alert(resData.messages ? (resData.messages.error || JSON.stringify(resData.messages)) : "Falha ao registrar dados.");
                     btn.disabled = false;
-                    btn.innerText = "Finalizar ✨";
+                    btn.innerHTML = "Finalizar ✨";
                 }
             } catch (error) {
+                console.error("Erro interno no processamento", error);
                 window.location.href = '<?= site_url('pesquisa/sucesso') ?>';
             }
         });
@@ -1021,7 +1019,7 @@
             }
         }
 
-        function dispararCronometroRegressivo(segundosTotais) {
+        function disparoCronometroRegressivo(segundosTotais) {
             const clockText = document.getElementById('regressiveClock');
             const pBar = document.getElementById('timerProgressBar');
             let tempoRestante = segundosTotais;
