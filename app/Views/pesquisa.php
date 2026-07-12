@@ -328,8 +328,6 @@
     $nomeLugar = isset($estabelecimento['razao_social']) ? $estabelecimento['razao_social'] : 'Estabelecimento';
     $tokenEstOriginal = isset($estabelecimento['token_qr_code']) ? $estabelecimento['token_qr_code'] : '';
     $aceitaDesconto = isset($estabelecimento['aceita_desconto']) && ((int) $estabelecimento['aceita_desconto'] === 1);
-
-    // NOVO PARAMETRO FLEXÍVEL: Obtém a porcentagem configurada no banco (padrão 10% se estiver nula ou vazia)
     $descontoPercentagem = isset($estabelecimento['desconto_percentagem']) ? (int) $estabelecimento['desconto_percentagem'] : 10;
     ?>
 
@@ -590,7 +588,6 @@
 
                         <div class="bg-white text-dark rounded-4 p-3 shadow-sm my-3 border">
                             <span class="d-block text-muted small fw-bold text-uppercase mb-1">Desconto Concedido</span>
-                            <!-- PORCENTAGEM DE DESCONTO EXIBIDA DINAMICAMENTE CONFORME ESCOLHA DO LOJISTA -->
                             <span class="h1 fw-bold text-nl-purple m-0"
                                 id="voucherValueText"><?= $descontoPercentagem ?>% OFF</span>
                         </div>
@@ -651,8 +648,6 @@
         let cidadeSelecionadaVerdadeira = false;
         let originalToken = "<?= esc($tokenEstOriginal) ?>";
         let aceitaDescontoDoLocal = <?= $aceitaDesconto ? 'true' : 'false' ?>;
-
-        // NOVO: Armazena o desconto dinâmico no JS do formulário para salvar no localStorage
         let descontoPercentagemDoLocal = <?= $descontoPercentagem ?>;
 
         document.addEventListener("DOMContentLoaded", function () {
@@ -876,7 +871,7 @@
                             });
                             suggestionsContainer.appendChild(item);
                         });
-                        suggestionsContainer.classList.remove('d-none');
+                        suggestionsContainer.appendChild(item);
                     } else {
                         suggestionsContainer.classList.add('d-none');
                     }
@@ -941,25 +936,9 @@
                 const resData = await response.json();
 
                 if (response.ok && resData.success) {
-
-                    if (resData.is_resident) {
-                        document.getElementById('formInovador').style.display = 'none';
-                        document.getElementById('progressWrapper').style.display = 'none';
-                        document.getElementById('alertContainer').innerHTML = `
-                            <div class="alert alert-warning p-4 border-0 rounded-4 text-center shadow-sm">
-                                <i class="fa-solid fa-user-shield fa-3x mb-2 text-warning"></i>
-                                <h5 class="fw-bold">Agradecemos sua Participação!</h5>
-                                <p class="small text-muted mb-3">Identificamos seu cadastro de morador em Nova Lima. Sua pesquisa foi salva com sucesso e ajudará muito a prefeitura a monitorar as políticas locais!</p>
-                                <p class="small text-muted mb-0 font-italic">* Conforme regulamento, os cupons da rede de vantagens são limitados para turistas em trânsito de fora do município.</p>
-                                <a href="<?= site_url('guia') ?>" class="btn btn-outline-primary btn-sm rounded-pill mt-4 px-4 fw-bold">Ir para o Guia Turístico</a>
-                            </div>
-                        `;
-                        return;
-                    }
-
+                    // --- ALTERAÇÃO DE FLUXO: MORADORES AGORA SEGUEM FLUXO NORMAL E GERAM CUPOM ---
                     if (resData.origem === 'qrcode') {
                         if (aceitaDescontoDoLocal) {
-                            // NOVO: Persiste o valor real e flexível do desconto no localStorage do turista
                             localStorage.setItem('inovatour_voucher', JSON.stringify({
                                 token: originalToken,
                                 local: '<?= esc($nomeLugar) ?>',
@@ -971,11 +950,10 @@
                             document.getElementById('progressWrapper').style.display = 'none';
                             document.getElementById('stepVoucher').classList.add('active');
                         } else {
-                            // Salva um voucher genérico de uso geral na rede parceira
                             localStorage.setItem('inovatour_voucher', JSON.stringify({
                                 token: 'rede_parceira',
                                 local: 'Rede de Vantagens (Qualquer Loja/Hotel)',
-                                desconto: 10, // Default para rede geral
+                                desconto: 10,
                                 status: 'pendente'
                             }));
                             window.location.href = '<?= site_url('pesquisa/sucesso') ?>';

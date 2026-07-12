@@ -35,7 +35,7 @@ class PesquisaController extends ResourceController
 
     /**
      * Mapeia o guia com destaque privilegiado baseado em SEO para lojistas da rede (Programa DesconTour)
-     * ALGORITMO ATUALIZADO: Prioriza quem participa da rede e, em segundo lugar, quem oferece a maior porcentagem de desconto!
+     * ALGORITMO: Prioriza quem participa da rede e, em segundo lugar, quem oferece a maior porcentagem de desconto!
      */
     public function guia()
     {
@@ -62,7 +62,7 @@ class PesquisaController extends ResourceController
     }
 
     /**
-     * MOTOR DE SUBMISSÃO DA PESQUISA COM FILTRO DE MORADOR E TRAVAS DE SPAM
+     * MOTOR DE SUBMISSÃO DA PESQUISA COM TRAVAS DE SPAM E VOUCHERS UNIFICADOS
      */
     public function salvar()
     {
@@ -138,10 +138,9 @@ class PesquisaController extends ResourceController
                 ], 400);
             }
 
-            // 3. TRIAGEM DO MORADOR MUNICIPAL (Sem Placebo / Barramento Direto)
-            $isMorador = $db->table('morador_novalima')
-                ->where('cpf', $cpfLimpo)
-                ->countAllResults() > 0;
+            // --- ALTERAÇÃO DE FLUXO CONCEITUAL: REMOVIDA A EXCLUSÃO DE MORADORES ---
+            // Todos os usuários (moradores ou turistas) são tratados de forma unificada para fomento local amplo!
+            $isMorador = false;
 
             // Tratamento das colunas fiscais conforme validação do Model
             if (isset($dados['faixa_gasto'])) {
@@ -153,7 +152,7 @@ class PesquisaController extends ResourceController
                 $dados['local_hospedagem'] = null;
             }
 
-            // CORREÇÃO: Se não receber origem explícita do front-end, o fallback definitivo é sempre 'qrcode' (Físico)
+            // Se não receber origem explícita do front-end, o fallback definitivo é sempre 'qrcode' (Físico)
             $origemValida = (isset($dados['origem']) && $dados['origem'] === 'guia') ? 'guia' : 'qrcode';
 
             // Injeta dados de conformidade e segurança na tabela de pesquisas
@@ -168,7 +167,7 @@ class PesquisaController extends ResourceController
                 'motivo_visita' => $dados['motivo_visita'],
                 'cpf' => $cpfLimpo,
                 'device_hash' => $deviceHash,
-                'is_morador' => $isMorador ? 1 : 0
+                'is_morador' => 0 // Salva como zero por padrão
             ];
 
             // Executamos a inserção de forma robusta e direta
@@ -176,8 +175,8 @@ class PesquisaController extends ResourceController
                 return $this->respond([
                     'status' => 201,
                     'success' => true,
-                    'is_resident' => $isMorador,
-                    'origem' => $origemValida, // Devolve sempre 'qrcode' ou 'guia' com segurança
+                    'is_resident' => false, // Retorna sempre falso para que o front libere o voucher normalmente
+                    'origem' => $origemValida,
                     'message' => 'Pesquisa avaliativa gravada com sucesso.'
                 ], 201);
             }
