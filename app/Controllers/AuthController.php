@@ -978,123 +978,9 @@ class AuthController extends BaseController
     }
 
     // ====================================================================
-// SUBSTITUA O MÉTODO executarMigracaoVantagens NO SEU AuthController.php
-// POR ESTA VERSÃO QUE UTILIZA BLOCOS TRY/CATCH COMPATÍVEIS COM CI4
-// ====================================================================
-
-    public function executarMigracaoVantagens()
-    {
-        $db = \Config\Database::connect();
-        $relatorio = [];
-
-        // --- PASSO 1: Atualização da tabela 'estabelecimento_evento' ---
-        try {
-            $query1 = "ALTER TABLE `estabelecimento_evento` 
-                   ADD COLUMN `aceita_desconto` TINYINT(1) NOT NULL DEFAULT 0 AFTER `tipo`";
-            $db->query($query1);
-            $relatorio[] = "<span style='color:green;'>[OK]</span> Coluna 'aceita_desconto' adicionada com sucesso.";
-        } catch (\Exception $e) {
-            // Se o erro for de coluna já existente (Código 1060), tratamos como aviso amigável
-            if (strpos($e->getMessage(), '1060') !== false) {
-                $relatorio[] = "<span style='color:orange;'>[Aviso]</span> Coluna 'aceita_desconto' já existia no banco.";
-            } else {
-                $relatorio[] = "<span style='color:red;'>[FALHA]</span> Erro ao adicionar 'aceita_desconto': " . $e->getMessage();
-            }
-        }
-
-        try {
-            $query2 = "ALTER TABLE `estabelecimento_evento` 
-                   ADD COLUMN `pin_validacao` VARCHAR(4) NULL DEFAULT NULL AFTER `aceita_desconto`";
-            $db->query($query2);
-            $relatorio[] = "<span style='color:green;'>[OK]</span> Coluna 'pin_validacao' adicionada com sucesso.";
-        } catch (\Exception $e) {
-            if (strpos($e->getMessage(), '1060') !== false) {
-                $relatorio[] = "<span style='color:orange;'>[Aviso]</span> Coluna 'pin_validacao' já existia no banco.";
-            } else {
-                $relatorio[] = "<span style='color:red;'>[FALHA]</span> Erro ao adicionar 'pin_validacao': " . $e->getMessage();
-            }
-        }
-
-        // --- PASSO 2: Atualização da tabela 'pesquisa' ---
-        try {
-            $query3 = "ALTER TABLE `pesquisa` 
-                   ADD COLUMN `cpf` VARCHAR(11) NULL DEFAULT NULL AFTER `motivo_visita`";
-            $db->query($query3);
-            $relatorio[] = "<span style='color:green;'>[OK]</span> Coluna 'cpf' adicionada com sucesso.";
-        } catch (\Exception $e) {
-            if (strpos($e->getMessage(), '1060') !== false) {
-                $relatorio[] = "<span style='color:orange;'>[Aviso]</span> Coluna 'cpf' já existia no banco.";
-            } else {
-                $relatorio[] = "<span style='color:red;'>[FALHA]</span> Erro ao adicionar 'cpf': " . $e->getMessage();
-            }
-        }
-
-        try {
-            $query4 = "ALTER TABLE `pesquisa` 
-                   ADD COLUMN `device_hash` VARCHAR(64) NULL DEFAULT NULL AFTER `cpf`";
-            $db->query($query4);
-            $relatorio[] = "<span style='color:green;'>[OK]</span> Coluna 'device_hash' adicionada com sucesso.";
-        } catch (\Exception $e) {
-            if (strpos($e->getMessage(), '1060') !== false) {
-                $relatorio[] = "<span style='color:orange;'>[Aviso]</span> Coluna 'device_hash' já existia no banco.";
-            } else {
-                $relatorio[] = "<span style='color:red;'>[FALHA]</span> Erro ao adicionar 'device_hash': " . $e->getMessage();
-            }
-        }
-
-        try {
-            $query5 = "ALTER TABLE `pesquisa` 
-                   ADD COLUMN `is_morador` TINYINT(1) NOT NULL DEFAULT 0 AFTER `device_hash`";
-            $db->query($query5);
-            $relatorio[] = "<span style='color:green;'>[OK]</span> Coluna 'is_morador' adicionada com sucesso.";
-        } catch (\Exception $e) {
-            if (strpos($e->getMessage(), '1060') !== false) {
-                $relatorio[] = "<span style='color:orange;'>[Aviso]</span> Coluna 'is_morador' já existia no banco.";
-            } else {
-                $relatorio[] = "<span style='color:red;'>[FALHA]</span> Erro ao adicionar 'is_morador': " . $e->getMessage();
-            }
-        }
-
-        // --- PASSO 3: Tabela de moradores ---
-        try {
-            $query6 = "CREATE TABLE IF NOT EXISTS `morador_novalima` (
-                      `id_morador` INT(11) NOT NULL AUTO_INCREMENT,
-                      `cpf` VARCHAR(11) NOT NULL,
-                      `nome` VARCHAR(150) NOT NULL,
-                      `criado_em` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
-                      PRIMARY KEY (`id_morador`),
-                      UNIQUE KEY `cpf_unico` (`cpf`)
-                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
-            $db->query($query6);
-            $relatorio[] = "<span style='color:green;'>[OK]</span> Tabela 'morador_novalima' verificada/criada.";
-        } catch (\Exception $e) {
-            $relatorio[] = "<span style='color:red;'>[FALHA]</span> Erro ao criar tabela 'morador_novalima': " . $e->getMessage();
-        }
-
-        // --- PASSO 4: Inserção de dados de simulação ---
-        try {
-            $query7 = "INSERT IGNORE INTO `morador_novalima` (`cpf`, `nome`) VALUES
-                    ('11111111111', 'Ana Souza (Moradora Teste 1)'),
-                    ('22222222222', 'Bruno Lima (Morador Teste 2)'),
-                    ('33333333333', 'Carlos Eduardo (Morador Teste 3)');";
-            $db->query($query7);
-            $relatorio[] = "<span style='color:green;'>[OK]</span> CPFs de simulação importados com sucesso.";
-        } catch (\Exception $e) {
-            $relatorio[] = "<span style='color:red;'>[FALHA]</span> Erro ao inserir CPFs: " . $e->getMessage();
-        }
-
-        // Retorna o diagnóstico detalhado formatado na tela
-        $html = "<h2>Relatório de Atualização de Banco - iNovaTour</h2>";
-        $html .= "<ul><li>" . implode("</li><li>", $relatorio) . "</li></ul>";
-        $html .= "<br><p><strong>Status:</strong> Se todos os passos retornaram [OK] ou [Aviso], o seu sistema já está totalmente pronto para rodar!</p>";
-        $html .= "<p><a href='" . site_url('guia') . "'>Ir para o Guia Turístico</a></p>";
-
-        return $html;
-    }
-
-    // ====================================================================
-// VERSÃO FINAL CORRIGIDA - SEM ATRIBUIÇÃO DE DBDEBUG E SEM CONFLITOS
-// (Pode colar de olhos fechados no seu AuthController.php)
+// SUBSTITUA O SEU MÉTODO ANTERIOR NO AuthController.php POR ESTA VERSÃO
+// Ela popula o banco com 10 estabelecimentos reais de Nova Lima,
+// metade participando da rede e metade não, todos com dados reais de comércio!
 // ====================================================================
 
     public function semearNovosParceirosReais()
@@ -1102,122 +988,335 @@ class AuthController extends BaseController
         $db = \Config\Database::connect();
         $relatorio = [];
 
-        // 1. Criar usuários fictícios para os responsáveis
+        // 1. Definição de 10 Usuários Reais/Fictícios associados aos locais (IDs de 30 a 39)
         $novosUsuarios = [
+            // --- GRUPO 1: USUÁRIOS DOS CREDENCIADOS (ACEITAM DESCONTO) ---
             [
-                'id_usuario' => 20,
-                'nome_responsavel' => 'Geraldo Magela (Rancho)',
-                'email' => 'contato@ranchodobolo.com.br',
+                'id_usuario' => 30,
+                'nome_responsavel' => 'Felipe (Cervejaria Capapreta)',
+                'email' => 'contato@capapreta.com.br',
                 'senha' => password_hash('senha123', PASSWORD_BCRYPT),
                 'role_usuario' => 'lojista',
                 'status_usuario' => 'ativo'
             ],
             [
-                'id_usuario' => 21,
-                'nome_responsavel' => 'Filipe Lamas (Cervejaria)',
-                'email' => 'financeiro@cervejariajambreiro.com.br',
+                'id_usuario' => 31,
+                'nome_responsavel' => 'Glauco (Restaurante Vila Chalezinho)',
+                'email' => 'reservas@chalezinhonovalima.com.br',
                 'senha' => password_hash('senha123', PASSWORD_BCRYPT),
                 'role_usuario' => 'lojista',
                 'status_usuario' => 'ativo'
             ],
             [
-                'id_usuario' => 22,
-                'nome_responsavel' => 'Mariana Guimarães (Pousada)',
-                'email' => 'reservas@pousadaserradorolamoca.com.br',
+                'id_usuario' => 32,
+                'nome_responsavel' => 'Rodrigo (Pousada Vila Mineira)',
+                'email' => 'contato@vilamineiramacacos.com.br',
+                'senha' => password_hash('senha123', PASSWORD_BCRYPT),
+                'role_usuario' => 'lojista',
+                'status_usuario' => 'ativo'
+            ],
+            [
+                'id_usuario' => 33,
+                'nome_responsavel' => 'Gabriela (Mercado Cervejeiro)',
+                'email' => 'comercial@mercadocervejeiro.com.br',
+                'senha' => password_hash('senha123', PASSWORD_BCRYPT),
+                'role_usuario' => 'lojista',
+                'status_usuario' => 'ativo'
+            ],
+            [
+                'id_usuario' => 34,
+                'nome_responsavel' => 'Marcos (Restaurante Mar de Morros)',
+                'email' => 'marcos@mardemorros.com.br',
+                'senha' => password_hash('senha123', PASSWORD_BCRYPT),
+                'role_usuario' => 'lojista',
+                'status_usuario' => 'ativo'
+            ],
+
+            // --- GRUPO 2: USUÁRIOS DOS NÃO CREDENCIADOS (FORA DA REDE) ---
+            [
+                'id_usuario' => 35,
+                'nome_responsavel' => 'Clarice (Pousada Maria Bonita)',
+                'email' => 'clarice@pousadamariabonita.com.br',
+                'senha' => password_hash('senha123', PASSWORD_BCRYPT),
+                'role_usuario' => 'lojista',
+                'status_usuario' => 'ativo'
+            ],
+            [
+                'id_usuario' => 36,
+                'nome_responsavel' => 'Otávio (Cervejaria Laut)',
+                'email' => 'otavio@lautbier.com.br',
+                'senha' => password_hash('senha123', PASSWORD_BCRYPT),
+                'role_usuario' => 'lojista',
+                'status_usuario' => 'ativo'
+            ],
+            [
+                'id_usuario' => 37,
+                'nome_responsavel' => 'Guilherme (Sebastião Bar)',
+                'email' => 'guilherme@sebastiaobar.com.br',
+                'senha' => password_hash('senha123', PASSWORD_BCRYPT),
+                'role_usuario' => 'lojista',
+                'status_usuario' => 'ativo'
+            ],
+            [
+                'id_usuario' => 38,
+                'nome_responsavel' => 'Carla (Pousada do Sol Macacos)',
+                'email' => 'carla@pousadadosolmacacos.com.br',
+                'senha' => password_hash('senha123', PASSWORD_BCRYPT),
+                'role_usuario' => 'lojista',
+                'status_usuario' => 'ativo'
+            ],
+            [
+                'id_usuario' => 39,
+                'nome_responsavel' => 'Leonardo (Atelier da Pizza)',
+                'email' => 'leonardo@atelierpizzamacacos.com.br',
                 'senha' => password_hash('senha123', PASSWORD_BCRYPT),
                 'role_usuario' => 'lojista',
                 'status_usuario' => 'ativo'
             ]
         ];
 
+        // Persiste os usuários do onboarding
         foreach ($novosUsuarios as $user) {
             try {
                 $db->table('usuario')->insert($user);
-                $relatorio[] = "<span style='color:green;'>[OK]</span> Usuário do responsável '{$user['nome_responsavel']}' criado.";
+                $relatorio[] = "<span style='color:green;'>[OK]</span> Usuário do lojista '{$user['nome_responsavel']}' configurado.";
             } catch (\Exception $ex) {
-                $relatorio[] = "<span style='color:orange;'>[Aviso]</span> Usuário '{$user['nome_responsavel']}' já existia ou conflitou: " . $ex->getMessage();
+                $relatorio[] = "<span style='color:orange;'>[Aviso]</span> Usuário '{$user['nome_responsavel']}' já existia no banco.";
             }
         }
 
-        // 2. Criar os novos estabelecimentos REAIS de Nova Lima que aceitam desconto
+        // 2. Criação de 10 estabelecimentos REAIS e icônicos de Nova Lima (Metade com desconto, metade sem)
         $novosEstabelecimentos = [
+            // ====================================================================
+            // PARTE A: PARTICIPANTES DA REDE DE RECOMPENSAS (aceita_desconto = 1)
+            // ====================================================================
             [
-                'id_estabelecimento' => 20,
-                'id_usuario' => 20,
-                'razao_social' => 'Rancho do Bolo (São Sebastião das Águas Claras)',
-                'cnpj' => '11.111.222/0001-33',
-                'telefone' => '(31) 99841-3321',
+                'id_estabelecimento' => 30,
+                'id_usuario' => 30,
+                'razao_social' => 'Cervejaria Capapreta (Jardim Canadá)',
+                'cnpj' => '30.111.222/0001-90',
+                'telefone' => '(31) 3581-2234',
                 'setor' => 'alimentacao_comercio',
-                'token_qr_code' => 'rancho_bolo_macacos_654',
+                'token_qr_code' => 'capapreta_jardim_canada_30',
                 'tipo' => 'fixo',
                 'aceita_desconto' => 1,
-                'pin_validacao' => '1234'
+                'pin_validacao' => '1122' // PIN de validação fácil para a banca
             ],
             [
-                'id_estabelecimento' => 21,
-                'id_usuario' => 21,
-                'razao_social' => 'Cervejaria Jambreiro (Centro Histórico)',
-                'cnpj' => '22.222.333/0001-44',
-                'telefone' => '(31) 3541-8899',
+                'id_estabelecimento' => 31,
+                'id_usuario' => 31,
+                'razao_social' => 'Restaurante Vila Chalezinho (Vale do Sereno)',
+                'cnpj' => '31.111.222/0001-91',
+                'telefone' => '(31) 3286-3101',
                 'setor' => 'alimentacao_comercio',
-                'token_qr_code' => 'cerveja_jambreiro_novalima_987',
+                'token_qr_code' => 'vila_chalezinho_valesereno_31',
                 'tipo' => 'fixo',
                 'aceita_desconto' => 1,
-                'pin_validacao' => '4321'
+                'pin_validacao' => '3344'
             ],
             [
-                'id_estabelecimento' => 22,
-                'id_usuario' => 22,
-                'razao_social' => 'Pousada Serra do Rola-Moça (Jardim de Alah)',
-                'cnpj' => '33.333.444/0001-55',
-                'telefone' => '(31) 3542-1212',
+                'id_estabelecimento' => 32,
+                'id_usuario' => 32,
+                'razao_social' => 'Pousada Vila Mineira (Macacos)',
+                'cnpj' => '32.111.222/0001-92',
+                'telefone' => '(31) 3547-7345',
                 'setor' => 'hospedagem',
-                'token_qr_code' => 'pousada_rolamoca_novalima_112',
+                'token_qr_code' => 'vila_mineira_macacos_32',
                 'tipo' => 'fixo',
                 'aceita_desconto' => 1,
-                'pin_validacao' => '7890'
+                'pin_validacao' => '5566'
+            ],
+            [
+                'id_estabelecimento' => 33,
+                'id_usuario' => 33,
+                'razao_social' => 'Mercado Cervejeiro (Jardim Canadá)',
+                'cnpj' => '33.111.222/0001-93',
+                'telefone' => '(31) 98451-2299',
+                'setor' => 'alimentacao_comercio',
+                'token_qr_code' => 'mercado_cervejeiro_canada_33',
+                'tipo' => 'fixo',
+                'aceita_desconto' => 1,
+                'pin_validacao' => '7788'
+            ],
+            [
+                'id_estabelecimento' => 34,
+                'id_usuario' => 34,
+                'razao_social' => 'Restaurante Mar de Morros (São Sebastião das Águas Claras)',
+                'cnpj' => '34.111.222/0001-94',
+                'telefone' => '(31) 99233-1456',
+                'setor' => 'alimentacao_comercio',
+                'token_qr_code' => 'mar_de_morros_macacos_34',
+                'tipo' => 'fixo',
+                'aceita_desconto' => 1,
+                'pin_validacao' => '9900'
+            ],
+
+            // ====================================================================
+            // PARTE B: FORA DA REDE DE RECOMPENSAS (aceita_desconto = 0)
+            // ====================================================================
+            [
+                'id_estabelecimento' => 35,
+                'id_usuario' => 35,
+                'razao_social' => 'Pousada Maria Bonita (Macacos)',
+                'cnpj' => '35.111.222/0001-95',
+                'telefone' => '(31) 3547-7123',
+                'setor' => 'hospedagem',
+                'token_qr_code' => 'maria_bonita_macacos_35',
+                'tipo' => 'fixo',
+                'aceita_desconto' => 0,
+                'pin_validacao' => null
+            ],
+            [
+                'id_estabelecimento' => 36,
+                'id_usuario' => 36,
+                'razao_social' => 'Cervejaria Laut (Jardim Canadá)',
+                'cnpj' => '36.111.222/0001-96',
+                'telefone' => '(31) 3541-2314',
+                'setor' => 'alimentacao_comercio',
+                'token_qr_code' => 'cervejaria_laut_canada_36',
+                'tipo' => 'fixo',
+                'aceita_desconto' => 0,
+                'pin_validacao' => null
+            ],
+            [
+                'id_estabelecimento' => 37,
+                'id_usuario' => 37,
+                'razao_social' => 'Sebastião Bar (São Sebastião das Águas Claras)',
+                'cnpj' => '37.111.222/0001-97',
+                'telefone' => '(31) 98771-4122',
+                'setor' => 'alimentacao_comercio',
+                'token_qr_code' => 'sebastiao_bar_macacos_37',
+                'tipo' => 'fixo',
+                'aceita_desconto' => 0,
+                'pin_validacao' => null
+            ],
+            [
+                'id_estabelecimento' => 38,
+                'id_usuario' => 38,
+                'razao_social' => 'Pousada do Sol (Macacos)',
+                'cnpj' => '38.111.222/0001-98',
+                'telefone' => '(31) 3547-7099',
+                'setor' => 'hospedagem',
+                'token_qr_code' => 'pousada_do_sol_macacos_38',
+                'tipo' => 'fixo',
+                'aceita_desconto' => 0,
+                'pin_validacao' => null
+            ],
+            [
+                'id_estabelecimento' => 39,
+                'id_usuario' => 39,
+                'razao_social' => 'Atelier da Pizza (Macacos)',
+                'cnpj' => '39.111.222/0001-99',
+                'telefone' => '(31) 99124-5544',
+                'setor' => 'alimentacao_comercio',
+                'token_qr_code' => 'atelier_pizza_macacos_39',
+                'tipo' => 'fixo',
+                'aceita_desconto' => 0,
+                'pin_validacao' => null
             ]
         ];
 
+        // Persiste os estabelecimentos
         foreach ($novosEstabelecimentos as $est) {
             try {
                 $db->table('estabelecimento_evento')->insert($est);
-                $relatorio[] = "<span style='color:green;'>[OK]</span> Estabelecimento real '{$est['razao_social']}' cadastrado e ativo na Rede de Vantagens (10% OFF)!";
+                $statusRede = $est['aceita_desconto'] ? "<strong style='color:green;'>Credenciado (10% OFF)</strong>" : "Comum (Fora da rede)";
+                $relatorio[] = "<span style='color:green;'>[OK]</span> Estabelecimento real '{$est['razao_social']}' inserido como: {$statusRede}.";
             } catch (\Exception $ex) {
-                $relatorio[] = "<span style='color:red;'>[FALHA]</span> Não foi possível inserir '{$est['razao_social']}': " . $ex->getMessage();
+                $relatorio[] = "<span style='color:red;'>[FALHA/AVISO]</span> Não foi possível inserir '{$est['razao_social']}': " . $ex->getMessage();
             }
         }
 
-        $html = "<h2>Semeador de Parceiros Reais com Desconto Ativo - iNovaTour</h2>";
+        // Geração do relatório detalhado na tela para a sua apresentação
+        $html = "<h2>Semeador de Estabelecimentos Reais de Nova Lima - iNovaTour</h2>";
+        $html .= "<p>Foram semeados 10 novos pontos turísticos e comerciais reais divididos igualmente na Rede de Vantagens.</p>";
         $html .= "<ul><li>" . implode("</li><li>", $relatorio) . "</li></ul>";
-        $html .= "<br><p><strong>Uso nos Testes Práticos:</strong></p>";
-        $html .= "<table border='1' cellpadding='10' style='border-collapse:collapse;'>
+
+        $html .= "<br><h3>📋 Tabela de Testes para a Banca</h3>";
+        $html .= "<table border='1' cellpadding='8' style='border-collapse:collapse; width:100%; max-width:800px;'>
                 <thead>
-                    <tr style='background-color:#F5F3FF;'>
-                        <th>Estabelecimento</th>
-                        <th>Token do QR Code</th>
-                        <th>PIN de Validação</th>
+                    <tr style='background-color:#EBF8FF;'>
+                        <th>Estabelecimento Real</th>
+                        <th>Região</th>
+                        <th>Status da Rede</th>
+                        <th>Token do QR Code (URL)</th>
+                        <th>PIN do Caixa</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>Rancho do Bolo</td>
-                        <td><strong>rancho_bolo_macacos_654</strong></td>
-                        <td><strong>1234</strong></td>
+                    <tr style='background-color:#F0FFF4;'>
+                        <td><strong>Cervejaria Capapreta</strong></td>
+                        <td>Jardim Canadá</td>
+                        <td><span style='color:green; font-weight:bold;'>Credenciado</span></td>
+                        <td><code>capapreta_jardim_canada_30</code></td>
+                        <td><strong>1122</strong></td>
                     </tr>
-                    <tr>
-                        <td>Cervejaria Jambreiro</td>
-                        <td><strong>cerveja_jambreiro_novalima_987</strong></td>
-                        <td><strong>4321</strong></td>
+                    <tr style='background-color:#F0FFF4;'>
+                        <td><strong>Vila Chalezinho</strong></td>
+                        <td>Vale do Sereno</td>
+                        <td><span style='color:green; font-weight:bold;'>Credenciado</span></td>
+                        <td><code>vila_chalezinho_valesereno_31</code></td>
+                        <td><strong>3344</strong></td>
                     </tr>
-                    <tr>
-                        <td>Pousada Serra do Rola-Moça</td>
-                        <td><strong>pousada_rolamoca_novalima_112</strong></td>
-                        <td><strong>7890</strong></td>
+                    <tr style='background-color:#F0FFF4;'>
+                        <td><strong>Pousada Vila Mineira</strong></td>
+                        <td>Macacos</td>
+                        <td><span style='color:green; font-weight:bold;'>Credenciado</span></td>
+                        <td><code>vila_mineira_macacos_32</code></td>
+                        <td><strong>5566</strong></td>
+                    </tr>
+                    <tr style='background-color:#F0FFF4;'>
+                        <td><strong>Mercado Cervejeiro</strong></td>
+                        <td>Jardim Canadá</td>
+                        <td><span style='color:green; font-weight:bold;'>Credenciado</span></td>
+                        <td><code>mercado_cervejeiro_canada_33</code></td>
+                        <td><strong>7788</strong></td>
+                    </tr>
+                    <tr style='background-color:#F0FFF4;'>
+                        <td><strong>Restaurante Mar de Morros</strong></td>
+                        <td>Macacos</td>
+                        <td><span style='color:green; font-weight:bold;'>Credenciado</span></td>
+                        <td><code>mar_de_morros_macacos_34</code></td>
+                        <td><strong>9900</strong></td>
+                    </tr>
+                    <tr style='background-color:#FFF5F5;'>
+                        <td>Pousada Maria Bonita</td>
+                        <td>Macacos</td>
+                        <td><span style='color:red;'>Fora da Rede</span></td>
+                        <td><code>maria_bonita_macacos_35</code></td>
+                        <td><i>Sem PIN</i></td>
+                    </tr>
+                    <tr style='background-color:#FFF5F5;'>
+                        <td>Cervejaria Laut</td>
+                        <td>Jardim Canadá</td>
+                        <td><span style='color:red;'>Fora da Rede</span></td>
+                        <td><code>cervejaria_laut_canada_36</code></td>
+                        <td><i>Sem PIN</i></td>
+                    </tr>
+                    <tr style='background-color:#FFF5F5;'>
+                        <td>Sebastião Bar</td>
+                        <td>Macacos</td>
+                        <td><span style='color:red;'>Fora da Rede</span></td>
+                        <td><code>sebastiao_bar_macacos_37</code></td>
+                        <td><i>Sem PIN</i></td>
+                    </tr>
+                    <tr style='background-color:#FFF5F5;'>
+                        <td>Pousada do Sol</td>
+                        <td>Macacos</td>
+                        <td><span style='color:red;'>Fora da Rede</span></td>
+                        <td><code>pousada_do_sol_macacos_38</code></td>
+                        <td><i>Sem PIN</i></td>
+                    </tr>
+                    <tr style='background-color:#FFF5F5;'>
+                        <td>Atelier da Pizza</td>
+                        <td>Macacos</td>
+                        <td><span style='color:red;'>Fora da Rede</span></td>
+                        <td><code>atelier_pizza_macacos_39</code></td>
+                        <td><i>Sem PIN</i></td>
                     </tr>
                 </tbody>
               </table>";
-        $html .= "<p><a href='" . site_url('guia') . "'>Ir para o Guia Turístico e testar o fluxo</a></p>";
+        $html .= "<br><p>👉 <strong>Próximo Passo:</strong> Vá no seu navegador, execute <code>/semear-novos-parceiros</code> para salvar esses dados, e depois visite <code>/guia</code> para ver o destaque do seu ecossistema.</p>";
 
         return $html;
     }
