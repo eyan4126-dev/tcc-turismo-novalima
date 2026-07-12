@@ -193,7 +193,7 @@
                                 <div class="form-check form-switch p-0 d-flex align-items-center justify-content-between">
                                     <div class="pe-3">
                                         <label class="form-check-label fw-bold text-dark mb-1" for="switchDesconto" style="cursor: pointer;">
-                                            <i class="fa-solid fa-ticket text-nl-purple me-1"></i> Participar da Rede de Vantagens (10% de desconto)
+                                            <i class="fa-solid fa-ticket text-nl-purple me-1"></i> Participar do Programa DesconTour
                                         </label>
                                         <p class="text-muted mb-0 small" style="font-size: 0.75rem; line-height: 1.3;">
                                             Ofereça incentivo de consumo aos turistas e apareça no topo das buscas do Guia com o Selo Oficial de Nova Lima.

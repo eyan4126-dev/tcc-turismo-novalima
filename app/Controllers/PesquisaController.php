@@ -34,16 +34,20 @@ class PesquisaController extends ResourceController
     }
 
     /**
-     * Mapeia o guia com destaque privilegiado baseado em SEO para lojistas da rede
+     * Mapeia o guia com destaque privilegiado baseado em SEO para lojistas da rede (Programa DesconTour)
+     * ALGORITMO ATUALIZADO: Prioriza quem participa da rede e, em segundo lugar, quem oferece a maior porcentagem de desconto!
      */
     public function guia()
     {
         $db = \Config\Database::connect();
 
-        // Puxamos diretamente via Query Builder para garantir que não haja cache no Model
+        // Puxamos diretamente via Query Builder ordenando estrategicamente conforme o modelo de negócio
         $estabelecimentos = $db->table('estabelecimento_evento ee')
             ->select('ee.*, u.role_usuario')
             ->join('usuario u', 'u.id_usuario = ee.id_usuario')
+            ->orderBy('ee.aceita_desconto', 'DESC')
+            ->orderBy('ee.desconto_percentagem', 'DESC')
+            ->orderBy('ee.razao_social', 'ASC')
             ->get()
             ->getResultArray();
 
