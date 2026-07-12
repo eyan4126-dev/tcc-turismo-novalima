@@ -278,7 +278,7 @@
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom py-3">
-        <div class="container d-flex align-items-center position-relative">
+        <div class="container d-flex align-items-center position-fixed">
             <a class="navbar-brand d-flex align-items-center" href="#">
                 <img src="<?= site_url('new-logo2.png') ?>" alt="iNovaTour" height="40" class="me-2"
                     onerror="this.style.display='none'">
