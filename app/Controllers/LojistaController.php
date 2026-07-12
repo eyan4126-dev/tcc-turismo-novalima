@@ -14,7 +14,7 @@ class LojistaController extends BaseController
         // 1. RECUPERA O LOJISTA LOGADO PELA SESSÃO REAL
         $idUsuarioLogado = session()->get('id');
 
-        // 2. BUSCA O ESTABELECIMENTO PARA COLETAR O SETOR REAL DO ENUM DO BANCO E OS NOVOS CAMPOS
+        // 2. BUSCA O ESTABELECIMENTO EM TEMPO REAL PARA GARANTIR DADOS FRESCOS
         $estabelecimentoLogado = $db->table('estabelecimento_evento')
             ->where('id_usuario', $idUsuarioLogado)
             ->get()
@@ -23,7 +23,7 @@ class LojistaController extends BaseController
         // Fallback caso não encontre o vínculo no banco, para não quebrar a página
         $setorReal = $estabelecimentoLogado['setor'] ?? 'outro';
         $aceitaDesconto = $estabelecimentoLogado['aceita_desconto'] ?? 0;
-        $descontoPercentagem = $estabelecimentoLogado['desconto_percentagem'] ?? 10; // Novo campo flexível
+        $descontoPercentagem = $estabelecimentoLogado['desconto_percentagem'] ?? 10; // Força fallback para 10%
         $pinValidacao = $estabelecimentoLogado['pin_validacao'] ?? 'Pendente';
         $fotoAtual = $estabelecimentoLogado['foto'] ?? null;
 
@@ -99,7 +99,7 @@ class LojistaController extends BaseController
             'charts' => $charts,
             'setorLojista' => $setorReal,
             'aceitaDesconto' => $aceitaDesconto,
-            'descontoPercentagem' => $descontoPercentagem, // Customização ativa
+            'descontoPercentagem' => $descontoPercentagem,
             'pinValidacao' => $pinValidacao,
             'fotoAtual' => $fotoAtual,
             'razaoSocial' => $estabelecimentoLogado['razao_social'] ?? 'Meu Negócio'
@@ -115,6 +115,7 @@ class LojistaController extends BaseController
             return "Erro de Sessão: Usuário não identificado.";
         }
 
+        // Busca fresca do estabelecimento
         $estabelecimento = $estabelecimentoModel->where('id_usuario', $id_usuario_logado)->first();
 
         if (!$estabelecimento) {
@@ -125,12 +126,12 @@ class LojistaController extends BaseController
         return view('lojista/qrcode', $data);
     }
 
-    // MÉTODO REESTRUTURADO: Agora realiza o upload e atualiza a margem flexível do Programa DesconTour
     public function atualizarDesconto()
     {
         $idUsuarioLogado = session()->get('id');
         $estabelecimentoModel = new EstabelecimentoModel();
 
+        // Busca o estabelecimento atual
         $estabelecimento = $estabelecimentoModel->where('id_usuario', $idUsuarioLogado)->first();
 
         if (!$estabelecimento) {
@@ -139,27 +140,30 @@ class LojistaController extends BaseController
 
         $aceitaDesconto = $this->request->getPost('aceita_desconto') !== null ? 1 : 0;
 
-        // Captura e valida a porcentagem dinâmica enviada pelo lojista
-        $descontoPercentagem = (int) $this->request->getPost('desconto_percentagem');
+        // Pega a porcentagem do formulário. Se for inativo, mantém o valor antigo no banco ou 10
+        $descontoPercentagem = $this->request->getPost('desconto_percentagem') !== null
+            ? (int) $this->request->getPost('desconto_percentagem')
+            : (int) ($estabelecimento['desconto_percentagem'] ?? 10);
 
-        // VALIDAÇÃO CRÍTICA (Regra de Negócio): Impede que o lojista salve descontos inferiores a 5%
-        if ($aceitaDesconto == 1 && $descontoPercentagem < 5) {
-            return redirect()->back()->with('error', 'Por questões de atratividade da campanha, o desconto mínimo aceito no Programa DesconTour é de 5%.');
+        // Força a validação de regras de negócio antes de gravar
+        if ($aceitaDesconto == 1) {
+            if ($descontoPercentagem < 5) {
+                return redirect()->back()->with('error', 'O desconto mínimo aceito no Programa DesconTour é de 5%.');
+            }
+            if ($descontoPercentagem > 100) {
+                return redirect()->back()->with('error', 'O desconto máximo aceito é de 100%.');
+            }
         }
 
-        if ($aceitaDesconto == 1 && $descontoPercentagem > 100) {
-            return redirect()->back()->with('error', 'O desconto máximo aceito é de 100%.');
-        }
-
-        // Se ele reativar o desconto mas não tiver um PIN gerado por alguma razão, o sistema garante a segurança do PIN
         $pinAtual = $estabelecimento['pin_validacao'];
         if ($aceitaDesconto == 1 && empty($pinAtual)) {
             $pinAtual = sprintf("%04d", mt_rand(0, 9999));
         }
 
+        // Prepara o array com tipos primitivos exatos para o MySQL
         $dadosUpdate = [
-            'aceita_desconto' => $aceitaDesconto,
-            'desconto_percentagem' => $descontoPercentagem,
+            'aceita_desconto' => (int) $aceitaDesconto,
+            'desconto_percentagem' => (int) $descontoPercentagem,
             'pin_validacao' => $pinAtual
         ];
 
@@ -177,6 +181,12 @@ class LojistaController extends BaseController
             if ($this->validate($validationRules)) {
                 $nomeUnico = $img->getRandomName();
                 $caminhoDestino = FCPATH . 'uploads/estabelecimentos';
+
+                // Cria a pasta se não existir física no servidor
+                if (!is_dir($caminhoDestino)) {
+                    @mkdir($caminhoDestino, 0777, true);
+                }
+
                 $img->move($caminhoDestino, $nomeUnico);
 
                 if (!empty($estabelecimento['foto']) && file_exists($caminhoDestino . '/' . $estabelecimento['foto'])) {
@@ -189,9 +199,12 @@ class LojistaController extends BaseController
             }
         }
 
-        $estabelecimentoModel->update($estabelecimento['id_estabelecimento'], $dadosUpdate);
-
-        return redirect()->back()->with('sucesso', 'Configurações do Programa DesconTour salvas com sucesso!');
+        // Executa o update usando o Model (que agora permite salvar desconto_percentagem!)
+        if ($estabelecimentoModel->update($estabelecimento['id_estabelecimento'], $dadosUpdate)) {
+            return redirect()->back()->with('sucesso', 'Configurações do Programa DesconTour salvas com sucesso!');
+        } else {
+            return redirect()->back()->with('error', 'Não foi possível atualizar as configurações no banco de dados.');
+        }
     }
 
     public function lancarOcupacao()

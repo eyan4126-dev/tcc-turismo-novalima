@@ -15,23 +15,17 @@ class PesquisaController extends ResourceController
      * GET /pesquisa ou GET /turismo/visitar/(:any)
      * Renderiza a página do formulário e trata o roteamento do QR Code físico
      */
-    public function index($tokenQr = null)
+    public function index()
     {
-        // Se a rota acessada foi 'turismo/visitar/{token}', o parâmetro $tokenQr virá preenchido.
-        if ($tokenQr !== null) {
-            // Nós redirecionamos o navegador dele injetando de forma mandatória o 'origem=qrcode' na URL
-            return redirect()->to(site_url("pesquisa?token={$tokenQr}&origem=qrcode"));
-        }
-
-        // Se o acesso foi direto à URL '/pesquisa', capturamos os parâmetros normais da query string
         $token = $this->request->getGet('token') ?? $this->request->getGet('id');
-        $estabelecimento = null;
+        $estabelecimentoModel = new EstabelecimentoModel();
 
-        if ($token) {
-            $estabelecimentoModel = new EstabelecimentoModel();
-            $estabelecimento = $estabelecimentoModel->where('token_qr_code', $token)
-                ->orWhere('id_estabelecimento', $token)
-                ->first();
+        // Busca o estabelecimento pelo QR code correspondente
+        $estabelecimento = $estabelecimentoModel->where('token_qr_code', $token)->first();
+
+        // Se não encontrar, retorna um erro amigável sem quebrar o framework
+        if (!$estabelecimento) {
+            return "Erro: O QR Code escaneado não aponta para nenhum estabelecimento cadastrado.";
         }
 
         return view('pesquisa', [
@@ -46,16 +40,16 @@ class PesquisaController extends ResourceController
     {
         $db = \Config\Database::connect();
 
-        // Ordenamos os estabelecimentos ativos priorizando quem participa da rede de vantagens (Selo de Destaque)
+        // Puxamos diretamente via Query Builder para garantir que não haja cache no Model
         $estabelecimentos = $db->table('estabelecimento_evento ee')
+            ->select('ee.*, u.role_usuario')
             ->join('usuario u', 'u.id_usuario = ee.id_usuario')
-            ->where('u.status_usuario', 'ativo')
-            ->orderBy('ee.aceita_desconto', 'DESC')
-            ->orderBy('ee.razao_social', 'ASC')
             ->get()
             ->getResultArray();
 
-        return view('guia', ['estabelecimentos' => $estabelecimentos]);
+        return view('guia', [
+            'estabelecimentos' => $estabelecimentos
+        ]);
     }
 
     public function sucesso()
@@ -204,43 +198,20 @@ class PesquisaController extends ResourceController
      */
     public function validarPin()
     {
-        try {
-            $dados = $this->request->getJSON(true);
+        $token = $this->request->getJSON(true)['token'] ?? null;
+        $pin = $this->request->getJSON(true)['pin'] ?? null;
 
-            $token = $dados['token'] ?? '';
-            $pinDigitado = $dados['pin'] ?? '';
-
-            if (empty($token) || empty($pinDigitado)) {
-                return $this->respond([
-                    'success' => false,
-                    'message' => 'Parâmetros ausentes.'
-                ], 400);
-            }
-
-            $db = \Config\Database::connect();
-            $estabelecimento = $db->table('estabelecimento_evento')
-                ->where('token_qr_code', $token)
-                ->orWhere('id_estabelecimento', $token)
-                ->get()
-                ->getRowArray();
-
-            if ($estabelecimento && $estabelecimento['pin_validacao'] === $pinDigitado) {
-                return $this->respond([
-                    'success' => true,
-                    'message' => 'PIN de Balcão homologado com sucesso!'
-                ]);
-            }
-
-            return $this->respond([
-                'success' => false,
-                'message' => 'PIN de validação inválido.'
-            ], 401);
-
-        } catch (\Exception $e) {
-            return $this->respond([
-                'success' => false,
-                'message' => 'Erro interno ao validar PIN.'
-            ], 500);
+        if (!$token || !$pin) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Dados insuficientes.']);
         }
+
+        $estabelecimentoModel = new EstabelecimentoModel();
+        $est = $estabelecimentoModel->where('token_qr_code', $token)->first();
+
+        if ($est && $est['pin_validacao'] === $pin) {
+            return $this->response->setJSON(['success' => true]);
+        }
+
+        return $this->response->setJSON(['success' => false, 'message' => 'PIN incorreto.']);
     }
 }

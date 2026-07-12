@@ -8,7 +8,12 @@ class EstabelecimentoModel extends Model
 {
     protected $table = 'estabelecimento_evento';
     protected $primaryKey = 'id_estabelecimento';
-    protected $useTimestamps = false;
+    protected $useAutoIncrement = true;
+    protected $returnType = 'array';
+    protected $useSoftDeletes = false;
+
+    // CRUCIAL: O 'desconto_percentagem' e 'foto' precisam estar aqui,
+    // senão o CodeIgniter ignora silenciosamente o update deles!
     protected $allowedFields = [
         'id_usuario',
         'razao_social',
@@ -19,7 +24,11 @@ class EstabelecimentoModel extends Model
         'tipo',
         'data_inicio',
         'data_fim',
-        'aceita_desconto', // NOVO CAMPO: Indica se o lojista aceitou participar da rede de descontos (0 ou 1)
-        'pin_validacao'    // NOVO CAMPO: PIN numérico de 4 dígitos gerado na aprovação para validação de balcão
+        'aceita_desconto',
+        'desconto_percentagem', // Adicionado para permitir atualização fluida
+        'pin_validacao',
+        'foto'
     ];
+
+    protected $useTimestamps = false;
 }
