@@ -100,7 +100,6 @@
             margin-bottom: 30px;
         }
 
-        /* Correção para garantir que o badge se ajuste no layout mobile de tabelas responsivas */
         .badge-discount-status {
             font-size: 0.72rem;
             font-weight: 700;
@@ -146,8 +145,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="<?= site_url('estabelecimentos') ?>"
-                        class="nav-link <?= url_is('estabelecimentos') ? 'active' : '' ?>">
+                    <a href="<?= site_url('estabelecimentos') ?>" class="nav-link <?= url_is('estabelecimentos') ? 'active' : '' ?>">
                         <i class="fa-solid fa-store"></i> Estabelecimentos
                     </a>
                 </li>
@@ -236,7 +234,7 @@
                                 <th>Nome do Local / Razão Social</th>
                                 <th>Setor</th>
                                 <th>Tipo de Operação</th>
-                                <th>Rede de Vantagens</th>
+                                <th>Programa DesconTour</th> <!-- RÓTULO COMERCIAL ATUALIZADO -->
                                 <th>PIN de Balcão</th>
                                 <th>Vínculo / Origem</th>
                             </tr>
@@ -261,18 +259,17 @@
                                             <?php endif; ?>
                                         </td>
                                         
-                                        <!-- NOVO CAMPO: Status da Rede de Vantagens do Lojista (Com correção de white-space) -->
+                                        <!-- NOVO CAMPO DINÂMICO: Exibe o percentual do Programa DesconTour cadastrado pelo lojista na tabela do Admin -->
                                         <td>
                                             <?php if (isset($est['aceita_desconto']) && $est['aceita_desconto'] == 1): ?>
                                                 <span class="badge-discount-status bg-success-subtle text-success border border-success fw-bold" style="background-color: #E8F9EE;">
-                                                    <i class="fa-solid fa-circle-check me-1"></i> Ativo (10% OFF)
+                                                    <i class="fa-solid fa-circle-check me-1"></i> Ativo (<?= esc($est['desconto_percentagem'] ?? '10') ?>% OFF)
                                                 </span>
                                             <?php else: ?>
                                                 <span class="text-muted small text-nowrap">Fora da Rede</span>
                                             <?php endif; ?>
                                         </td>
 
-                                        <!-- NOVO CAMPO: PIN Ativo gerado para suporte ao lojista -->
                                         <td>
                                             <?php if (isset($est['aceita_desconto']) && $est['aceita_desconto'] == 1 && !empty($est['pin_validacao'])): ?>
                                                 <span class="pin-code-display"><?= esc($est['pin_validacao']) ?></span>

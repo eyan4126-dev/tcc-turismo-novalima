@@ -327,9 +327,10 @@
     <?php
     $nomeLugar = isset($estabelecimento['razao_social']) ? $estabelecimento['razao_social'] : 'Estabelecimento';
     $tokenEstOriginal = isset($estabelecimento['token_qr_code']) ? $estabelecimento['token_qr_code'] : '';
-
-    // CORREÇÃO CONCEITUAL: Tratamento explícito com coerção de tipo (Cast Inteiro) para o switch de desconto
     $aceitaDesconto = isset($estabelecimento['aceita_desconto']) && ((int) $estabelecimento['aceita_desconto'] === 1);
+
+    // NOVO PARAMETRO FLEXÍVEL: Obtém a porcentagem configurada no banco (padrão 10% se estiver nula ou vazia)
+    $descontoPercentagem = isset($estabelecimento['desconto_percentagem']) ? (int) $estabelecimento['desconto_percentagem'] : 10;
     ?>
 
     <div class="top-identity-bar"></div>
@@ -356,10 +357,8 @@
                 <div class="alertContainer animate__animated animate__fadeIn" id="alertContainer"></div>
 
                 <form id="formInovador">
-                    <!-- ID criptografado ou token do local -->
                     <input type="hidden" id="id_estabelecimento" name="id_estabelecimento"
                         value="<?= esc($tokenEstOriginal) ?>">
-                    <!-- Assinatura única do navegador para coibir spams em segundo plano -->
                     <input type="hidden" id="device_hash" name="device_hash">
 
                     <!-- PASSO 1: Boas-vindas, Origem e Motivação -->
@@ -581,17 +580,19 @@
                     </div>
                 </form>
 
-                <!-- PASSO 5 (DINÂMICO): TELA DE VOUCHER / CRONÔMETRO PÓS-PIN CONTRA PRINTS -->
+                <!-- PASSO 5 (DINÂMICO): TELA DE VOUCHER / CRONÔMETRO PÓS-PIN DO PROGRAMA DESCONTOUR -->
                 <div class="card-step p-4 text-center animate__animated animate__fadeIn" id="stepVoucher">
                     <div class="voucher-active-card p-4 shadow-lg text-white mb-4">
-                        <i class="fa-solid fa-ticket fa-3x mb-3"></i>
-                        <h4 class="fw-bold mb-1">Seu Voucher de Desconto!</h4>
-                        <p class="small opacity-90 mb-3">Válido exclusivamente para resgate neste estabelecimento
-                            parceiro.</p>
+                        <i class="fa-solid fa-ticket fa-3x mb-3 animate__animated animate__swing animate__infinite"></i>
+                        <h4 class="fw-bold mb-1">Programa DesconTour</h4>
+                        <p class="small opacity-90 mb-3">Voucher de incentivo fiscal e econômico ativo para consumo
+                            local.</p>
 
                         <div class="bg-white text-dark rounded-4 p-3 shadow-sm my-3 border">
-                            <span class="d-block text-muted small fw-bold text-uppercase mb-1">Status do Desconto</span>
-                            <span class="h1 fw-bold text-nl-purple m-0">10% OFF</span>
+                            <span class="d-block text-muted small fw-bold text-uppercase mb-1">Desconto Concedido</span>
+                            <!-- PORCENTAGEM DE DESCONTO EXIBIDA DINAMICAMENTE CONFORME ESCOLHA DO LOJISTA -->
+                            <span class="h1 fw-bold text-nl-purple m-0"
+                                id="voucherValueText"><?= $descontoPercentagem ?>% OFF</span>
                         </div>
                     </div>
 
@@ -650,6 +651,9 @@
         let cidadeSelecionadaVerdadeira = false;
         let originalToken = "<?= esc($tokenEstOriginal) ?>";
         let aceitaDescontoDoLocal = <?= $aceitaDesconto ? 'true' : 'false' ?>;
+
+        // NOVO: Armazena o desconto dinâmico no JS do formulário para salvar no localStorage
+        let descontoPercentagemDoLocal = <?= $descontoPercentagem ?>;
 
         document.addEventListener("DOMContentLoaded", function () {
             const urlParams = new URLSearchParams(window.location.search);
@@ -888,7 +892,6 @@
             });
         }
 
-        // MOTOR DE SUBMISSÃO DA PESQUISA AMARRADO CONTRA SPAM E FRAUDE DE MORADORES
         document.getElementById('formInovador').addEventListener('submit', async function (e) {
             e.preventDefault();
 
@@ -908,7 +911,6 @@
             const valorFloat = parseFloat(valorRaw);
 
             const urlParams = new URLSearchParams(window.location.search);
-            // CORREÇÃO DE SEGURANÇA: Se o parâmetro "origem" for omitido, tratamos como 'qrcode' (Físico) por padrão!
             const canalOrigem = urlParams.get('origem') || 'qrcode';
 
             const payload = {
@@ -940,7 +942,6 @@
 
                 if (response.ok && resData.success) {
 
-                    // CASO SEJA MORADOR IDENTIFICADO: Bloqueia de forma elegante a geração do voucher
                     if (resData.is_resident) {
                         document.getElementById('formInovador').style.display = 'none';
                         document.getElementById('progressWrapper').style.display = 'none';
@@ -956,33 +957,30 @@
                         return;
                     }
 
-                    // CASO SEJA TURISTA E O LOCAL PARTICIPE DA REDE DE RECOMPENSAS COM LEITURA VIA QR CODE FÍSICO
                     if (resData.origem === 'qrcode') {
                         if (aceitaDescontoDoLocal) {
-                            // Local dá desconto direto. Salva e mostra tela do PIN local.
+                            // NOVO: Persiste o valor real e flexível do desconto no localStorage do turista
                             localStorage.setItem('inovatour_voucher', JSON.stringify({
                                 token: originalToken,
                                 local: '<?= esc($nomeLugar) ?>',
+                                desconto: descontoPercentagemDoLocal,
                                 status: 'pendente'
                             }));
 
-                            // Avança dinamicamente para o Passo do Voucher Ativo (Sem redirecionar de página!)
                             document.getElementById('formInovador').style.display = 'none';
                             document.getElementById('progressWrapper').style.display = 'none';
                             document.getElementById('stepVoucher').classList.add('active');
                         } else {
-                            // MÓDULO ANTIFRAUDE FLEXÍVEL: Local NÃO dá desconto direto (como ponto natural/público).
-                            // Salva um voucher de desconto de uso geral na rede parceira
+                            // Salva um voucher genérico de uso geral na rede parceira
                             localStorage.setItem('inovatour_voucher', JSON.stringify({
                                 token: 'rede_parceira',
                                 local: 'Rede de Vantagens (Qualquer Loja/Hotel)',
+                                desconto: 10, // Default para rede geral
                                 status: 'pendente'
                             }));
-                            // Redireciona para a tela de sucesso para ser parabenizado
                             window.location.href = '<?= site_url('pesquisa/sucesso') ?>';
                         }
                     } else {
-                        // Sem voucher para origens espontâneas de casa ou sem QR code
                         window.location.href = '<?= site_url('pesquisa/sucesso') ?>';
                     }
 
@@ -997,7 +995,6 @@
             }
         });
 
-        // MECÂNICA ANTIFRAUDE: Validação dinâmica do PIN de Caixa e disparo do Cronômetro Ativo
         async function validarPinEAtivarCronometro() {
             const pinDigitado = document.getElementById('caixaPinInput').value.trim();
 
@@ -1023,8 +1020,6 @@
                     document.getElementById('countdownTimerZone').classList.remove('d-none');
 
                     dispararCronometroRegressivo(120);
-
-                    // Limpa o LocalStorage porque o desconto já foi formalmente resgatado
                     localStorage.removeItem('inovatour_voucher');
                 } else {
                     alert("Código PIN inválido para este estabelecimento.");

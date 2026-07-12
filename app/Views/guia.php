@@ -214,7 +214,6 @@
             color: #ffffff;
         }
 
-        /* Botão flutuante estilizado de cupom ativo */
         .floating-voucher-btn {
             position: fixed;
             bottom: 24px;
@@ -240,7 +239,6 @@
             box-shadow: 0 12px 30px rgba(0, 211, 105, 0.45);
         }
 
-        /* Animação contra prints */
         @keyframes waveGradiente {
             0% {
                 background-position: 0% 50%;
@@ -303,7 +301,7 @@
         </div>
     </nav>
 
-    <!-- BOTÃO FLUTUANTE DE RESGATE DO VOUCHER DO LOCALSTORAGE -->
+    <!-- BOTÃO FLUTUANTE DE RESGATE DO VOUCHER DO LOCALSTORAGE (Sincronizado com DesconTour) -->
     <button id="floatingVoucherRecovery" class="floating-voucher-btn d-none animate__animated animate__bounceIn"
         onclick="abrirModalVoucher()">
         <i class="fa-solid fa-ticket fa-lg animate__animated animate__swing animate__infinite animate__slower"></i>
@@ -318,18 +316,18 @@
 
     <div class="container my-4">
 
-        <!-- BANNER DE ENGAJAMENTO -->
+        <!-- BANNER DE ENGAJAMENTO INTEGRADO COM DESCONTOUR -->
         <div class="cta-research-banner">
             <div class="row align-items-center">
                 <div class="col-lg-9">
                     <span class="badge mb-2"
-                        style="background-color: var(--nl-magenta); font-weight: 700; font-size: 0.75rem;">COLABORE COM
-                        O TURISMO</span>
-                    <h4 class="fw-bold mb-2 text-white">Sua opinião vale prêmios e melhorias em Nova Lima!</h4>
+                        style="background-color: var(--nl-magenta); font-weight: 700; font-size: 0.75rem;">PROGRAMA
+                        DESCONTOUR</span>
+                    <h4 class="fw-bold mb-2 text-white">Sua opinião fomenta o turismo de Nova Lima!</h4>
                     <p class="mb-0 text-white-50 small">
-                        Ao responder nossa pesquisa de satisfação turística de 1 minuto, você ajuda o município a captar
-                        recursos estaduais e ganha <strong>10% de desconto</strong> para consumir na nossa rede
-                        credenciada!
+                        Ao avaliar os atrativos de Nova Lima em 1 minuto, você destrava de forma instantânea **descontos
+                        flexíveis de 5% a 20%** para utilizar nos melhores restaurantes, cervejarias e pousadas
+                        credenciadas da cidade!
                     </p>
                 </div>
                 <div class="col-lg-3 text-lg-end mt-3 mt-lg-0">
@@ -368,9 +366,11 @@
                     <div class="col-md-6 col-lg-4 card-item" data-setor="<?= $est['setor'] ?>">
                         <div class="atrativo-card d-flex flex-column h-100">
 
+                            <!-- BADGE DE DESTAQUE PREMIUM DINÂMICO CONFORME DESCONTO DO ESTABELECIMENTO -->
                             <?php if ($est['aceita_desconto'] == 1): ?>
                                 <div class="badge-highlight-premium">
-                                    <i class="fa-solid fa-certificate me-1"></i> 10% de Desconto
+                                    <i class="fa-solid fa-certificate me-1"></i> DesconTour:
+                                    <?= esc($est['desconto_percentagem'] ?? '10') ?>% OFF
                                 </div>
                             <?php endif; ?>
 
@@ -467,14 +467,14 @@
         </div>
     </div>
 
-    <!-- MODAL DE RESGATE DE VOUCHER (DINÂMICO CONTRA PRINTS) -->
+    <!-- MODAL DE RESGATE DE VOUCHER (DINÂMICO CONTRA PRINTS INTEGRADO AO DESCONTOUR) -->
     <div class="modal fade" id="modalAtivacaoVoucher" tabindex="-1" aria-labelledby="modalAtivacaoVoucherLabel"
         aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow" style="border-radius: 20px;">
                 <div class="modal-header border-0 bg-light py-3">
                     <h5 class="modal-title fw-bold text-nl-purple" id="modalAtivacaoVoucherLabel">
-                        <i class="fa-solid fa-gift me-2 text-nl-magenta"></i>Resgatar meu Desconto
+                        <i class="fa-solid fa-gift me-2 text-nl-magenta"></i>Programa DesconTour
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                         id="btnCloseVoucherModal"></button>
@@ -492,17 +492,20 @@
                         <p class="small text-muted mb-3" id="modalVoucherExplainer">Selecione onde você está consumindo
                             para digitar o PIN de validação do caixa:</p>
 
-                        <!-- Dropdown de seleção de estabelecimento da rede ativa (Oculto se for voucher local pré-definido) -->
+                        <!-- Dropdown de seleção de estabelecimento da rede ativa -->
                         <div class="mb-4" id="modalPartnerSelectWrapper">
                             <label class="form-label small fw-bold text-muted text-uppercase d-block text-start">Onde
                                 você está agora?</label>
-                            <select class="form-select border-2" id="modalSelectTokenLocal">
+                            <select class="form-select border-2" id="modalSelectTokenLocal"
+                                onchange="atualizarPorcentagemModal(this)">
                                 <option value="" disabled selected>-- Escolha o lojista para desconto --</option>
                                 <?php if (!empty($estabelecimentos)): ?>
                                     <?php foreach ($estabelecimentos as $est): ?>
                                         <?php if ($est['aceita_desconto'] == 1): ?>
-                                            <option value="<?= $est['token_qr_code'] ?>">
-                                                <?= $est['razao_social'] ?>
+                                            <!-- SALVA A PORCENTAGEM EXCLUSIVA NO ATRIBUTO DATA-PERCENT -->
+                                            <option value="<?= $est['token_qr_code'] ?>"
+                                                data-percent="<?= esc($est['desconto_percentagem'] ?? '10') ?>">
+                                                <?= $est['razao_social'] ?> (<?= esc($est['desconto_percentagem'] ?? '10') ?>% OFF)
                                             </option>
                                         <?php endif; ?>
                                     <?php endforeach; ?>
@@ -515,7 +518,8 @@
 
                         <button type="button" class="btn btn-nl-success btn-lg w-100 rounded-pill py-3 fw-bold"
                             onclick="validarPinModal()">
-                            <i class="fa-solid fa-bolt me-2"></i> Ativar Desconto de 10%
+                            <i class="fa-solid fa-bolt me-2"></i> <span id="btnAtivarDescontoModalText">Ativar
+                                Desconto</span>
                         </button>
                     </div>
 
@@ -557,20 +561,21 @@
         let ativacaoModalInstanciado = null;
 
         document.addEventListener("DOMContentLoaded", function () {
-            // Instancia o modal do bootstrap para manipulação via JS
             ativacaoModalInstanciado = new bootstrap.Modal(document.getElementById('modalAtivacaoVoucher'));
 
-            // RECUPERAÇÃO AUTOMÁTICA DE VOUCHER DO LOCALSTORAGE (Geral ou Local)
+            // RECUPERAÇÃO AUTOMÁTICA DE VOUCHER DO LOCALSTORAGE (Sincronizado com o DesconTour dinâmico)
             const voucherObj = localStorage.getItem('inovatour_voucher');
             if (voucherObj) {
                 try {
                     voucherAtivoLocal = JSON.parse(voucherObj);
                     if (voucherAtivoLocal && voucherAtivoLocal.status === 'pendente') {
+                        // Resgata o desconto customizado do JSON
+                        const desc = voucherAtivoLocal.desconto || 10;
 
                         if (voucherAtivoLocal.token === 'rede_parceira') {
-                            document.getElementById('floatingVoucherLabel').innerText = "Voucher Geral de 10% OFF Ativo!";
+                            document.getElementById('floatingVoucherLabel').innerText = `DesconTour Geral Ativo!`;
                         } else {
-                            document.getElementById('floatingVoucherLabel').innerText = `Cupom do ${voucherAtivoLocal.local} de 10% OFF!`;
+                            document.getElementById('floatingVoucherLabel').innerText = `${voucherAtivoLocal.local}: ${desc}% OFF!`;
                         }
 
                         document.getElementById('floatingVoucherRecovery').classList.remove('d-none');
@@ -581,20 +586,32 @@
             }
         });
 
+        // Atualiza dinamicamente o texto do botão do modal com a porcentagem ao selecionar no dropdown
+        function atualizarPorcentagemModal(select) {
+            const selectedOption = select.options[select.selectedIndex];
+            const percent = selectedOption.getAttribute('data-percent') || 10;
+            document.getElementById('modalVoucherTitle').innerText = `Desconto de ${percent}% Autorizado!`;
+            document.getElementById('btnAtivarDescontoModalText').innerText = `Ativar Desconto de ${percent}%`;
+        }
+
         // Configura o modal de resgate dinamicamente dependendo de onde o turista avaliou
         function abrirModalVoucher() {
             if (!voucherAtivoLocal) return;
 
+            const desc = voucherAtivoLocal.desconto || 10;
+
             if (voucherAtivoLocal.token === 'rede_parceira') {
-                // Caso o voucher seja geral (ganhou avaliando trilha/ponto natural)
-                document.getElementById('modalVoucherSubtitle').innerText = "Resgatável em qualquer parceiro da cidade";
+                document.getElementById('modalVoucherTitle').innerText = `DesconTour Geral Autorizado!`;
+                document.getElementById('modalVoucherSubtitle').innerText = "Válido em qualquer parceiro credenciado";
                 document.getElementById('modalVoucherExplainer').innerText = "Selecione o estabelecimento onde você está fisicamente agora para digitar o PIN do balcão deles:";
                 document.getElementById('modalPartnerSelectWrapper').classList.remove('d-none');
+                document.getElementById('btnAtivarDescontoModalText').innerText = `Ativar Desconto`;
             } else {
-                // Caso o voucher seja de um comércio local específico
+                document.getElementById('modalVoucherTitle').innerText = `Desconto de ${desc}% Ativo!`;
                 document.getElementById('modalVoucherSubtitle').innerText = `Válido exclusivamente no(a) ${voucherAtivoLocal.local}`;
                 document.getElementById('modalVoucherExplainer').innerText = `Apresente este celular ao atendente do(a) ${voucherAtivoLocal.local} e digite o PIN de balcão deles abaixo:`;
                 document.getElementById('modalPartnerSelectWrapper').classList.add('d-none');
+                document.getElementById('btnAtivarDescontoModalText').innerText = `Ativar Desconto de ${desc}%`;
             }
 
             ativacaoModalInstanciado.show();
@@ -608,7 +625,6 @@
                 return;
             }
 
-            // Define qual token de estabelecimento enviar para validar
             let tokenParaValidar = "";
             if (voucherAtivoLocal.token === 'rede_parceira') {
                 tokenParaValidar = document.getElementById('modalSelectTokenLocal').value;
@@ -633,14 +649,12 @@
                 const data = await response.json();
 
                 if (response.ok && data.success) {
-                    // Trava o fechamento do modal para o lojista validar o timer sem risco de clique errado
                     document.getElementById('btnCloseVoucherModal').classList.add('d-none');
                     document.getElementById('modalPinActivationZone').classList.add('d-none');
                     document.getElementById('modalCountdownZone').classList.remove('d-none');
 
                     dispararCronometroRegressivoModal(120);
 
-                    // Limpa o LocalStorage porque o desconto já foi formalmente consumido
                     localStorage.removeItem('inovatour_voucher');
                     document.getElementById('floatingVoucherRecovery').classList.add('d-none');
                 } else {
@@ -677,7 +691,6 @@
                             <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill mt-4 px-4 fw-bold" data-bs-dismiss="modal" onclick="window.location.reload();">Fechar Guia</button>
                         </div>
                     `;
-                    // Devolve o botão de fechar modal após expirar
                     document.getElementById('btnCloseVoucherModal').classList.remove('d-none');
                 }
             }, 1000);

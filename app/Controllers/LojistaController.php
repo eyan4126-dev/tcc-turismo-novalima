@@ -11,7 +11,7 @@ class LojistaController extends BaseController
     {
         $db = \Config\Database::connect();
 
-        // 1. RECUPERA O LOJISTA LOGADO PELA SESSÃO REAL (Usando 'id' conforme grava seu AuthController)
+        // 1. RECUPERA O LOJISTA LOGADO PELA SESSÃO REAL
         $idUsuarioLogado = session()->get('id');
 
         // 2. BUSCA O ESTABELECIMENTO PARA COLETAR O SETOR REAL DO ENUM DO BANCO E OS NOVOS CAMPOS
@@ -23,8 +23,9 @@ class LojistaController extends BaseController
         // Fallback caso não encontre o vínculo no banco, para não quebrar a página
         $setorReal = $estabelecimentoLogado['setor'] ?? 'outro';
         $aceitaDesconto = $estabelecimentoLogado['aceita_desconto'] ?? 0;
+        $descontoPercentagem = $estabelecimentoLogado['desconto_percentagem'] ?? 10; // Novo campo flexível
         $pinValidacao = $estabelecimentoLogado['pin_validacao'] ?? 'Pendente';
-        $fotoAtual = $estabelecimentoLogado['foto'] ?? null; // NOVO CAMPO: Recupera o nome da foto cadastrada
+        $fotoAtual = $estabelecimentoLogado['foto'] ?? null;
 
         // Filtro Temporal enviado pelo form da View do Lojista
         $periodo = $this->request->getGet('periodo') ?? 'atual';
@@ -56,22 +57,15 @@ class LojistaController extends BaseController
             };
 
             // --- CÁLCULO DE KPIS EXCLUSIVOS DO LOJISTA ---
-
-            // Faturamento Capturado dentro da loja dele
             $kpis['faturamento_estimado'] = $aplicarFiltroLojista($db->table('pesquisa p')->selectSum('p.valor_gasto_estimado'))->get()->getRowArray()['valor_gasto_estimado'] ?? 0;
-
-            // Quantidade de Clientes que leram o QR Code dele
             $kpis['volume_clientes'] = $aplicarFiltroLojista($db->table('pesquisa p'))->countAllResults();
 
-            // Cálculo do Ticket Médio Real (Faturamento / Volume)
             if ($kpis['volume_clientes'] > 0) {
                 $kpis['ticket_medio'] = round($kpis['faturamento_estimado'] / $kpis['volume_clientes'], 2);
             }
 
-            // Nota de Satisfação Interna do Estabelecimento
             $kpis['satisfacao_exclusiva'] = round($aplicarFiltroLojista($db->table('pesquisa p')->selectAvg('p.satisfacao_estrelas'))->get()->getRowArray()['satisfacao_estrelas'] ?? 0, 1);
 
-            // NPS Privado da Loja
             $npsData = $aplicarFiltroLojista($db->table('pesquisa p')->select('p.nps'))->get()->getResultArray();
             if (count($npsData) > 0) {
                 $p = 0;
@@ -86,30 +80,26 @@ class LojistaController extends BaseController
             }
 
             // --- GRÁFICOS DE INTELIGÊNCIA COMPETITIVA (LOJISTA) ---
-
-            // De onde vêm as pessoas que compram na minha loja?
             $cidades = $aplicarFiltroLojista($db->table('pesquisa p')->select('p.cidade_origem, COUNT(*) as total')->groupBy('p.cidade_origem')->orderBy('total', 'DESC')->limit(5))->get()->getResultArray();
             $charts['cidades'] = ['labels' => json_encode(array_column($cidades, 'cidade_origem')), 'valores' => json_encode(array_map('intval', array_column($cidades, 'total')))];
 
-            // Meu cliente dorme na cidade ou faz bate-volta? (Ajuste de horário de funcionamento)
             $permanencia = $aplicarFiltroLojista($db->table('pesquisa p')->select('p.tempo_permanencia, COUNT(*) as total')->groupBy('p.tempo_permanencia'))->get()->getResultArray();
             $charts['permanencia'] = ['labels' => json_encode(array_column($permanencia, 'tempo_permanencia')), 'valores' => json_encode(array_map('intval', array_column($permanencia, 'total')))];
 
-            // O que trouxe meu cliente para a cidade?
             $motivos = $aplicarFiltroLojista($db->table('pesquisa p')->select('p.motivo_visita, COUNT(*) as total')->groupBy('p.motivo_visita'))->get()->getResultArray();
             $charts['motivos'] = ['labels' => json_encode(array_column($motivos, 'motivo_visita')), 'valores' => json_encode(array_map('intval', array_column($motivos, 'total')))];
 
-            // Onde meu cliente se hospeda? (Para fazer parcerias de panfletagem/indicação)
             $hosp = $aplicarFiltroLojista($db->table('pesquisa p')->where('p.tempo_permanencia', 'dormir')->select('p.local_hospedagem, COUNT(*) as total')->groupBy('p.local_hospedagem'))->get()->getResultArray();
             $charts['hospedagem'] = ['labels' => json_encode(array_column($hosp, 'local_hospedagem')), 'valores' => json_encode(array_map('intval', array_column($hosp, 'total')))];
         }
 
-        // 3. ENVIA TUDO PARA A VIEW, INCLUINDO NOVAS CONFIGURAÇÕES DE DESCONTO E FOTO ATUAL
+        // 3. ENVIA TUDO PARA A VIEW, INCLUINDO AS PORCENTAGENS DO DESCONTOUR
         return view('lojista/dashboard', [
             'kpis' => $kpis,
             'charts' => $charts,
             'setorLojista' => $setorReal,
             'aceitaDesconto' => $aceitaDesconto,
+            'descontoPercentagem' => $descontoPercentagem, // Customização ativa
             'pinValidacao' => $pinValidacao,
             'fotoAtual' => $fotoAtual,
             'razaoSocial' => $estabelecimentoLogado['razao_social'] ?? 'Meu Negócio'
@@ -119,32 +109,23 @@ class LojistaController extends BaseController
     public function qrcode()
     {
         $estabelecimentoModel = new EstabelecimentoModel();
+        $id_usuario_logado = session()->get('id_usuario') ?? session()->get('id');
 
-        // Tenta resgatar o ID por qualquer um dos nomes que o seu Login possa ter usado
-        $id_usuario_logado = session()->get('id_usuario')
-            ?? session()->get('id')
-            ?? session()->get('id_user');
-
-        // Se mesmo testando os 3 nomes ainda vier vazio, vamos avisar exatamente o que está na sessão
         if (!$id_usuario_logado) {
-            return "Erro de Sessão: Não foi encontrado nenhum ID de usuário logado. Conteúdo atual da sessão: " . print_r(session()->get(), true);
+            return "Erro de Sessão: Usuário não identificado.";
         }
 
-        // Busca na tabela estabelecimento_evento usando o ID recuperado
         $estabelecimento = $estabelecimentoModel->where('id_usuario', $id_usuario_logado)->first();
 
-        // Se o ID existir mas não achar o vínculo
         if (!$estabelecimento) {
-            return "Erro de Vínculo: O usuário com o ID (" . esc($id_usuario_logado) . ") está logado, mas nenhuma linha na tabela 'estabelecimento_evento' aponta para este ID.";
+            return "Erro de Vínculo: Estabelecimento não encontrado.";
         }
 
-        // Passa o estabelecimento real encontrado ("Artesanatos de Nova Lima") para a View
         $data['estabelecimento'] = $estabelecimento;
-
         return view('lojista/qrcode', $data);
     }
 
-    // MÉTODO REESTRUTURADO E INTEGRADO COM UPLOAD SEGURO DE FOTOS DO CODEIGNITER 4
+    // MÉTODO REESTRUTURADO: Agora realiza o upload e atualiza a margem flexível do Programa DesconTour
     public function atualizarDesconto()
     {
         $idUsuarioLogado = session()->get('id');
@@ -158,6 +139,18 @@ class LojistaController extends BaseController
 
         $aceitaDesconto = $this->request->getPost('aceita_desconto') !== null ? 1 : 0;
 
+        // Captura e valida a porcentagem dinâmica enviada pelo lojista
+        $descontoPercentagem = (int) $this->request->getPost('desconto_percentagem');
+
+        // VALIDAÇÃO CRÍTICA (Regra de Negócio): Impede que o lojista salve descontos inferiores a 5%
+        if ($aceitaDesconto == 1 && $descontoPercentagem < 5) {
+            return redirect()->back()->with('error', 'Por questões de atratividade da campanha, o desconto mínimo aceito no Programa DesconTour é de 5%.');
+        }
+
+        if ($aceitaDesconto == 1 && $descontoPercentagem > 100) {
+            return redirect()->back()->with('error', 'O desconto máximo aceito é de 100%.');
+        }
+
         // Se ele reativar o desconto mas não tiver um PIN gerado por alguma razão, o sistema garante a segurança do PIN
         $pinAtual = $estabelecimento['pin_validacao'];
         if ($aceitaDesconto == 1 && empty($pinAtual)) {
@@ -166,6 +159,7 @@ class LojistaController extends BaseController
 
         $dadosUpdate = [
             'aceita_desconto' => $aceitaDesconto,
+            'desconto_percentagem' => $descontoPercentagem,
             'pin_validacao' => $pinAtual
         ];
 
@@ -173,8 +167,6 @@ class LojistaController extends BaseController
         $img = $this->request->getFile('foto_estabelecimento');
 
         if ($img && $img->isValid() && !$img->hasMoved()) {
-
-            // Regra de validação: tamanho máximo 4MB e formato de imagem válido
             $validationRules = [
                 'foto_estabelecimento' => [
                     'rules' => 'uploaded[foto_estabelecimento]|is_image[foto_estabelecimento]|max_size[foto_estabelecimento,4096]',
@@ -183,16 +175,10 @@ class LojistaController extends BaseController
             ];
 
             if ($this->validate($validationRules)) {
-                // Nome randômico único e seguro
                 $nomeUnico = $img->getRandomName();
-
-                // Pasta de destino em public/uploads/estabelecimentos/
                 $caminhoDestino = FCPATH . 'uploads/estabelecimentos';
-
-                // Move o arquivo
                 $img->move($caminhoDestino, $nomeUnico);
 
-                // Se houver uma foto antiga, remove ela do servidor para não acumular lixo
                 if (!empty($estabelecimento['foto']) && file_exists($caminhoDestino . '/' . $estabelecimento['foto'])) {
                     @unlink($caminhoDestino . '/' . $estabelecimento['foto']);
                 }
@@ -205,7 +191,7 @@ class LojistaController extends BaseController
 
         $estabelecimentoModel->update($estabelecimento['id_estabelecimento'], $dadosUpdate);
 
-        return redirect()->back()->with('sucesso', 'Configurações do estabelecimento atualizadas com sucesso!');
+        return redirect()->back()->with('sucesso', 'Configurações do Programa DesconTour salvas com sucesso!');
     }
 
     public function lancarOcupacao()
@@ -213,11 +199,9 @@ class LojistaController extends BaseController
         $db = \Config\Database::connect();
         $fluxoModel = new \App\Models\FluxoOcupacaoModel();
 
-        // 1. Recupera o ID do lojista logado na sessão (usando a correção que fizemos antes)
         $idUsuarioLogado = session()->get('id_usuario') ?? session()->get('id');
 
-        // 2. Busca o id_estabelecimento associado a esse usuário logado
-        $estabelecimento = $db->table('estabelecimento_evento') // Ajuste o nome dessa tabela se for diferente
+        $estabelecimento = $db->table('estabelecimento_evento')
             ->where('id_usuario', $idUsuarioLogado)
             ->get()
             ->getRowArray();
@@ -226,11 +210,9 @@ class LojistaController extends BaseController
             return redirect()->back()->with('error', 'Estabelecimento não vinculado ao seu usuário.');
         }
 
-        // 3. Captura e formata a data_referencia recebida do input "month" (YYYY-MM) para o padrão DATE (YYYY-MM-DD)
-        $mesAno = $this->request->getPost('data_referencia'); // ex: "2026-07"
-        $dataReferenciaFormatted = $mesAno . '-01'; // vira "2026-07-01"
+        $mesAno = $this->request->getPost('data_referencia');
+        $dataReferenciaFormatted = $mesAno . '-01';
 
-        // 4. Prepara o Payload para a tabela
         $payload = [
             'id_estabelecimento' => $estabelecimento['id_estabelecimento'],
             'volume_clientes' => (int) $this->request->getPost('volume_clientes'),
@@ -240,17 +222,14 @@ class LojistaController extends BaseController
         ];
 
         try {
-            // Validação contra duplicidade: Verifica se este estabelecimento já enviou o fechamento deste mês específico
             $registroExistente = $fluxoModel->where('id_estabelecimento', $estabelecimento['id_estabelecimento'])
                 ->where('data_referencia', $dataReferenciaFormatted)
                 ->first();
 
             if ($registroExistente) {
-                // Se já existir dados para esse mês, atualiza (Sobrescreve)
                 $fluxoModel->update($registroExistente['id_fluxos'], $payload);
                 return redirect()->back()->with('success', 'Dados de desempenho operacional atualizados com sucesso!');
             } else {
-                // Se for o primeiro envio do mês, insere uma nova linha
                 $fluxoModel->insert($payload);
                 return redirect()->back()->with('success', 'Dados de desempenho operacional gravados com sucesso!');
             }

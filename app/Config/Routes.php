@@ -32,7 +32,7 @@ $routes->get('painel', 'AuthController::painel');
 
 // --- 3. FLUXO DO TURISTA (Submissão da Pesquisa e Validação do PIN) ---
 $routes->post('api/pesquisa', 'PesquisaController::salvar');
-$routes->post('api/pesquisa/validar-pin', 'PesquisaController::validarPin'); // NOVA ROTA: Validação dinâmica do PIN de balcão
+$routes->post('api/pesquisa/validar-pin', 'PesquisaController::validarPin');
 
 // --- 4. FLUXO DO TURISTA (Escaneamento do QR Code) ---
 $routes->get('turismo/visitar/(:any)', 'PesquisaController::index');
@@ -51,19 +51,19 @@ $routes->group('admin', ['filter' => 'AdminAuthFilter'], function ($routes) {
     // 🏛️ MÓDULO 3: Tela de Consolidação Web
     $routes->get('consolidador', 'AdminController::consolidador');
 
-    // 📊 MÓDULO 2: Downloads Diretos das Exportações (Via POST vindo do seu modal/painel principal)
+    // 📊 MÓDULO 2: Downloads Diretos das Exportações
     $routes->post('exportar-icms', 'AdminController::exportarIcms');
     $routes->post('exportar-sismapa', 'AdminController::exportarSismapa');
 
-    // Processamento de Cadastros e Ações Diretas da Tela (Ajustado para bater com a View)
+    // Processamento de Cadastros e Ações Diretas da Tela
     $routes->post('aprovarLojista/(:num)', 'AdminController::aprovarLojista/$1');
     $routes->post('recusarLojista/(:num)', 'AdminController::recusarLojista/$1');
 });
 
-// 🏛️ ROTA DE SALVAMENTO DIRETO (Ajustada para bater com site_url('estabelecimentos/salvar-direto') do formulário)
+// 🏛️ ROTA DE SALVAMENTO DIRETO
 $routes->post('estabelecimentos/salvar-direto', 'AdminController::salvarDireto', ['filter' => 'AdminAuthFilter']);
 
-// Mantido por compatibilidade caso seu JS use a rota antiga diretamente na raiz
+// Mantido por compatibilidade
 $routes->get('estabelecimentos', 'AdminController::estabelecimentos', ['filter' => 'AdminAuthFilter']);
 $routes->get('qrcodes', 'AdminController::qrcodes', ['filter' => 'AdminAuthFilter']);
 
@@ -77,7 +77,7 @@ $routes->group('api/admin', ['filter' => 'AdminAuthFilter'], function ($routes) 
     $routes->get('exportar/icms-turismo', 'AdminController::exportarIcmsTurismo');
     $routes->get('exportar/sismapa', 'AdminController::exportarSismapa');
 
-    // 📈 MÓDULO 3: Motor de API para Consolidação e Cruzamento de Dados (Chart.js / AJAX)
+    // 📈 MÓDULO 3: Motor de API para Consolidação e Cruzamento de Dados
     $routes->get('dados/indicadores-gerais', 'AdminController::apiIndicadoresGerais');
     $routes->get('dados/cruzamento-motivo', 'AdminController::apiCruzamentoMotivo');
     $routes->get('dados/cruzamento-permanencia', 'AdminController::apiCruzamentoPermanencia');
@@ -93,7 +93,7 @@ $routes->group('lojista', ['filter' => 'LojistaAuthFilter'], function ($routes) 
     $routes->get('dashboard', 'LojistaController::index');
     $routes->get('qrcode', 'LojistaController::qrcode');
 
-    // NOVA ROTA: Permite atualizar o status do switch de desconto diretamente do painel do lojista
+    // Atualiza desconto e foto de perfil sob o Programa DesconTour
     $routes->post('atualizar-desconto', 'LojistaController::atualizarDesconto');
 });
 
@@ -103,22 +103,15 @@ $routes->group('api/painel', ['filter' => 'LojistaAuthFilter'], function ($route
     $routes->post('ocupacao', 'LojistaController::lancarOcupacao');
 });
 
-// --- ROTAS DO NOVO GUIA TURÍSTICO (Mão Dupla com a Pesquisa) ---
-// Rota pública para visualizar o Guia
+// --- ROTAS DO NOVO GUIA TURÍSTICO ---
 $routes->get('guia', 'PesquisaController::guia');
-
-// Rota pública de sucesso da pesquisa (que redireciona para o Guia)
 $routes->get('pesquisa/sucesso', 'PesquisaController::sucesso');
 
+// --- SEMEADORES E MIGRAÇÕES AUTOMÁTICAS ---
 $routes->get('banco', 'AuthController::semearBanco');
-
-// ====================================================================
-// ADICIONE ESTA ROTA NO SEU ARQUIVO app/Config/Routes.php
-// (Pode colar perto da sua rota '/banco' que chama o semearBanco)
-// ====================================================================
-
 $routes->get('migrar-banco', 'AuthController::executarMigracaoVantagens');
-
 $routes->get('semear-parceiros', 'AuthController::semearNovosParceirosReais');
-
 $routes->get('migrar-banco-foto', 'AuthController::executarMigracaoFoto');
+
+// NOVA ROTA: Roda a atualização do Programa DesconTour adicionando a porcentagem flexível
+$routes->get('migrar-banco-descontour', 'AuthController::executarMigracaoDesconTour');

@@ -146,7 +146,6 @@
             box-shadow: 0 4px 15px rgba(93, 70, 210, 0.03);
         }
 
-        /* Foto de Preview do Perfil */
         .preview-photo-box {
             width: 130px;
             height: 130px;
@@ -224,7 +223,7 @@
                 </div>
             </form>
 
-            <!-- NOVO BANNER ESTRATÉGICO DE COMPLIANCE NO DASHBOARD -->
+            <!-- ANÚNCIO DO PROGRAMA DESCONTOUR NO BANNER -->
             <div
                 class="alert-promo-banner d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
                 <div class="d-flex align-items-center gap-3">
@@ -233,24 +232,25 @@
                         <i class="fa-solid fa-ticket text-nl-purple fs-4"></i>
                     </div>
                     <div>
-                        <h6 class="fw-bold text-dark mb-1">Status da Rede de Vantagens:
+                        <h6 class="fw-bold text-dark mb-1">Status no <strong>Programa DesconTour</strong>:
                             <span class="<?= $aceitaDesconto ? 'text-success' : 'text-secondary' ?>">
-                                <?= $aceitaDesconto ? 'Ativo (10% de Desconto)' : 'Inativo' ?>
+                                <?= $aceitaDesconto ? 'Ativo (' . esc($descontoPercentagem) . '% OFF)' : 'Inativo' ?>
                             </span>
                         </h6>
                         <p class="text-muted mb-0 small" style="line-height: 1.3;">
                             <?php if ($aceitaDesconto): ?>
-                                Seu estabelecimento está qualificado para receber o <strong>Selo de Destaque</strong> e
-                                possui o PIN <strong><?= esc($pinValidacao) ?></strong> ativo para validações no balcão.
+                                Seu estabelecimento está qualificado com o desconto ativo de
+                                <strong><?= esc($descontoPercentagem) ?>%</strong>, recebendo o <strong>Selo de
+                                    Destaque</strong> no Guia e PIN <strong><?= esc($pinValidacao) ?></strong> de validação
+                                de mesa.
                             <?php else: ?>
-                                Ative a sua adesão à rede para garantir destaque algorítmico privilegiado no topo do Guia
-                                Turístico Municipal.
+                                Ative a sua adesão à rede do <strong>DesconTour</strong> para garantir destaque algorítmico
+                                privilegiado no topo do Guia Turístico Municipal de Nova Lima.
                             <?php endif; ?>
                         </p>
                     </div>
                 </div>
                 <div>
-                    <!-- Link transformado em Botão Acionador do Painel Collapse de Configuração de Foto -->
                     <button class="btn btn-sm btn-outline-primary rounded-pill px-4 fw-bold text-nowrap"
                         style="color: var(--nl-purple); border-color: var(--nl-purple);" data-bs-toggle="collapse"
                         data-bs-target="#collapseConfiguracoes">
@@ -263,20 +263,19 @@
                 <div class="alert alert-success fw-bold mb-4 border-0 shadow-sm"><i
                         class="fa-solid fa-circle-check me-2"></i><?= session()->getFlashdata('sucesso') ?></div>
             <?php endif; ?>
-            <?php if (session()->getFlashdata('erro')): ?>
+            <?php if (session()->getFlashdata('error')): ?>
                 <div class="alert alert-danger fw-bold mb-4 border-0 shadow-sm"><i
-                        class="fa-solid fa-circle-exclamation me-2"></i><?= session()->getFlashdata('erro') ?></div>
+                        class="fa-solid fa-circle-exclamation me-2"></i><?= session()->getFlashdata('error') ?></div>
             <?php endif; ?>
 
-            <!-- COLLAPSE CONTAINER: ZONA DE CONFIGURAÇÃO DO PERFIL E PREVIEW DA FOTO -->
+            <!-- COLLAPSE CONTAINER: CONFIGURAÇÕES E FLEXIBILIZAÇÃO DA PORCENTAGEM -->
             <div class="collapse mb-4" id="collapseConfiguracoes">
                 <div class="card card-body border-0 shadow-sm rounded-4 p-4 bg-white">
                     <h5 class="fw-bold mb-3 text-nl-purple"><i class="fa-solid fa-store me-2"></i>Configurações do Seu
-                        Perfil Público</h5>
-                    <p class="text-muted small mb-4">Adicione uma foto real do seu comércio, pousada ou atrativo para
-                        exibi-la com exclusividade no Guia Turístico de Nova Lima.</p>
+                        Perfil Público — <strong>DesconTour</strong></h5>
+                    <p class="text-muted small mb-4">Adicione uma foto real do seu comércio, pousada ou atrativo e
+                        configure livremente o valor do seu desconto (mínimo de 5%) de acordo com seu movimento.</p>
 
-                    <!-- Formulário configurado com multipart/form-data obrigatório para o upload funcionar -->
                     <form action="<?= site_url('lojista/atualizar-desconto') ?>" method="POST"
                         enctype="multipart/form-data">
                         <?= csrf_field() ?>
@@ -306,18 +305,36 @@
                                         ou JPEG. Resolução recomendada: 800x600 pixels (Max: 4MB).</div>
                                 </div>
 
-                                <div class="row g-3">
-                                    <div class="col-md-6">
+                                <div class="row g-3 align-items-end">
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold text-secondary">Adesão ao
+                                            DesconTour:</label>
                                         <div class="form-check form-switch pt-2">
                                             <input class="form-switch form-check-input" type="checkbox" role="switch"
-                                                id="switchDesconto" name="aceita_desconto" value="1" <?= $aceitaDesconto ? 'checked' : '' ?>>
+                                                id="switchDesconto" name="aceita_desconto" value="1" <?= $aceitaDesconto ? 'checked' : '' ?> onchange="toggleInputDesconto(this.checked)">
                                             <label class="form-check-label small fw-bold text-secondary"
-                                                for="switchDesconto">Participar da Rede de Vantagens (10% OFF)</label>
+                                                for="switchDesconto">Participar da Rede</label>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+
+                                    <!-- NOVO COMPONENTE: Input dinâmico de porcentagem (Mínimo de 5% de segurança) -->
+                                    <div class="col-md-4" id="wrapperInputDesconto"
+                                        style="<?= !$aceitaDesconto ? 'display: none;' : '' ?>">
+                                        <label class="form-label small fw-bold text-secondary">Percentual de Desconto
+                                            (%):</label>
+                                        <div class="input-group">
+                                            <input type="number" name="desconto_percentagem" id="inputDescontoNum"
+                                                class="form-control fw-bold" min="5" max="100" required
+                                                value="<?= esc($descontoPercentagem) ?>">
+                                            <span class="input-group-text bg-light fw-bold">% OFF</span>
+                                        </div>
+                                        <div class="form-text text-muted" style="font-size: 0.65rem;">Mínimo obrigatório
+                                            de 5%.</div>
+                                    </div>
+
+                                    <div class="col-md-4 ms-auto">
                                         <button type="submit" class="btn btn-nl-primary w-100 fw-bold rounded-pill">
-                                            <i class="fa-solid fa-floppy-disk me-1"></i> Salvar Alterações
+                                            <i class="fa-solid fa-floppy-disk me-1"></i> Salvar Perfil
                                         </button>
                                     </div>
                                 </div>
@@ -327,6 +344,7 @@
                 </div>
             </div>
 
+            <!-- LANÇAMENTO DE OCUPAÇÃO -->
             <div class="card-chart-data mb-5">
                 <h6 class="fw-bold mb-2" style="color: var(--nl-purple);">
                     <i class="fa-solid fa-hotel me-2"></i>Lançamento de Desempenho e Fluxo Operacional
@@ -376,7 +394,7 @@
                                     placeholder="Ex: 1500">
                             </div>
 
-                        <?php else: // Recursos Naturais, Culturais ou Outros ?>
+                        <?php else: ?>
                             <div class="col-md-3">
                                 <label class="form-label small fw-bold text-secondary">Volume Total de Visitantes:</label>
                                 <input type="number" name="volume_clientes" class="form-control" min="0" required
@@ -400,6 +418,7 @@
                 </form>
             </div>
 
+            <!-- KPIs -->
             <div class="row row-cols-1 row-cols-md-2 row-cols-xl-5 g-3 mb-5">
                 <div class="col">
                     <div class="card-metric d-flex align-items-center justify-content-between">
@@ -449,8 +468,7 @@
                             <span class="text-muted small d-block fw-semibold mb-1">Seu NPS</span>
                             <h3
                                 class="fw-bold mb-0 <?= $kpis['nps_proprio'] >= 50 ? 'text-success' : ($kpis['nps_proprio'] >= 0 ? 'text-warning' : 'text-danger') ?>">
-                                <?= $kpis['nps_proprio'] ?>
-                            </h3>
+                                <?= $kpis['nps_proprio'] ?></h3>
                         </div>
                         <div class="metric-icon" style="background: #FFF5F5; color: var(--nl-magenta);"><i
                                 class="fa-solid fa-heart"></i></div>
@@ -458,6 +476,7 @@
                 </div>
             </div>
 
+            <!-- Gráficos -->
             <div class="row g-4 mb-4">
                 <div class="col-md-6">
                     <div class="card-chart">
@@ -499,7 +518,7 @@
     </div>
 
     <script>
-        // Função de Preview instantâneo do upload da Imagem no Navegador
+        // Preview instantâneo da Imagem
         function previewImagemFisica(input) {
             const container = document.getElementById('photoPreviewContainer');
             if (input.files && input.files[0]) {
@@ -508,6 +527,19 @@
                     container.innerHTML = `<img src="${e.target.result}" alt="Preview Foto">`;
                 };
                 reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Toggle do campo de porcentagem dinâmico
+        function toggleInputDesconto(checked) {
+            const wrapper = document.getElementById('wrapperInputDesconto');
+            const inputNum = document.getElementById('inputDescontoNum');
+            if (checked) {
+                wrapper.style.display = 'block';
+                inputNum.setAttribute('required', 'required');
+            } else {
+                wrapper.style.display = 'none';
+                inputNum.removeAttribute('required');
             }
         }
 
