@@ -1320,4 +1320,27 @@ class AuthController extends BaseController
 
         return $html;
     }
+
+    // ====================================================================
+// ADICIONE ESTE MÉTODO AO SEU AuthController.php
+// E ADICIONE A ROTA: $routes->get('migrar-foto', 'AuthController::executarMigracaoFoto');
+// Acesse: https://seu-sistema.railway.app/migrar-foto para atualizar o banco!
+// ====================================================================
+
+    public function executarMigracaoFoto()
+    {
+        $db = \Config\Database::connect();
+
+        try {
+            // Adiciona a coluna 'foto' na tabela de estabelecimentos de forma segura
+            $query = "ALTER TABLE `estabelecimento_evento` 
+                  ADD COLUMN IF NOT EXISTS `foto` VARCHAR(255) NULL DEFAULT NULL AFTER `pin_validacao`";
+
+            $db->query($query);
+
+            return "<h3>Sucesso! 📸</h3><p>A coluna 'foto' foi adicionada com sucesso na tabela 'estabelecimento_evento' em produção na Railway!</p><p><a href='" . site_url('lojista/dashboard') . "'>Voltar para o Painel</a></p>";
+        } catch (\Exception $e) {
+            return "<h3>Erro ao migrar coluna de foto:</h3><p style='color:red;'>" . $e->getMessage() . "</p>";
+        }
+    }
 }

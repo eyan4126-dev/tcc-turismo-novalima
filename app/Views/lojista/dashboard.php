@@ -138,13 +138,38 @@
             padding: 25px;
         }
 
-        /* Banner promocional para o Dashboard */
         .alert-promo-banner {
             background: linear-gradient(135deg, #F5F3FF 0%, #ECE9FC 100%);
             border-left: 4px solid var(--nl-purple);
             border-radius: 12px;
             padding: 20px;
             box-shadow: 0 4px 15px rgba(93, 70, 210, 0.03);
+        }
+
+        /* Foto de Preview do Perfil */
+        .preview-photo-box {
+            width: 130px;
+            height: 130px;
+            border-radius: 16px;
+            background-color: #F1F5F9;
+            border: 2px dashed #CBD5E1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+            transition: all 0.2s ease;
+        }
+
+        .preview-photo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-photo-box:hover {
+            border-color: var(--nl-purple);
         }
     </style>
 </head>
@@ -186,7 +211,7 @@
         <div id="content">
             <form method="GET" action="<?= site_url('lojista/dashboard') ?>" class="row g-3 mb-4 align-items-center">
                 <div class="col-md-8">
-                    <h2 class="fw-bold mb-1" style="color: var(--nl-purple);">Seu Estabelecimento</h2>
+                    <h2 class="fw-bold mb-1" style="color: var(--nl-purple);"><?= esc($razaoSocial) ?></h2>
                     <p class="text-muted small mb-0">Métricas estratégicas reais e comportamento de consumo dos seus
                         clientes.</p>
                 </div>
@@ -216,7 +241,7 @@
                         <p class="text-muted mb-0 small" style="line-height: 1.3;">
                             <?php if ($aceitaDesconto): ?>
                                 Seu estabelecimento está qualificado para receber o <strong>Selo de Destaque</strong> e
-                                possui o PIN <strong><?= esc($pinValidacao) ?></strong> ativo para validações.
+                                possui o PIN <strong><?= esc($pinValidacao) ?></strong> ativo para validações no balcão.
                             <?php else: ?>
                                 Ative a sua adesão à rede para garantir destaque algorítmico privilegiado no topo do Guia
                                 Turístico Municipal.
@@ -225,11 +250,12 @@
                     </div>
                 </div>
                 <div>
-                    <a href="<?= site_url('lojista/qrcode') ?>"
-                        class="btn btn-sm btn-outline-primary rounded-pill px-4 fw-bold text-nowrap"
-                        style="color: var(--nl-purple); border-color: var(--nl-purple);">
-                        <i class="fa-solid fa-sliders me-1"></i> Gerenciar Adesão
-                    </a>
+                    <!-- Link transformado em Botão Acionador do Painel Collapse de Configuração de Foto -->
+                    <button class="btn btn-sm btn-outline-primary rounded-pill px-4 fw-bold text-nowrap"
+                        style="color: var(--nl-purple); border-color: var(--nl-purple);" data-bs-toggle="collapse"
+                        data-bs-target="#collapseConfiguracoes">
+                        <i class="fa-solid fa-gears me-1"></i> Configurações do Perfil
+                    </button>
                 </div>
             </div>
 
@@ -241,6 +267,65 @@
                 <div class="alert alert-danger fw-bold mb-4 border-0 shadow-sm"><i
                         class="fa-solid fa-circle-exclamation me-2"></i><?= session()->getFlashdata('erro') ?></div>
             <?php endif; ?>
+
+            <!-- COLLAPSE CONTAINER: ZONA DE CONFIGURAÇÃO DO PERFIL E PREVIEW DA FOTO -->
+            <div class="collapse mb-4" id="collapseConfiguracoes">
+                <div class="card card-body border-0 shadow-sm rounded-4 p-4 bg-white">
+                    <h5 class="fw-bold mb-3 text-nl-purple"><i class="fa-solid fa-store me-2"></i>Configurações do Seu
+                        Perfil Público</h5>
+                    <p class="text-muted small mb-4">Adicione uma foto real do seu comércio, pousada ou atrativo para
+                        exibi-la com exclusividade no Guia Turístico de Nova Lima.</p>
+
+                    <!-- Formulário configurado com multipart/form-data obrigatório para o upload funcionar -->
+                    <form action="<?= site_url('lojista/atualizar-desconto') ?>" method="POST"
+                        enctype="multipart/form-data">
+                        <?= csrf_field() ?>
+
+                        <div class="row g-4 align-items-center">
+                            <div class="col-auto">
+                                <div class="preview-photo-box" id="photoPreviewContainer">
+                                    <?php if (!empty($fotoAtual)): ?>
+                                        <img src="<?= site_url('uploads/estabelecimentos/' . $fotoAtual) ?>"
+                                            alt="Foto do Estabelecimento" id="imgElementPreview">
+                                    <?php else: ?>
+                                        <div class="text-center p-2 text-muted" id="placeholderIconPreview">
+                                            <i class="fa-solid fa-camera fa-2x mb-1 text-slate-300"></i>
+                                            <small class="d-block" style="font-size:0.65rem;">Sem Foto</small>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-secondary">Escolha a Foto
+                                        Oficial:</label>
+                                    <input type="file" name="foto_estabelecimento" id="fotoInput" class="form-control"
+                                        accept="image/*" onchange="previewImagemFisica(this)">
+                                    <div class="form-text text-muted small" style="font-size:0.7rem;">Suporta JPG, PNG
+                                        ou JPEG. Resolução recomendada: 800x600 pixels (Max: 4MB).</div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch pt-2">
+                                            <input class="form-switch form-check-input" type="checkbox" role="switch"
+                                                id="switchDesconto" name="aceita_desconto" value="1" <?= $aceitaDesconto ? 'checked' : '' ?>>
+                                            <label class="form-check-label small fw-bold text-secondary"
+                                                for="switchDesconto">Participar da Rede de Vantagens (10% OFF)</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <button type="submit" class="btn btn-nl-primary w-100 fw-bold rounded-pill">
+                                            <i class="fa-solid fa-floppy-disk me-1"></i> Salvar Alterações
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
             <div class="card-chart-data mb-5">
                 <h6 class="fw-bold mb-2" style="color: var(--nl-purple);">
@@ -414,6 +499,18 @@
     </div>
 
     <script>
+        // Função de Preview instantâneo do upload da Imagem no Navegador
+        function previewImagemFisica(input) {
+            const container = document.getElementById('photoPreviewContainer');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    container.innerHTML = `<img src="${e.target.result}" alt="Preview Foto">`;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
         const configPadrao = {
             responsive: true,
             maintainAspectRatio: false,
@@ -482,6 +579,7 @@
             options: configPadrao
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

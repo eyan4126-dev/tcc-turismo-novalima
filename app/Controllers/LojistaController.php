@@ -24,6 +24,7 @@ class LojistaController extends BaseController
         $setorReal = $estabelecimentoLogado['setor'] ?? 'outro';
         $aceitaDesconto = $estabelecimentoLogado['aceita_desconto'] ?? 0;
         $pinValidacao = $estabelecimentoLogado['pin_validacao'] ?? 'Pendente';
+        $fotoAtual = $estabelecimentoLogado['foto'] ?? null; // NOVO CAMPO: Recupera o nome da foto cadastrada
 
         // Filtro Temporal enviado pelo form da View do Lojista
         $periodo = $this->request->getGet('periodo') ?? 'atual';
@@ -103,13 +104,15 @@ class LojistaController extends BaseController
             $charts['hospedagem'] = ['labels' => json_encode(array_column($hosp, 'local_hospedagem')), 'valores' => json_encode(array_map('intval', array_column($hosp, 'total')))];
         }
 
-        // 3. ENVIA TUDO PARA A VIEW, INCLUINDO NOVAS CONFIGURAÇÕES DE DESCONTO
+        // 3. ENVIA TUDO PARA A VIEW, INCLUINDO NOVAS CONFIGURAÇÕES DE DESCONTO E FOTO ATUAL
         return view('lojista/dashboard', [
             'kpis' => $kpis,
             'charts' => $charts,
             'setorLojista' => $setorReal,
             'aceitaDesconto' => $aceitaDesconto,
-            'pinValidacao' => $pinValidacao
+            'pinValidacao' => $pinValidacao,
+            'fotoAtual' => $fotoAtual,
+            'razaoSocial' => $estabelecimentoLogado['razao_social'] ?? 'Meu Negócio'
         ]);
     }
 
@@ -141,7 +144,7 @@ class LojistaController extends BaseController
         return view('lojista/qrcode', $data);
     }
 
-    // NOVO MÉTODO: Permite que o Lojista ative/desative sua participação na rede diretamente de seu painel
+    // MÉTODO REESTRUTURADO E INTEGRADO COM UPLOAD SEGURO DE FOTOS DO CODEIGNITER 4
     public function atualizarDesconto()
     {
         $idUsuarioLogado = session()->get('id');
@@ -161,12 +164,48 @@ class LojistaController extends BaseController
             $pinAtual = sprintf("%04d", mt_rand(0, 9999));
         }
 
-        $estabelecimentoModel->update($estabelecimento['id_estabelecimento'], [
+        $dadosUpdate = [
             'aceita_desconto' => $aceitaDesconto,
             'pin_validacao' => $pinAtual
-        ]);
+        ];
 
-        return redirect()->back()->with('success', 'Configurações de recompensa atualizadas com sucesso!');
+        // --- SISTEMA DE UPLOAD FOTO (CI4) ---
+        $img = $this->request->getFile('foto_estabelecimento');
+
+        if ($img && $img->isValid() && !$img->hasMoved()) {
+
+            // Regra de validação: tamanho máximo 4MB e formato de imagem válido
+            $validationRules = [
+                'foto_estabelecimento' => [
+                    'rules' => 'uploaded[foto_estabelecimento]|is_image[foto_estabelecimento]|max_size[foto_estabelecimento,4096]',
+                    'label' => 'Foto do Estabelecimento'
+                ]
+            ];
+
+            if ($this->validate($validationRules)) {
+                // Nome randômico único e seguro
+                $nomeUnico = $img->getRandomName();
+
+                // Pasta de destino em public/uploads/estabelecimentos/
+                $caminhoDestino = FCPATH . 'uploads/estabelecimentos';
+
+                // Move o arquivo
+                $img->move($caminhoDestino, $nomeUnico);
+
+                // Se houver uma foto antiga, remove ela do servidor para não acumular lixo
+                if (!empty($estabelecimento['foto']) && file_exists($caminhoDestino . '/' . $estabelecimento['foto'])) {
+                    @unlink($caminhoDestino . '/' . $estabelecimento['foto']);
+                }
+
+                $dadosUpdate['foto'] = $nomeUnico;
+            } else {
+                return redirect()->back()->with('error', 'Formato de imagem inválido ou tamanho limite de 4MB excedido.');
+            }
+        }
+
+        $estabelecimentoModel->update($estabelecimento['id_estabelecimento'], $dadosUpdate);
+
+        return redirect()->back()->with('sucesso', 'Configurações do estabelecimento atualizadas com sucesso!');
     }
 
     public function lancarOcupacao()

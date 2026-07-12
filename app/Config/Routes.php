@@ -120,3 +120,5 @@ $routes->get('banco', 'AuthController::semearBanco');
 $routes->get('migrar-banco', 'AuthController::executarMigracaoVantagens');
 
 $routes->get('semear-parceiros', 'AuthController::semearNovosParceirosReais');
+
+$routes->get('migrar-banco-foto', 'AuthController::executarMigracaoFoto');
