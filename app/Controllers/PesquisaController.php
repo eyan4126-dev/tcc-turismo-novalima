@@ -12,20 +12,18 @@ class PesquisaController extends ResourceController
     protected $format = 'json';
 
     /**
-     * GET /pesquisa ou GET /turismo/visitar/(:any)
-     * Renderiza a página do formulário e trata o roteamento do QR Code físico
+     * Renderiza o formulário de pesquisa carregando as preferências do local
      */
     public function index()
     {
         $token = $this->request->getGet('token') ?? $this->request->getGet('id');
-        $estabelecimentoModel = new EstabelecimentoModel();
+        $estabelecimento = null;
 
-        // Busca o estabelecimento pelo QR code correspondente
-        $estabelecimento = $estabelecimentoModel->where('token_qr_code', $token)->first();
-
-        // Se não encontrar, retorna um erro amigável sem quebrar o framework
-        if (!$estabelecimento) {
-            return "Erro: O QR Code escaneado não aponta para nenhum estabelecimento cadastrado.";
+        if ($token) {
+            $estabelecimentoModel = new EstabelecimentoModel();
+            $estabelecimento = $estabelecimentoModel->where('token_qr_code', $token)
+                ->orWhere('id_estabelecimento', $token)
+                ->first();
         }
 
         return view('pesquisa', [
@@ -34,26 +32,22 @@ class PesquisaController extends ResourceController
     }
 
     /**
-     * Mapeia o guia com destaque privilegiado baseado em SEO para lojistas da rede (Programa DesconTour)
-     * ALGORITMO: Prioriza quem participa da rede e, em segundo lugar, quem oferece a maior porcentagem de desconto!
+     * Mapeia o guia com destaque privilegiado baseado em SEO para lojistas da rede
      */
     public function guia()
     {
         $db = \Config\Database::connect();
 
-        // Puxamos diretamente via Query Builder ordenando estrategicamente conforme o modelo de negócio
+        // Ordenamos os estabelecimentos ativos priorizando quem participa da rede de vantagens (Selo de Destaque)
         $estabelecimentos = $db->table('estabelecimento_evento ee')
-            ->select('ee.*, u.role_usuario')
             ->join('usuario u', 'u.id_usuario = ee.id_usuario')
+            ->where('u.status_usuario', 'ativo')
             ->orderBy('ee.aceita_desconto', 'DESC')
-            ->orderBy('ee.desconto_percentagem', 'DESC')
             ->orderBy('ee.razao_social', 'ASC')
             ->get()
             ->getResultArray();
 
-        return view('guia', [
-            'estabelecimentos' => $estabelecimentos
-        ]);
+        return view('guia', ['estabelecimentos' => $estabelecimentos]);
     }
 
     public function sucesso()
@@ -62,7 +56,7 @@ class PesquisaController extends ResourceController
     }
 
     /**
-     * MOTOR DE SUBMISSÃO DA PESQUISA COM TRAVAS DE SPAM E VOUCHERS UNIFICADOS
+     * MOTOR DE SUBMISSÃO DA PESQUISA COM FILTRO DE MORADOR E TRAVAS DE SPAM CORRIGIDO
      */
     public function salvar()
     {
@@ -105,9 +99,9 @@ class PesquisaController extends ResourceController
                 ], 400);
             }
 
-            // 2. GARANTIA DE UNICIDADE DO ENVIO (CPF + DEVICE FINGERPRINT NOS ÚLTIMOS 30 DIAS)
+            // 2. GARANTIA DE UNICIDADE COM TRATAMENTO DE VALORES NULOS/VAZIOS (PREVENT COALITION)
             $cpfLimpo = preg_replace('/\D/', '', $dados['cpf'] ?? '');
-            $deviceHash = $dados['device_hash'] ?? '';
+            $deviceHash = isset($dados['device_hash']) ? trim($dados['device_hash']) : '';
 
             if (empty($cpfLimpo)) {
                 return $this->respond([
@@ -117,16 +111,26 @@ class PesquisaController extends ResourceController
                 ], 400);
             }
 
-            // Consulta duplicidade para este local nos últimos 30 dias de forma unificada
-            $duplicidade = $db->table('pesquisa')
+            // Iniciamos a query de duplicidade limitando-se ao estabelecimento alvo e à janela de 30 dias
+            $duplicidadeQuery = $db->table('pesquisa')
                 ->where('id_estabelecimento', $idEstabelecimento)
-                ->groupStart()
-                ->where('cpf', $cpfLimpo)
-                ->orWhere('device_hash', $deviceHash)
-                ->groupEnd()
-                ->where('respondido_em >=', date('Y-m-d H:i:s', strtotime('-30 days')))
-                ->get()
-                ->getRowArray();
+                ->where('respondido_em >=', date('Y-m-d H:i:s', strtotime('-30 days')));
+
+            // Agrupamento lógico preventivo: CPF coincide OU Device coincidente (Apenas se o Device for válido)
+            $duplicidadeQuery->groupStart();
+            $duplicidadeQuery->where('cpf', $cpfLimpo);
+
+            // Só valida duplicidade por Device se ele não for vazio, nulo ou genérico demais
+            if (!empty($deviceHash) && strlen($deviceHash) > 10) {
+                $duplicidadeQuery->orGroupStart()
+                    ->where('device_hash', $deviceHash)
+                    ->where('device_hash IS NOT NULL')
+                    ->where('device_hash !=', '')
+                    ->groupEnd();
+            }
+            $duplicidadeQuery->groupEnd();
+
+            $duplicidade = $duplicidadeQuery->get()->getRowArray();
 
             if ($duplicidade) {
                 return $this->respond([
@@ -138,11 +142,12 @@ class PesquisaController extends ResourceController
                 ], 400);
             }
 
-            // --- ALTERAÇÃO DE FLUXO CONCEITUAL: REMOVIDA A EXCLUSÃO DE MORADORES ---
-            // Todos os usuários (moradores ou turistas) são tratados de forma unificada para fomento local amplo!
-            $isMorador = false;
+            // 3. TRIAGEM DO MORADOR MUNICIPAL
+            $isMorador = $db->table('morador_novalima')
+                ->where('cpf', $cpfLimpo)
+                ->countAllResults() > 0;
 
-            // Tratamento das colunas fiscais conforme validação do Model
+            // Ajuste de tipagem fiscal
             if (isset($dados['faixa_gasto'])) {
                 $dados['valor_gasto_estimado'] = (float) $dados['faixa_gasto'];
                 unset($dados['faixa_gasto']);
@@ -152,10 +157,6 @@ class PesquisaController extends ResourceController
                 $dados['local_hospedagem'] = null;
             }
 
-            // Se não receber origem explícita do front-end, o fallback definitivo é sempre 'qrcode' (Físico)
-            $origemValida = (isset($dados['origem']) && $dados['origem'] === 'guia') ? 'guia' : 'qrcode';
-
-            // Injeta dados de conformidade e segurança na tabela de pesquisas
             $payloadPesquisa = [
                 'id_estabelecimento' => $dados['id_estabelecimento'],
                 'cidade_origem' => $dados['cidade_origem'],
@@ -166,17 +167,16 @@ class PesquisaController extends ResourceController
                 'nps' => (int) $dados['nps'],
                 'motivo_visita' => $dados['motivo_visita'],
                 'cpf' => $cpfLimpo,
-                'device_hash' => $deviceHash,
-                'is_morador' => 0 // Salva como zero por padrão
+                'device_hash' => (!empty($deviceHash) && strlen($deviceHash) > 10) ? $deviceHash : null,
+                'is_morador' => $isMorador ? 1 : 0
             ];
 
-            // Executamos a inserção de forma robusta e direta
             if ($db->table('pesquisa')->insert($payloadPesquisa)) {
                 return $this->respond([
                     'status' => 201,
                     'success' => true,
-                    'is_resident' => false, // Retorna sempre falso para que o front libere o voucher normalmente
-                    'origem' => $origemValida,
+                    'is_resident' => $isMorador,
+                    'origem' => $dados['origem'] ?? 'guia',
                     'message' => 'Pesquisa avaliativa gravada com sucesso.'
                 ], 201);
             }
@@ -184,7 +184,7 @@ class PesquisaController extends ResourceController
             return $this->respond([
                 'status' => 400,
                 'success' => false,
-                'messages' => $this->model->errors()
+                'messages' => ['error' => 'Falha interna ao processar a gravação no banco.']
             ], 400);
 
         } catch (\Exception $e) {
@@ -201,20 +201,43 @@ class PesquisaController extends ResourceController
      */
     public function validarPin()
     {
-        $token = $this->request->getJSON(true)['token'] ?? null;
-        $pin = $this->request->getJSON(true)['pin'] ?? null;
+        try {
+            $dados = $this->request->getJSON(true);
 
-        if (!$token || !$pin) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Dados insuficientes.']);
+            $token = $dados['token'] ?? '';
+            $pinDigitado = $dados['pin'] ?? '';
+
+            if (empty($token) || empty($pinDigitado)) {
+                return $this->respond([
+                    'success' => false,
+                    'message' => 'Parâmetros ausentes.'
+                ], 400);
+            }
+
+            $db = \Config\Database::connect();
+            $estabelecimento = $db->table('estabelecimento_evento')
+                ->where('token_qr_code', $token)
+                ->orWhere('id_estabelecimento', $token)
+                ->get()
+                ->getRowArray();
+
+            if ($estabelecimento && $estabelecimento['pin_validacao'] === $pinDigitado) {
+                return $this->respond([
+                    'success' => true,
+                    'message' => 'PIN de Balcão homologado com sucesso!'
+                ]);
+            }
+
+            return $this->respond([
+                'success' => false,
+                'message' => 'PIN de validação inválido.'
+            ], 401);
+
+        } catch (\Exception $e) {
+            return $this->respond([
+                'success' => false,
+                'message' => 'Erro interno ao validar PIN.'
+            ], 500);
         }
-
-        $estabelecimentoModel = new EstabelecimentoModel();
-        $est = $estabelecimentoModel->where('token_qr_code', $token)->first();
-
-        if ($est && $est['pin_validacao'] === $pin) {
-            return $this->response->setJSON(['success' => true]);
-        }
-
-        return $this->response->setJSON(['success' => false, 'message' => 'PIN incorreto.']);
     }
 }
