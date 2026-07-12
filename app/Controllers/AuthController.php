@@ -1322,9 +1322,8 @@ class AuthController extends BaseController
     }
 
     // ====================================================================
-// ADICIONE ESTE MÉTODO AO SEU AuthController.php
-// E ADICIONE A ROTA: $routes->get('migrar-foto', 'AuthController::executarMigracaoFoto');
-// Acesse: https://seu-sistema.railway.app/migrar-foto para atualizar o banco!
+// SUBSTITUA O MÉTODO executarMigracaoFoto NO SEU AuthController.php
+// POR ESTA VERSÃO TOTALMENTE COMPATÍVEL COM QUALQUER VERSÃO DO MYSQL
 // ====================================================================
 
     public function executarMigracaoFoto()
@@ -1332,15 +1331,19 @@ class AuthController extends BaseController
         $db = \Config\Database::connect();
 
         try {
-            // Adiciona a coluna 'foto' na tabela de estabelecimentos de forma segura
+            // SQL puro e universalmente compatível (sem IF NOT EXISTS dentro do ALTER TABLE)
             $query = "ALTER TABLE `estabelecimento_evento` 
-                  ADD COLUMN IF NOT EXISTS `foto` VARCHAR(255) NULL DEFAULT NULL AFTER `pin_validacao`";
+                  ADD COLUMN `foto` VARCHAR(255) NULL DEFAULT NULL AFTER `pin_validacao`";
 
             $db->query($query);
 
-            return "<h3>Sucesso! 📸</h3><p>A coluna 'foto' foi adicionada com sucesso na tabela 'estabelecimento_evento' em produção na Railway!</p><p><a href='" . site_url('lojista/dashboard') . "'>Voltar para o Painel</a></p>";
+            return "<h3>Sucesso! 📸</h3><p>A coluna 'foto' foi adicionada com sucesso na tabela 'estabelecimento_evento' da Railway!</p><p><a href='" . site_url('lojista/dashboard') . "'>Voltar ao Painel</a></p>";
         } catch (\Exception $e) {
-            return "<h3>Erro ao migrar coluna de foto:</h3><p style='color:red;'>" . $e->getMessage() . "</p>";
+            // Captura o erro clássico de coluna duplicada (geralmente contém o código 1060 ou o texto "Duplicate column")
+            if (strpos($e->getMessage(), '1060') !== false || strpos(strtolower($e->getMessage()), 'duplicate column') !== false) {
+                return "<h3>Aviso!</h3><p>A coluna 'foto' já existia no seu banco de dados na Railway. Nada precisou ser alterado!</p><p><a href='" . site_url('lojista/dashboard') . "'>Ir para o Painel</a></p>";
+            }
+            return "<h3>Erro na migração:</h3><p style='color:red;'>" . $e->getMessage() . "</p>";
         }
     }
 }
