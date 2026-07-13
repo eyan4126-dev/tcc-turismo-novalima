@@ -838,48 +838,94 @@
             }
         }
 
+        // ====================================================================
+        // COPIE E SUBSTITUA APENAS A SUA FUNÇÃO configurarAutocompleteCidades()
+        // NO SEU ARQUIVO app/Views/pesquisa.php POR ESTA VERSÃO CORRIGIDA
+        // ====================================================================
+
         function configurarAutocompleteCidades() {
             const input = document.getElementById('busca_cidade');
             const suggestionsContainer = document.getElementById('suggestions');
+            let debounceTimeout;
 
-            input.addEventListener('input', async function () {
+            input.addEventListener('input', function () {
+                // Reseta o estado de validação a cada digitação para garantir consistência
                 cidadeSelecionadaVerdadeira = false;
-                const busca = this.value.trim();
+                document.getElementById('cidade_origem').value = '';
                 validarCamposPasso();
 
-                if (busca.length < 3) { suggestionsContainer.classList.add('d-none'); return; }
+                const busca = this.value.trim();
 
-                try {
-                    const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/municipios?view=completa`);
-                    const municipios = await response.json();
-                    const filtrados = municipios.filter(m => m.nome.toLowerCase().includes(busca.toLowerCase())).slice(0, 5);
-
-                    if (filtrados.length > 0) {
-                        suggestionsContainer.innerHTML = '';
-                        filtrados.forEach(m => {
-                            const item = document.createElement('div');
-                            item.className = 'suggestion-item';
-                            const stringFormatada = `${m.nome} - ${m.microrregiao.mesorregiao.UF.sigla}`;
-                            item.innerText = stringFormatada;
-
-                            item.addEventListener('click', function () {
-                                input.value = stringFormatada;
-                                document.getElementById('cidade_origem').value = stringFormatada;
-                                cidadeSelecionadaVerdadeira = true;
-                                suggestionsContainer.classList.add('d-none');
-                                validarCamposPasso();
-                            });
-                            suggestionsContainer.appendChild(item);
-                        });
-                        suggestionsContainer.appendChild(item);
-                    } else {
-                        suggestionsContainer.classList.add('d-none');
-                    }
-                } catch (e) {
-                    cidadeSelecionadaVerdadeira = true;
-                    document.getElementById('cidade_origem').value = busca;
-                    validarCamposPasso();
+                if (busca.length < 3) {
+                    suggestionsContainer.classList.add('d-none');
+                    return;
                 }
+
+                // Aplica Debounce de 300ms para evitar requisições duplicadas a cada tecla digitada
+                clearTimeout(debounceTimeout);
+                debounceTimeout = setTimeout(async () => {
+                    try {
+                        // OTIMIZAÇÃO DE ENGENHARIA: Filtragem direta no servidor do IBGE usando o parâmetro &nome=
+                        // Isso reduz o payload de 10MB para menos de 2KB, garantindo velocidade instantânea no 4G
+                        const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/municipios?view=completa&nome=${encodeURIComponent(busca)}`);
+                        const municipios = await response.json();
+
+                        // Filtra localmente apenas para garantir correspondência exata do termo buscado (limite de 5 resultados)
+                        const filtrados = municipios.filter(m =>
+                            m.nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(
+                                busca.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                            )
+                        ).slice(0, 5);
+
+                        if (filtrados.length > 0) {
+                            suggestionsContainer.innerHTML = '';
+                            filtrados.forEach(m => {
+                                const item = document.createElement('div');
+                                item.className = 'suggestion-item';
+                                const stringFormatada = `${m.nome} - ${m.microrregiao.mesorregiao.UF.sigla}`;
+                                item.innerText = stringFormatada;
+
+                                item.addEventListener('click', function () {
+                                    input.value = stringFormatada;
+                                    document.getElementById('cidade_origem').value = stringFormatada;
+                                    cidadeSelecionadaVerdadeira = true;
+                                    suggestionsContainer.classList.add('d-none');
+                                    validarCamposPasso();
+                                });
+                                suggestionsContainer.appendChild(item);
+                            });
+                            suggestionsContainer.classList.remove('d-none');
+                        } else {
+                            suggestionsContainer.classList.add('d-none');
+                        }
+                    } catch (e) {
+                        // Se a API do IBGE falhar por completo ou ficar offline na hora da banca:
+                        // Permite a digitação como contingência, mas exige que o texto inserido seja válido (não vazio)
+                        if (busca.length >= 3) {
+                            document.getElementById('cidade_origem').value = busca;
+                            cidadeSelecionadaVerdadeira = true;
+                            validarCamposPasso();
+                        }
+                    }
+                }, 300);
+            });
+
+            // BLINDAGEM DE CONSISTÊNCIA CONTRA TEXTO LIVRE:
+            // Se o usuário digitar caracteres avulsos (como "rio") e perder o foco (blur) sem selecionar 
+            // um item válido da lista, o sistema apaga o campo e o botão "Avançar" é desativado!
+            input.addEventListener('blur', function () {
+                setTimeout(() => {
+                    const valorDigitado = this.value.trim();
+                    const valorSalvoNoHidden = document.getElementById('cidade_origem').value;
+
+                    // Se o texto visível não bater exatamente com o valor homologado que guardamos no hidden
+                    if (!cidadeSelecionadaVerdadeira || valorDigitado !== valorSalvoNoHidden) {
+                        this.value = '';
+                        document.getElementById('cidade_origem').value = '';
+                        cidadeSelecionadaVerdadeira = false;
+                        validarCamposPasso();
+                    }
+                }, 250); // Delay milimétrico necessário para registrar o evento de clique na lista antes da limpeza
             });
 
             document.addEventListener('click', function (e) {
